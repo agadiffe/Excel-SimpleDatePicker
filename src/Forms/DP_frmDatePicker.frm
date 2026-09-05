@@ -18,8 +18,13 @@ Option Explicit
 ' References
 '----------------------------------------
 
+Private Const CALENDAR_DAY_COUNT As Long = _
+    CALENDAR_COLUMNS * CALENDAR_ROWS
+
 Private TargetCell As Range
 Private CurrentMonth As Date
+
+Private CalendarInitialized As Boolean
 
 Private MonthLabelHandler As DP_CHeaderLabel
 Private ArrowHandlers As Collection
@@ -53,6 +58,18 @@ End Sub
 
 
 Private Sub BuildCalendar()
+
+    If Not CalendarInitialized Then
+        InitializeCalendar
+        CalendarInitialized = True
+    Else
+        RefreshCalendar
+    End If
+
+End Sub
+
+
+Private Sub InitializeCalendar()
 
     Dim ArrowHandler As DP_CArrowLabel
 
@@ -89,13 +106,23 @@ Private Sub BuildCalendar()
     '--------------------
 
     BuildWeekdaysHeader
-    BuildCalendarDays
+    CreateCalendarDays
 
     ' Go To Today button
     '--------------------
 
     Set TodayButtonHandler = New DP_CActionButton
     TodayButtonHandler.Setup Me, "GO_TO_TODAY"
+
+End Sub
+
+
+Private Sub RefreshCalendar()
+
+    ResetAllHover
+
+    MonthLabelHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
+    UpdateCalendarDays
 
 End Sub
 
@@ -121,35 +148,32 @@ Private Sub BuildWeekdaysHeader()
 End Sub
 
 
-Private Sub BuildCalendarDays()
+Private Sub CreateCalendarDays()
 
     Dim CellIndex As Long
-    Dim CellDate As Date
-    Dim FirstDayIndex As Long
 
-    FirstDayIndex = Weekday(CurrentMonth, vbMonday)
-
-    For CellIndex = 0 To 41
-        CellDate = CurrentMonth - FirstDayIndex + 1 + CellIndex
-        BuildCalendarDay CellDate, CellIndex
+    For CellIndex = 0 To CALENDAR_DAY_COUNT - 1
+        CreateCalendarDay GetCalendarCellDate(CellIndex), CellIndex
     Next CellIndex
 
 End Sub
 
 
-Private Sub BuildCalendarDay(ByVal CellDate As Date, _
-                             ByVal CellIndex As Long)
+Private Sub CreateCalendarDay(ByVal CellDate As Date, _
+                              ByVal CellIndex As Long)
 
     Dim DayTextHandler As DP_CDayLabel
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
-    ColumnIndex = GridColumn(CellIndex, GRID_COLUMNS)
-    RowIndex = GridRow(CellIndex, GRID_COLUMNS)
+    ColumnIndex = GridColumn(CellIndex, CALENDAR_COLUMNS)
+    RowIndex = GridRow(CellIndex, CALENDAR_COLUMNS)
 
     Set DayTextHandler = New DP_CDayLabel
-    DayTextHandler.Setup Me, CellDate, _
+
+    DayTextHandler.Setup Me, _
+                         CellDate, _
                          GridLeft(ColumnIndex, GRID_LEFT, GRID_CELL_WIDTH), _
                          GridTop(RowIndex + 1, GRID_TOP, GRID_CELL_HEIGHT)
 
@@ -158,9 +182,40 @@ Private Sub BuildCalendarDay(ByVal CellDate As Date, _
 End Sub
 
 
+Private Sub UpdateCalendarDays()
+
+    Dim CellIndex As Long
+    Dim DayTextHandler As DP_CDayLabel
+
+    For CellIndex = 0 To CALENDAR_DAY_COUNT - 1
+        Set DayTextHandler = DayTextHandlers.Item(CellIndex + 1)
+        DayTextHandler.UpdateDate GetCalendarCellDate(CellIndex)
+    Next CellIndex
+
+End Sub
+
+
+Private Function GetCalendarCellDate(ByVal CellIndex As Long) As Date
+
+    Dim FirstDayIndex As Long
+
+    FirstDayIndex = Weekday(CurrentMonth, vbMonday)
+
+    GetCalendarCellDate = CurrentMonth - FirstDayIndex + 1 + CellIndex
+
+End Function
+
+
 '----------------------------------------
 ' Date picker helpers
 '----------------------------------------
+
+Public Function GetTargetCell() As Range
+
+    Set GetTargetCell = TargetCell
+
+End Function
+
 
 Public Function GetCurrentMonth() As Date
 
@@ -243,13 +298,6 @@ Public Sub GoToToday()
     Unload Me
 
 End Sub
-
-
-Public Function GetTargetCell() As Range
-
-    Set GetTargetCell = TargetCell
-
-End Function
 
 
 '----------------------------------------

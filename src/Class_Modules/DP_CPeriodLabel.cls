@@ -21,6 +21,7 @@ Attribute PeriodTextLabel.VB_VarHelpID = -1
 Private ParentForm As Object
 Private PeriodKind As String
 Private PeriodValue As Long
+Private PeriodDate As Date
 
 Private HoverHandler As DP_CHoverHandler
 
@@ -30,12 +31,18 @@ Private HoverHandler As DP_CHoverHandler
 '----------------------------------------
 
 Public Sub Setup(ByVal Form As Object, _
-                 ByVal PeriodCaption As String, _
+                 ByVal Kind As String, _
+                 ByVal Value As Long, _
+                 ByVal CellDate As Date, _
                  ByVal LeftPosition As Single, _
                  ByVal TopPosition As Single, _
                  ByVal CellWidth As Single)
 
     Set ParentForm = Form
+
+    PeriodKind = Kind
+    PeriodValue = Value
+    PeriodDate = CellDate
 
     Set PeriodLabel = ParentForm.Controls.Add("Forms.Label.1")
 
@@ -49,7 +56,7 @@ Public Sub Setup(ByVal Form As Object, _
     Set PeriodTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With PeriodTextLabel
-        .Caption = PeriodCaption
+        .Caption = GetPeriodCaption()
         .Font.Size = FONT_SIZE_PERIOD * GetFontScale(ParentForm.Width)
         .TextAlign = fmTextAlignCenter
         .ForeColor = ColorText()
@@ -77,13 +84,35 @@ End Sub
 ' Period
 '----------------------------------------
 
-Public Sub SetPeriod(ByVal Kind As String, _
-                     ByVal Value As Long)
+Public Sub UpdatePeriod(ByVal CellDate As Date, _
+                        ByVal Value As Long, _
+                        ByVal IsCurrent As Boolean, _
+                        ByVal IsSelected As Boolean)
 
-    PeriodKind = Kind
+    PeriodDate = CellDate
     PeriodValue = Value
 
+    PeriodTextLabel.Caption = GetPeriodCaption()
+
+    SetState IsCurrent, IsSelected
+
 End Sub
+
+
+Private Function GetPeriodCaption() As String
+
+    Select Case PeriodKind
+        Case "MONTH"
+            If MONTH_GRID_COLUMNS > 3 Then
+                GetPeriodCaption = Format(PeriodDate, "mmm")
+            Else
+                GetPeriodCaption = Format(PeriodDate, "mmmm")
+            End If
+        Case "YEAR"
+            GetPeriodCaption = Format(PeriodDate, "yyyy")
+    End Select
+
+End Function
 
 
 '----------------------------------------
@@ -99,6 +128,14 @@ Public Sub SetState(ByVal IsCurrent As Boolean, _
     PeriodLabel.BackColor = ColorBg()
     PeriodTextLabel.ForeColor = ColorText()
     PeriodTextLabel.Font.Bold = False
+
+    ' Other year
+    '--------------------
+
+    If PeriodKind = "MONTH" And _
+           Year(PeriodDate) <> ParentForm.GetCurrentYear Then
+        PeriodTextLabel.ForeColor = ColorTextSecondary()
+    End If
 
     ' Current
     '--------------------

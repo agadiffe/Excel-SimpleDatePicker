@@ -71,6 +71,13 @@ Public Sub Setup(ByVal Form As Object, _
 End Sub
 
 
+Public Sub SetCaption(ByVal Caption As String)
+
+    HeaderTextLabel.Caption = Caption
+
+End Sub
+
+
 Public Sub SetInteractive(ByVal Value As Boolean)
 
     Interactive = Value

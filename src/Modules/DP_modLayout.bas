@@ -32,20 +32,20 @@ Private Const SECTION_GAP_RATIO As Single = 0.1
 ' Day
 '----------------------------------------
 
-Public Const GRID_COLUMNS As Long = 7
-Public Const GRID_ROWS As Long = 7
+Public Const CALENDAR_COLUMNS As Long = 7
+Public Const CALENDAR_ROWS As Long = 6
 
 Public Const GRID_WIDTH As Single = _
     DATEPICKER_WIDTH * (1 - DATEPICKER_MARGIN_RATIO * 2)
 
 Public Const GRID_CELL_WIDTH As Single = _
-    GRID_WIDTH / GRID_COLUMNS
+    GRID_WIDTH / CALENDAR_COLUMNS
 
 Public Const GRID_CELL_HEIGHT As Single = _
     GRID_CELL_WIDTH
 
 Public Const GRID_HEIGHT As Single = _
-    GRID_CELL_HEIGHT * GRID_ROWS
+    GRID_CELL_HEIGHT * (CALENDAR_ROWS + 1)
 
 Public Const GRID_LEFT As Single = _
     DATEPICKER_MARGIN

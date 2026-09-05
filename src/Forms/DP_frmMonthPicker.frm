@@ -18,8 +18,13 @@ Option Explicit
 ' References
 '----------------------------------------
 
+Private Const MONTH_COUNT As Long = _
+    MONTH_GRID_COLUMNS * MONTH_GRID_ROWS
+
 Private ParentPicker As DP_frmDatePicker
 Private CurrentYear As Long
+
+Private MonthsInitialized As Boolean
 
 Private ArrowHandlers As Collection
 Private MonthLabelHandlers As Collection
@@ -45,6 +50,18 @@ End Sub
 
 Private Sub BuildMonths()
 
+    If Not MonthsInitialized Then
+        InitializeMonths
+        MonthsInitialized = True
+    Else
+        RefreshMonths
+    End If
+
+End Sub
+
+
+Private Sub InitializeMonths()
+
     Dim ArrowHandler As DP_CArrowLabel
 
     Set MonthLabelHandlers = New Collection
@@ -64,7 +81,7 @@ Private Sub BuildMonths()
 
     Set ArrowHandler = New DP_CArrowLabel
     ArrowHandler.Setup Me, "PREV_YEAR", ChrW(&H25B2), ARROW_PREV_LEFT
-                       
+
     ArrowHandlers.Add ArrowHandler
 
     ' Next year
@@ -78,7 +95,7 @@ Private Sub BuildMonths()
     ' Months
     '--------------------
 
-    BuildMonthLabels
+    CreateMonthLabels
 
     ' Go To Current Month button
     '--------------------
@@ -89,24 +106,35 @@ Private Sub BuildMonths()
 End Sub
 
 
+Private Sub RefreshMonths()
+
+    ResetAllHover
+
+    YearLabelHandler.SetCaption CStr(CurrentYear)
+
+    UpdateMonthLabels
+
+End Sub
+
+
 '----------------------------------------
 ' Build Months helpers
 '----------------------------------------
 
-Private Sub BuildMonthLabels()
+Private Sub CreateMonthLabels()
 
     Dim MonthHandler As DP_CPeriodLabel
     Dim CellIndex As Long
-    Dim CellDate As Date
     Dim MonthNumber As Long
+    Dim CellDate As Date
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
-    For CellIndex = 0 To 11
+    For CellIndex = 0 To MONTH_COUNT - 1
 
         MonthNumber = CellIndex + 1
-        CellDate = DateSerial(CurrentYear, MonthNumber, 1)
+        CellDate = GetMonthDate(CellIndex)
 
         ColumnIndex = GridColumn(CellIndex, MONTH_GRID_COLUMNS)
         RowIndex = GridRow(CellIndex, MONTH_GRID_COLUMNS)
@@ -114,23 +142,68 @@ Private Sub BuildMonthLabels()
         Set MonthHandler = New DP_CPeriodLabel
 
         MonthHandler.Setup Me, _
-                           Format(CellDate, "mmmm"), _
+                           "MONTH", _
+                           MonthNumber, _
+                           CellDate, _
                            GridLeft(ColumnIndex, PERIOD_GRID_LEFT, MONTH_GRID_CELL_WIDTH), _
-                           GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_GRID_CELL_HEIGHT), _
+                           GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_CELL_HEIGHT), _
                            MONTH_CELL_WIDTH
 
-        MonthHandler.SetPeriod "MONTH", MonthNumber
-
-        MonthHandler.SetState _
-            (MonthNumber = Month(Date) And CurrentYear = Year(Date)), _
-            (MonthNumber = Month(ParentPicker.GetCurrentMonth) And _
-                CurrentYear = Year(ParentPicker.GetCurrentMonth))
+        MonthHandler.SetState IsCurrentMonth(MonthNumber), IsSelectedMonth(MonthNumber)
 
         MonthLabelHandlers.Add MonthHandler
 
     Next CellIndex
 
 End Sub
+
+
+Private Sub UpdateMonthLabels()
+
+    Dim CellIndex As Long
+    Dim MonthNumber As Long
+    Dim CellDate As Date
+
+    Dim MonthHandler As DP_CPeriodLabel
+
+    For CellIndex = 0 To MONTH_COUNT - 1
+
+        MonthNumber = CellIndex + 1
+        CellDate = GetMonthDate(CellIndex)
+
+        Set MonthHandler = MonthLabelHandlers.Item(CellIndex + 1)
+
+        MonthHandler.UpdatePeriod CellDate, _
+                                  MonthNumber, _
+                                  IsCurrentMonth(MonthNumber), _
+                                  IsSelectedMonth(MonthNumber)
+
+    Next CellIndex
+
+End Sub
+
+
+Private Function GetMonthDate(ByVal CellIndex As Long) As Date
+
+    GetMonthDate = DateSerial(CurrentYear, CellIndex + 1, 1)
+
+End Function
+
+
+Private Function IsCurrentMonth(ByVal MonthNumber As Long) As Boolean
+
+    IsCurrentMonth = MonthNumber = Month(Date) And _
+                     CurrentYear = Year(Date)
+
+End Function
+
+
+Private Function IsSelectedMonth(ByVal MonthNumber As Long) As Boolean
+
+    IsSelectedMonth = MonthNumber = Month(ParentPicker.GetCurrentMonth) And _
+                      CurrentYear = Year(ParentPicker.GetCurrentMonth)
+
+End Function
 
 
 '----------------------------------------

@@ -133,7 +133,7 @@ Private Function GetPointsPerPixelY() As Double
         1# / _
         ( _
             (ActiveWindow.ActivePane.PointsToScreenPixelsY(CalibrationPoints) - _
-              ActiveWindow.ActivePane.PointsToScreenPixelsY(0)) / _
+                ActiveWindow.ActivePane.PointsToScreenPixelsY(0)) / _
             CALIBRATION_POINTS_BASE _
         )
 

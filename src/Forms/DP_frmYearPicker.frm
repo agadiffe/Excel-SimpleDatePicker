@@ -21,6 +21,8 @@ Option Explicit
 Private ParentPicker As DP_frmMonthPicker
 Private CurrentYear As Long
 
+Private YearsInitialized As Boolean
+
 Private ArrowHandlers As Collection
 Private YearLabelHandlers As Collection
 Private YearRangeLabelHandler As DP_CHeaderLabel
@@ -44,6 +46,18 @@ End Sub
 
 
 Private Sub BuildYears()
+
+    If Not YearsInitialized Then
+        InitializeYears
+        YearsInitialized = True
+    Else
+        RefreshYears
+    End If
+
+End Sub
+
+
+Private Sub InitializeYears()
 
     Dim ArrowHandler As DP_CArrowLabel
     Dim FirstYear As Long
@@ -85,7 +99,7 @@ Private Sub BuildYears()
     ' Years
     '--------------------
 
-    BuildYearLabels
+    CreateYearLabels
 
     ' Go To Current Year button
     '--------------------
@@ -96,47 +110,114 @@ Private Sub BuildYears()
 End Sub
 
 
+Private Sub RefreshYears()
+
+    ResetAllHover
+
+    UpdateYearRangeHeader
+    UpdateYearLabels
+
+End Sub
+
+
+Private Sub UpdateYearRangeHeader()
+
+    Dim FirstYear As Long
+    Dim LastYear As Long
+
+    FirstYear = GetFirstDisplayedYear(CurrentYear)
+    LastYear = FirstYear + YEAR_BLOCK_SIZE - 1
+
+    YearRangeLabelHandler.SetCaption CStr(FirstYear) & " - " & CStr(LastYear)
+
+End Sub
+
+
 '----------------------------------------
 ' Build Years helpers
 '----------------------------------------
 
-Private Sub BuildYearLabels()
+Private Sub CreateYearLabels()
 
     Dim YearHandler As DP_CPeriodLabel
     Dim CellIndex As Long
     Dim DisplayYear As Long
     Dim FirstYear As Long
+    Dim CellDate As Date
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
     FirstYear = GetFirstDisplayedYear(CurrentYear)
 
-    For CellIndex = 0 To (YEAR_BLOCK_SIZE - 1)
+    For CellIndex = 0 To YEAR_BLOCK_SIZE - 1
 
         DisplayYear = FirstYear + CellIndex
+        CellDate = DateSerial(DisplayYear, 1, 1)
+
         ColumnIndex = GridColumn(CellIndex, YEAR_GRID_COLUMNS)
         RowIndex = GridRow(CellIndex, YEAR_GRID_COLUMNS)
 
         Set YearHandler = New DP_CPeriodLabel
 
         YearHandler.Setup Me, _
-                          CStr(DisplayYear), _
+                          "YEAR", _
+                          DisplayYear, _
+                          CellDate, _
                           GridLeft(ColumnIndex, PERIOD_GRID_LEFT, YEAR_GRID_CELL_WIDTH), _
-                          GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_GRID_CELL_HEIGHT), _
+                          GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_CELL_HEIGHT), _
                           YEAR_CELL_WIDTH
 
-        YearHandler.SetPeriod "YEAR", DisplayYear
-
-        YearHandler.SetState _
-            (DisplayYear = Year(Date)), _
-            (DisplayYear = ParentPicker.GetCurrentYear)
+        YearHandler.SetState IsCurrentYear(DisplayYear), _
+                             IsSelectedYear(DisplayYear)
 
         YearLabelHandlers.Add YearHandler
 
     Next CellIndex
 
 End Sub
+
+
+Private Sub UpdateYearLabels()
+
+    Dim CellIndex As Long
+    Dim DisplayYear As Long
+    Dim FirstYear As Long
+    Dim CellDate As Date
+
+    Dim YearHandler As DP_CPeriodLabel
+
+    FirstYear = GetFirstDisplayedYear(CurrentYear)
+
+    For CellIndex = 0 To YEAR_BLOCK_SIZE - 1
+
+        DisplayYear = FirstYear + CellIndex
+        CellDate = DateSerial(DisplayYear, 1, 1)
+
+        Set YearHandler = YearLabelHandlers.Item(CellIndex + 1)
+
+        YearHandler.UpdatePeriod CellDate, _
+                                 DisplayYear, _
+                                 IsCurrentYear(DisplayYear), _
+                                 IsSelectedYear(DisplayYear)
+
+    Next CellIndex
+
+End Sub
+
+
+Private Function IsCurrentYear(ByVal DisplayYear As Long) As Boolean
+
+    IsCurrentYear = DisplayYear = Year(Date)
+
+End Function
+
+
+Private Function IsSelectedYear(ByVal DisplayYear As Long) As Boolean
+
+    IsSelectedYear = DisplayYear = ParentPicker.GetCurrentYear
+
+End Function
 
 
 '----------------------------------------

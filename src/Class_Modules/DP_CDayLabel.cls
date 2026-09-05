@@ -54,13 +54,57 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
     Set DayTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With DayTextLabel
-        .Caption = CStr(Day(CellDate))
         .Font.Size = FONT_SIZE_DAY * GetFontScale(ParentForm.Width)
-        .ForeColor = ColorText()
         .BackStyle = fmBackStyleTransparent
         .TextAlign = fmTextAlignCenter
         .WordWrap = False
     End With
+
+    ' Center text vertically
+    '--------------------
+
+    With DayTextLabel
+        .AutoSize = True
+
+        .Top = VerticalTextTop(DayLabel.Top, _
+                               DayLabel.Height, _
+                               .Height)
+
+        .AutoSize = False
+        .Left = DayLabel.Left
+        .Width = DayLabel.Width
+    End With
+
+    ' Hover
+    '--------------------
+
+    Set HoverHandler = New DP_CHoverHandler
+    HoverHandler.Setup DayTextLabel, DayLabel
+
+    ' Initial state
+    '--------------------
+
+    UpdateDate CalendarCellDate
+
+End Sub
+
+
+'----------------------------------------
+' Update
+'----------------------------------------
+
+Public Sub UpdateDate(ByVal CalendarCellDate As Date)
+
+    CellDate = CalendarCellDate
+
+    DayTextLabel.Caption = CStr(Day(CellDate))
+
+    ' Default state
+    '--------------------
+
+    DayLabel.BackColor = ColorBg()
+    DayTextLabel.ForeColor = ColorText()
+    DayTextLabel.Font.Bold = False
 
     ' Other month
     '--------------------
@@ -86,27 +130,6 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
         DayTextLabel.ForeColor = ColorTextSelected()
         DayTextLabel.Font.Bold = True
     End If
-
-    ' Center text vertically
-    '--------------------
-
-    With DayTextLabel
-        .AutoSize = True
-
-        .Top = VerticalTextTop(DayLabel.Top, _
-                               DayLabel.Height, _
-                               .Height)
-
-        .AutoSize = False
-        .Left = DayLabel.Left
-        .Width = DayLabel.Width
-    End With
-
-    ' Hover
-    '--------------------
-
-    Set HoverHandler = New DP_CHoverHandler
-    HoverHandler.Setup DayTextLabel, DayLabel
 
 End Sub
 

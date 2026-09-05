@@ -60,12 +60,12 @@ Public Sub Setup(ByVal Form As Object, _
                                .Height)
     End With
 
-    ButtonWidth = ButtonTextLabel.Width + DATEPICKER_WIDTH * 0.13
+    ButtonWidth = ButtonTextLabel.Width + DATEPICKER_WIDTH * 0.07
 
     With ButtonLabel
         .Width = ButtonWidth
         .Left = GRID_LEFT _
-                + (GRID_COLUMNS - 1) * GRID_CELL_WIDTH _
+                + (CALENDAR_COLUMNS - 1) * GRID_CELL_WIDTH _
                 + CALENDAR_CELL_WIDTH _
                 - .Width
     End With
