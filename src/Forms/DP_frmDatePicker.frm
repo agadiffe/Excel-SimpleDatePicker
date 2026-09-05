@@ -47,7 +47,7 @@ Public Sub ShowPicker(ByVal Cell As Range)
     CurrentMonth = DateSerial(Year(InitialDate), Month(InitialDate), 1)
 
     BuildCalendar
-    Me.Show
+    ShowPopupNextToCell Me, Cell
 
 End Sub
 
@@ -243,6 +243,13 @@ Public Sub GoToToday()
     Unload Me
 
 End Sub
+
+
+Public Function GetTargetCell() As Range
+
+    Set GetTargetCell = TargetCell
+
+End Function
 
 
 '----------------------------------------

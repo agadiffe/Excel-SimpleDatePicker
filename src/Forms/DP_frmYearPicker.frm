@@ -1,6 +1,5 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} DP_frmYearPicker 
-   Caption         =   "UserForm1"
    ClientHeight    =   3015
    ClientLeft      =   120
    ClientTop       =   465
@@ -39,7 +38,7 @@ Public Sub ShowYears(ByVal Picker As DP_frmMonthPicker)
     CurrentYear = Picker.GetCurrentYear
 
     BuildYears
-    Me.Show
+    ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
 
 End Sub
 

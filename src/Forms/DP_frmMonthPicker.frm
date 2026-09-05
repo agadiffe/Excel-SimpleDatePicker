@@ -38,7 +38,7 @@ Public Sub ShowMonths(ByVal Picker As DP_frmDatePicker)
     CurrentYear = Year(ParentPicker.GetCurrentMonth)
 
     BuildMonths
-    Me.Show
+    ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
 
 End Sub
 
