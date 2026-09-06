@@ -9,7 +9,7 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 
 ## 📝 Features
 
-- Opens automatically when double-clicking a cell formatted as **Short Date**
+- Opens automatically when double-clicking a cell formatted as **Date**
 - Fully responsive and automatically scales to different sizes
 - Supports **light and dark mode**
 - Supports multiple UI languages based on Excel's interface language
@@ -39,7 +39,7 @@ The VBA source is provided as exported VBA components. **Importing the component
 
 > **Important:** Do not rename the imported VBA components unless you also update the code accordingly.
 
-The `ThisWorkbook` code is required for the DatePicker to open when double-clicking a cell formatted as **Short Date**.
+The `ThisWorkbook` code is required for the DatePicker to open when double-clicking a cell using a supported **Date** format.
 
 ### Using the included demo
 
@@ -68,11 +68,13 @@ For automatic dark-mode detection, copy `DatePickerTheme.applescript` from `src/
 Create the `com.microsoft.Excel` folder if it does not already exist.  
 If the script is unavailable or cannot be executed, the DatePicker safely falls back to Light Mode.
 
-
 ## 📌 Remarks
 
-The DatePicker is designed to work with cells formatted as **Short Date**.  
-**Long Date** formatting is not supported.
+The DatePicker opens automatically when double-clicking a cell using a supported **Date** format.  
+This includes Excel's **Short Date** formats, the system-local **Long Date** format, and several common **Long Date** formats not tied to the system locale.
+
+Time-only formats are not supported, and custom date formats outside the supported formats may not open the DatePicker.  
+The automatic double-click behavior can be customized in the `ThisWorkbook` code, including which cell formats trigger the DatePicker.
 
 Excel Online includes a built-in date picker, but this feature is currently not available in the desktop version of Excel.
 

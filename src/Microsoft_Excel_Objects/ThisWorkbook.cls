@@ -9,7 +9,6 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-
 Private Sub Workbook_SheetBeforeDoubleClick( _
     ByVal Sh As Object, _
     ByVal Target As Range, _
@@ -19,10 +18,10 @@ Private Sub Workbook_SheetBeforeDoubleClick( _
     If Target.Cells.CountLarge <> 1 Then Exit Sub
 
     ' Do not open the date picker if the cell has a formula
-    If Target.Cells(1).HasFormula Then Exit Sub
+    If Target.HasFormula Then Exit Sub
 
-    ' Only open the date picker for supported date-formatted cells
-    If Not IsShortDateCell(Target) Then Exit Sub
+    ' Only open the date picker for supported date cells
+    If Not IsDatePickerCell(Target) Then Exit Sub
 
     ' Prevent Excel's normal double-click action
     Cancel = True
@@ -33,29 +32,54 @@ Private Sub Workbook_SheetBeforeDoubleClick( _
 End Sub
 
 
-Private Function IsShortDateCell(ByVal Cell As Range) As Boolean
+Private Function IsDatePickerCell(ByVal Cell As Range) As Boolean
 
-    Dim FormatType As Variant
+    Dim FormatType As String
+    Dim NumFormat As String
 
     On Error GoTo NotDate
 
-    FormatType = Cell.Parent.Evaluate( _
-        "=CELL(""format""," & Cell.Address(False, False) & ")")
+    ' Standard Excel date formats D1-D5
+    FormatType = UCase$(Trim$(CStr( _
+        Cell.Parent.Evaluate( _
+            "=CELL(""format""," & Cell.Address(False, False) & ")"))))
 
-    ' Excel returns a format code beginning with "D"
-    ' for supported date formats.
-    '
-    ' Long-date and custom date-format handling is not
-    ' explicitly distinguished here.
+    Select Case FormatType
+        Case "D1", "D2", "D3", "D4", "D5"
+            IsDatePickerCell = True
+            Exit Function
+    End Select
 
-    IsShortDateCell = _
-        (Left$(UCase$(Trim$(CStr(FormatType))), 1) = "D")
+    ' Common Long Date formats
+    NumFormat = LCase$(Cell.NumberFormat)
 
-    Exit Function
+    ' Excel's system Long Date format
+    If Left$(NumFormat, Len("[$-f800]")) = "[$-f800]" Then
+        IsDatePickerCell = True
+        Exit Function
+    End If
+
+    ' Common Long Date formats without a system-locale prefix
+    Select Case NumFormat
+        Case "dddd, mmmm d, yyyy", _
+             "dddd, mmmm dd, yyyy", _
+             "mmmm d, yyyy", _
+             "d mmmm yyyy", _
+             "dd mmmm yyyy", _
+             "dddd d mmmm yyyy", _
+             "dddd, d mmmm yyyy", _
+             "dddd, dd mmmm yyyy", _
+             "d. mmmm yyyy", _
+             "dd. mmmm yyyy", _
+             "d-mmmm-yyyy", _
+             "dd-mmmm-yyyy"
+
+            IsDatePickerCell = True
+            Exit Function
+    End Select
 
 NotDate:
-
-    IsShortDateCell = False
+    IsDatePickerCell = False
 
 End Function
 
