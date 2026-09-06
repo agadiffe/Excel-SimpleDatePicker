@@ -225,8 +225,6 @@ Public Sub HeaderClicked()
 
     Me.Hide
     DP_frmYearPicker.ShowYears Me
-
-    Unload DP_frmYearPicker
     Me.Show
 
 End Sub

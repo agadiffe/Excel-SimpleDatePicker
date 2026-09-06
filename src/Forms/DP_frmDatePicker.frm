@@ -247,8 +247,6 @@ Public Sub HeaderClicked()
 
     Me.Hide
     DP_frmMonthPicker.ShowMonths Me
-
-    Unload DP_frmMonthPicker
     Me.Show
 
 End Sub
@@ -279,7 +277,7 @@ Public Sub DayLabelClicked(ByVal SelectedDate As Date)
         TargetCell.Value = SelectedDate
     End If
 
-    Unload Me
+    Me.Hide
 
 End Sub
 
@@ -295,7 +293,7 @@ Public Sub GoToToday()
         TargetCell.Value = Date
     End If
 
-    Unload Me
+    Me.Hide
 
 End Sub
 
