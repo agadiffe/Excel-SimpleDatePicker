@@ -15,16 +15,8 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 - Supports multiple UI languages based on Excel's interface language
 - Allows easy **day, month, and year selection**
 
-> **Resizing:** To change the DatePicker size, modify the `DATEPICKER_WIDTH` constant in `DP_modLayout`. The layout, controls, and font sizes scale automatically.
-
-## 🔒 Security
-
-The `.xlsm` file included in this repository is a working example of the VBA DatePicker.
-
-Because it is a macro-enabled Excel file, Excel may display a security warning when you open it.  
-This is normal for files containing VBA macros.
-
-The complete VBA source code is provided in this repository for anyone who wants to inspect it.
+> **Resizing:** To change the DatePicker size, modify the `DATEPICKER_WIDTH` constant in `DP_modLayout`.  
+> The layout, controls, and font sizes scale automatically.
 
 ## ⚙️ Installation
 
@@ -51,7 +43,15 @@ The `ThisWorkbook` code is required for the DatePicker to open when double-click
 
 ### Using the included demo
 
-A ready-to-use example is available in [`demo/Excel-SimpleDatePicker.xlsm`](demo/Excel-SimpleDatePicker.xlsm).
+A ready-to-use example is available in `demo/Excel-SimpleDatePicker.xlsm`.  
+Open the workbook and enable macros when prompted.
+
+## 🔒 Security
+
+The demo workbook is a macro-enabled file, so Excel may display a security warning when you open it.  
+This is normal for files containing VBA macros.
+
+The complete VBA source code is provided in this repository for anyone who wants to inspect it.
 
 ## 🖥️ Compatibility
 
