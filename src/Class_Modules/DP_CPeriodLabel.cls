@@ -87,14 +87,15 @@ End Sub
 Public Sub UpdatePeriod(ByVal CellDate As Date, _
                         ByVal Value As Long, _
                         ByVal IsCurrent As Boolean, _
-                        ByVal IsSelected As Boolean)
+                        ByVal IsSelected As Boolean, _
+                        Optional ByVal IsSecondary As Boolean = False)
 
     PeriodDate = CellDate
     PeriodValue = Value
 
     PeriodTextLabel.Caption = GetPeriodCaption()
 
-    SetState IsCurrent, IsSelected
+    SetState IsCurrent, IsSelected, IsSecondary
 
 End Sub
 
@@ -120,7 +121,8 @@ End Function
 '----------------------------------------
 
 Public Sub SetState(ByVal IsCurrent As Boolean, _
-                    ByVal IsSelected As Boolean)
+                    ByVal IsSelected As Boolean, _
+                    Optional ByVal IsSecondary As Boolean = False)
 
     ' Default state
     '--------------------
@@ -129,11 +131,10 @@ Public Sub SetState(ByVal IsCurrent As Boolean, _
     PeriodTextLabel.ForeColor = ColorText()
     PeriodTextLabel.Font.Bold = False
 
-    ' Other year
+    ' Other period
     '--------------------
 
-    If PeriodKind = "MONTH" And _
-           Year(PeriodDate) <> ParentForm.GetCurrentYear Then
+    If IsSecondary Then
         PeriodTextLabel.ForeColor = ColorTextSecondary()
     End If
 

@@ -149,7 +149,9 @@ Private Sub CreateMonthLabels()
                            GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_CELL_HEIGHT), _
                            MONTH_CELL_WIDTH
 
-        MonthHandler.SetState IsCurrentMonth(MonthNumber), IsSelectedMonth(MonthNumber)
+        MonthHandler.SetState IsCurrentMonth(MonthNumber), _
+                              IsSelectedMonth(MonthNumber), _
+                              Year(CellDate) <> CurrentYear
 
         MonthLabelHandlers.Add MonthHandler
 
