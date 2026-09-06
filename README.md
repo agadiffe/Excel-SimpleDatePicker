@@ -9,22 +9,20 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 
 ## 📝 Features
 
-- Opens automatically when double-clicking a cell formatted as **Date**
-- Fully responsive and automatically scales to different sizes
-- Supports **light and dark mode**
-- Supports multiple UI languages based on Excel's interface language
-- Allows easy **day, month, and year selection**
+- Opens automatically when double-clicking a cell formatted as Date
+- Supports light and dark mode with automatic detection
+- Supports multiple languages based on Excel's interface language
+- Fully responsive with adjustable size
 
-> **Resizing:** To change the DatePicker size, modify the `DATEPICKER_WIDTH` constant in `DP_modLayout`.  
-> The layout, controls, and font sizes scale automatically.
+> **Resizing:** To change the DatePicker size, modify the `DATEPICKER_WIDTH` constant in `DP_modLayout`.
 
 ## ⚙️ Installation
 
-The DatePicker requires **Microsoft Excel with VBA support**. Macros must be enabled to use it.
-
-The VBA source is provided as exported VBA components. **Importing the components is recommended over copying and pasting the code**, as this preserves the required module, class, and UserForm structure.
+The DatePicker requires **Microsoft Excel with VBA support and macros enabled**.
 
 ### Import the VBA components
+
+> **Note:** If Windows has blocked the downloaded VBA component files, unblock them before importing.
 
 1. Open your Excel workbook and press `Alt + F11` to open the VBA editor.
 2. In the **Project Explorer**, select your workbook's VBA project.
@@ -33,13 +31,9 @@ The VBA source is provided as exported VBA components. **Importing the component
    - **Forms** → import the `.frm` files
    - **Modules** → import the `.bas` files
 4. When importing a UserForm, keep its corresponding `.frx` file in the same folder as the `.frm` file.
-5. From `Microsoft_Excel_Objects`, copy the provided code into the corresponding Excel objects in your workbook, such as `ThisWorkbook`.
+5. Copy the provided code from `Microsoft_Excel_Objects` into the corresponding Excel objects, such as `ThisWorkbook`.
 6. Save your workbook as an `.xlsm` file.
 7. Enable macros when prompted.
-
-> **Important:** Do not rename the imported VBA components unless you also update the code accordingly.
-
-The `ThisWorkbook` code is required for the DatePicker to open when double-clicking a cell using a supported **Date** format.
 
 ### Using the included demo
 
@@ -48,10 +42,12 @@ Open the workbook and enable macros when prompted.
 
 ## 🔒 Security
 
-The demo workbook is a macro-enabled file, so Excel may display a security warning when you open it.  
-This is normal for files containing VBA macros.
+The demo workbook contains VBA macros, so Excel may display the usual security warning when you open it.
 
-The complete VBA source code is provided in this repository for anyone who wants to inspect it.
+If Windows has blocked the downloaded file, Excel may prevent the macros from running without offering an option to enable them.  
+To unblock it, right-click the file, select **Properties**, check **Unblock**, then confirm.
+
+The complete VBA source code is available in this repository for review.
 
 ## 🖥️ Compatibility
 
@@ -61,20 +57,16 @@ Older Excel versions may be compatible, but have not been tested against every r
 ### macOS
 
 The DatePicker supports Excel for Mac.  
-For automatic dark-mode detection, copy `DatePickerTheme.applescript` from `src/Mac/` to:
+For the optional automatic dark-mode detection, copy `DatePickerTheme.applescript` from `src/Mac/` to:
 
 `~/Library/Application Scripts/com.microsoft.Excel/`
 
-Create the `com.microsoft.Excel` folder if it does not already exist.  
-If the script is unavailable or cannot be executed, the DatePicker safely falls back to Light Mode.
-
 ## 📌 Remarks
 
-The DatePicker opens automatically when double-clicking a cell using a supported **Date** format.  
-This includes Excel's **Short Date** formats, the system-local **Long Date** format, and several common **Long Date** formats not tied to the system locale.
+Supported formats include Excel's Short Date formats, the system-local Long Date format, and several common Long Date formats not tied to the system locale.
 
-Time-only formats are not supported, and custom date formats outside the supported formats may not open the DatePicker.  
-The automatic double-click behavior can be customized in the `ThisWorkbook` code, including which cell formats trigger the DatePicker.
+Time-only formats are not supported, and custom date formats may not trigger the DatePicker.  
+The double-click behavior can be customized in the `ThisWorkbook` code, including which cell formats trigger the DatePicker.
 
 Excel Online includes a built-in date picker, but this feature is currently not available in the desktop version of Excel.
 
