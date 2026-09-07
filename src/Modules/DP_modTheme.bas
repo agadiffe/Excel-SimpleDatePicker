@@ -2,8 +2,11 @@ Attribute VB_Name = "DP_modTheme"
 Option Explicit
 
 '----------------------------------------
-' Font Size
+' Constants
 '----------------------------------------
+
+' Font sizes
+'--------------------
 
 Public Const DP_FONT_SIZE_HEADER As Long = 10
 Public Const DP_FONT_SIZE_ARROW As Long = 10
@@ -12,17 +15,168 @@ Public Const DP_FONT_SIZE_WEEKDAY As Long = 8
 Public Const DP_FONT_SIZE_PERIOD As Long = 9
 Public Const DP_FONT_SIZE_ACTION_BUTTON As Long = 9
 
-
-'----------------------------------------
 ' Theme
+'--------------------
+
+' Used to detect dark theme from picker background in month/year pickers.
+Public Const DP_ColorBgDark As Long = 3091499 ' RGB(43, 44, 47)
+
+
+'----------------------------------------
+' State
 '----------------------------------------
 
-Private Function IsDarkMode() As Boolean
+Public DP_DarkMode As Boolean
+
+
+'----------------------------------------
+' Colors
+'----------------------------------------
+
+' Background
+'--------------------
+
+Public Function DP_ColorBg() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBg = DP_ColorBgDark
+    Else
+        DP_ColorBg = RGB(248, 249, 251)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBorder() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBorder = RGB(60, 61, 65)
+    Else
+        DP_ColorBorder = RGB(190, 194, 201)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBgToday() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBgToday = RGB(48, 72, 96)
+    Else
+        DP_ColorBgToday = RGB(210, 232, 255)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBgSelected() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBgSelected = RGB(65, 135, 205)
+    Else
+        DP_ColorBgSelected = RGB(70, 145, 220)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBgHover() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBgHover = RGB(70, 72, 77)
+    Else
+        DP_ColorBgHover = RGB(225, 230, 237)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBgSelectedHover() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBgSelectedHover = RGB(85, 155, 220)
+    Else
+        DP_ColorBgSelectedHover = RGB(95, 165, 230)
+    End If
+
+End Function
+
+
+Public Function DP_ColorBgArrowPressed() As Long
+
+    If DP_DarkMode Then
+        DP_ColorBgArrowPressed = RGB(85, 87, 93)
+    Else
+        DP_ColorBgArrowPressed = RGB(205, 211, 221)
+    End If
+
+End Function
+
+
+' Text
+'--------------------
+
+Public Function DP_ColorText() As Long
+
+    If DP_DarkMode Then
+        DP_ColorText = RGB(228, 228, 231)
+    Else
+        DP_ColorText = RGB(35, 40, 48)
+    End If
+
+End Function
+
+
+Public Function DP_ColorTextSecondary() As Long
+
+    If DP_DarkMode Then
+        DP_ColorTextSecondary = RGB(148, 148, 155)
+    Else
+        DP_ColorTextSecondary = RGB(155, 160, 168)
+    End If
+
+End Function
+
+
+Public Function DP_ColorTextHeader() As Long
+
+    If DP_DarkMode Then
+        DP_ColorTextHeader = RGB(220, 220, 223)
+    Else
+        DP_ColorTextHeader = RGB(30, 50, 75)
+    End If
+
+End Function
+
+
+Public Function DP_ColorTextToday() As Long
+
+    If DP_DarkMode Then
+        DP_ColorTextToday = RGB(100, 180, 240)
+    Else
+        DP_ColorTextToday = RGB(0, 90, 170)
+    End If
+
+End Function
+
+
+Public Function DP_ColorTextSelected() As Long
+
+    DP_ColorTextSelected = RGB(255, 255, 255)
+
+End Function
+
+
+'----------------------------------------
+' Theme detection
+'----------------------------------------
+
+Public Function DP_IsDarkMode() As Boolean
 
     If IsWindows() Then
-        IsDarkMode = IsExcelDarkThemeActive()
+        DP_IsDarkMode = IsExcelDarkThemeActive()
     Else
-        IsDarkMode = IsMacDarkThemeActive()
+        DP_IsDarkMode = IsMacDarkThemeActive()
     End If
 
 End Function
@@ -148,122 +302,6 @@ LightMode:
     IsMacDarkThemeActive = False
 
 #End If
-
-End Function
-
-
-'----------------------------------------
-' Color
-'----------------------------------------
-
-' Background
-'--------------------
-
-Public Function DP_ColorBg() As Long
-
-    If IsDarkMode() Then
-        DP_ColorBg = RGB(43, 44, 47)
-    Else
-        DP_ColorBg = RGB(248, 249, 251)
-    End If
-
-End Function
-
-
-Public Function DP_ColorBgToday() As Long
-
-    If IsDarkMode() Then
-        DP_ColorBgToday = RGB(48, 72, 96)
-    Else
-        DP_ColorBgToday = RGB(210, 232, 255)
-    End If
-
-End Function
-
-
-Public Function DP_ColorBgSelected() As Long
-
-    If IsDarkMode() Then
-        DP_ColorBgSelected = RGB(65, 135, 205)
-    Else
-        DP_ColorBgSelected = RGB(70, 145, 220)
-    End If
-
-End Function
-
-
-Public Function DP_ColorBgHover() As Long
-
-    If IsDarkMode() Then
-        DP_ColorBgHover = RGB(70, 72, 77)
-    Else
-        DP_ColorBgHover = RGB(225, 230, 237)
-    End If
-
-End Function
-
-
-Public Function DP_ColorBgSelectedHover() As Long
-
-    If IsDarkMode() Then
-        DP_ColorBgSelectedHover = RGB(85, 155, 220)
-    Else
-        DP_ColorBgSelectedHover = RGB(95, 165, 230)
-    End If
-
-End Function
-
-
-' Text
-'--------------------
-
-Public Function DP_ColorText() As Long
-
-    If IsDarkMode() Then
-        DP_ColorText = RGB(228, 228, 231)
-    Else
-        DP_ColorText = RGB(35, 40, 48)
-    End If
-
-End Function
-
-
-Public Function DP_ColorTextSecondary() As Long
-
-    If IsDarkMode() Then
-        DP_ColorTextSecondary = RGB(148, 148, 155)
-    Else
-        DP_ColorTextSecondary = RGB(155, 160, 168)
-    End If
-
-End Function
-
-
-Public Function DP_ColorTextHeader() As Long
-
-    If IsDarkMode() Then
-        DP_ColorTextHeader = RGB(220, 220, 223)
-    Else
-        DP_ColorTextHeader = RGB(30, 50, 75)
-    End If
-
-End Function
-
-
-Public Function DP_ColorTextToday() As Long
-
-    If IsDarkMode() Then
-        DP_ColorTextToday = RGB(100, 180, 240)
-    Else
-        DP_ColorTextToday = RGB(0, 90, 170)
-    End If
-
-End Function
-
-
-Public Function DP_ColorTextSelected() As Long
-
-    DP_ColorTextSelected = RGB(255, 255, 255)
 
 End Function
 

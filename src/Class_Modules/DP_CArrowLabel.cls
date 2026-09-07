@@ -89,10 +89,29 @@ Private Sub ArrowTextLabel_Click()
 End Sub
 
 
+Private Sub ArrowLabel_MouseDown(ByVal Button As Integer, _
+                                 ByVal Shift As Integer, _
+                                 ByVal X As Single, _
+                                 ByVal Y As Single)
+
+    ArrowLabel.BackColor = DP_ColorBgArrowPressed()
+
+End Sub
+
+
+Private Sub ArrowTextLabel_MouseDown(ByVal Button As Integer, _
+                                     ByVal Shift As Integer, _
+                                     ByVal X As Single, _
+                                     ByVal Y As Single)
+
+    ArrowLabel.BackColor = DP_ColorBgArrowPressed()
+
+End Sub
+
+
 '----------------------------------------
 ' Hover
 '----------------------------------------
-
 
 Private Sub ArrowLabel_MouseMove(ByVal Button As Integer, _
                                  ByVal Shift As Integer, _

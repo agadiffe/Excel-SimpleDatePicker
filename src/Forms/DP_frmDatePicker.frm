@@ -59,10 +59,21 @@ End Sub
 
 Private Sub BuildCalendar()
 
+    Dim CurrentDarkMode As Boolean
+
+    CurrentDarkMode = DP_IsDarkMode()
+
     If Not CalendarInitialized Then
-        DP_RemoveUserFormTitleBar Me.Caption
+        If Not DP_SHOW_TITLEBAR Then
+            DP_RemoveUserFormTitleBar Me.Caption
+        End If
+
+        DP_DarkMode = CurrentDarkMode
         InitializeCalendar
         CalendarInitialized = True
+    ElseIf DP_DarkMode <> CurrentDarkMode Then
+        DP_DarkMode = CurrentDarkMode
+        InitializeCalendar
     Else
         RefreshCalendar
     End If
@@ -230,11 +241,11 @@ Public Function GetCurrentMonth() As Date
 End Function
 
 
-Public Function HasSelectedDate(ByVal CellDate As Date) As Boolean
+Public Function IsSelected(ByVal CellDate As Date) As Boolean
 
     If Not IsDate(TargetCell.Value) Then Exit Function
 
-    HasSelectedDate = (CellDate = DateValue(TargetCell.Value))
+    IsSelected = (CellDate = DateValue(TargetCell.Value))
 
 End Function
 

@@ -121,7 +121,7 @@ Public Sub UpdateDate(ByVal CalendarCellDate As Date)
     ' Selected date
     '--------------------
 
-    If ParentForm.HasSelectedDate(CellDate) Then
+    If ParentForm.IsSelected(CellDate) Then
         DayLabel.BackColor = DP_ColorBgSelected()
         DayTextLabel.ForeColor = DP_ColorTextSelected()
         DayTextLabel.Font.Bold = True

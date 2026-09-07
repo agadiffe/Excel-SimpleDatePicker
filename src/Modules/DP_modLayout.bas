@@ -7,6 +7,8 @@ Option Explicit
 
 Public Const DP_DATEPICKER_WIDTH As Long = 236
 
+Public Const DP_SHOW_TITLEBAR As Boolean = False
+
 Private Const DATEPICKER_MARGIN_RATIO As Single = 0.05
 Private Const DATEPICKER_MARGIN As Single = _
     DP_DATEPICKER_WIDTH * DATEPICKER_MARGIN_RATIO
@@ -18,6 +20,9 @@ Public Const DP_YEARPICKER_WIDTH As Single = _
     DP_DATEPICKER_WIDTH
 
 Private Const SECTION_GAP_RATIO As Single = 0.11
+
+Public Const DP_BORDER_WIDTH As Single = 1
+
 
 '----------------------------------------
 ' Day
