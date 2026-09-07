@@ -40,14 +40,14 @@ Public Sub Setup(ByVal Form As Object, _
 
     With ButtonLabel
         .Height = DP_ACTION_BUTTON_HEIGHT
-        .Top = ParentForm.Height - .Height - DP_ACTION_BUTTON_BOTTOM_MARGIN
+        .Top = ParentForm.InsideHeight - .Height - DP_ACTION_BUTTON_BOTTOM_MARGIN
     End With
 
     Set ButtonTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With ButtonTextLabel
         .Caption = DP_GetDatePickerActionText(ActionKey)
-        .Font.Size = DP_FONT_SIZE_ACTION_BUTTON * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_ACTION_BUTTON * DP_GetFontScale(ParentForm.InsideWidth)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
         .ForeColor = DP_ColorTextSecondary()
@@ -60,14 +60,11 @@ Public Sub Setup(ByVal Form As Object, _
                                   .Height)
     End With
 
-    ButtonWidth = ButtonTextLabel.Width + DP_DATEPICKER_WIDTH * 0.07
+    ButtonWidth = ButtonTextLabel.Width + DP_DATEPICKER_WIDTH * 0.1
 
     With ButtonLabel
         .Width = ButtonWidth
-        .Left = DP_GRID_LEFT + _
-                (DP_CALENDAR_COLUMNS - 1) * DP_GRID_CELL_WIDTH + _
-                DP_CALENDAR_CELL_WIDTH - _
-                .Width
+        .Left = DP_DATEPICKER_WIDTH - DP_ACTION_BUTTON_RIGHT_MARGIN - .Width
     End With
 
     With ButtonTextLabel

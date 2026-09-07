@@ -32,10 +32,13 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
 
     With WeekdayLabel
         .Caption = Format(DateSerial(2029, 1, 1 + WeekdayIndex), "ddd")
-        .Left = DP_GridLeft(WeekdayIndex, DP_GRID_LEFT, DP_GRID_CELL_WIDTH)
+        .Left = DP_GridLeft(WeekdayIndex, _
+                            DP_GRID_LEFT, _
+                            DP_GRID_CELL_WIDTH, _
+                            DP_CALENDAR_CELL_WIDTH)
         .ForeColor = DP_ColorTextHeader()
         .Font.Bold = True
-        .Font.Size = DP_FONT_SIZE_WEEKDAY * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_WEEKDAY * DP_GetFontScale(ParentForm.InsideWidth)
         .TextAlign = fmTextAlignCenter
         .AutoSize = True
 

@@ -47,7 +47,7 @@ Public Sub Setup(ByVal Form As Object, _
 
     With HeaderTextLabel
         .Caption = HeaderCaption
-        .Font.Size = DP_FONT_SIZE_HEADER * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_HEADER * DP_GetFontScale(ParentForm.InsideWidth)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
         .ForeColor = DP_ColorTextHeader()

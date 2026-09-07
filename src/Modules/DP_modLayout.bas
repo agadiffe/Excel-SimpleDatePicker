@@ -27,7 +27,7 @@ Public Const DP_CALENDAR_COLUMNS As Long = 7
 Public Const DP_CALENDAR_ROWS As Long = 6
 
 Private Const GRID_WIDTH As Single = _
-    DP_DATEPICKER_WIDTH * (1 - DATEPICKER_MARGIN_RATIO * 2)
+    DP_DATEPICKER_WIDTH - DATEPICKER_MARGIN * 2
 
 Public Const DP_GRID_CELL_WIDTH As Single = _
     GRID_WIDTH / DP_CALENDAR_COLUMNS
@@ -77,7 +77,7 @@ Public Const DP_MONTH_GRID_COLUMNS As Long = 3
 Public Const DP_MONTH_GRID_ROWS As Long = 4
 
 Private Const MONTH_GRID_WIDTH As Single = _
-    DP_MONTHPICKER_WIDTH * (1 - DATEPICKER_MARGIN_RATIO * 2)
+    DP_MONTHPICKER_WIDTH - DATEPICKER_MARGIN * 2
 
 Public Const DP_MONTH_GRID_CELL_WIDTH As Single = _
     MONTH_GRID_WIDTH / DP_MONTH_GRID_COLUMNS
@@ -97,7 +97,7 @@ Public Const DP_YEAR_GRID_COLUMNS As Long = 4
 Public Const DP_YEAR_GRID_ROWS As Long = 4
 
 Private Const YEAR_GRID_WIDTH As Single = _
-    DP_YEARPICKER_WIDTH * (1 - DATEPICKER_MARGIN_RATIO * 2)
+    DP_YEARPICKER_WIDTH - DATEPICKER_MARGIN * 2
 
 Public Const DP_YEAR_GRID_CELL_WIDTH As Single = _
     YEAR_GRID_WIDTH / DP_YEAR_GRID_COLUMNS
@@ -155,16 +155,23 @@ Public Const DP_ACTION_BUTTON_HEIGHT As Single = _
 Public Const DP_ACTION_BUTTON_BOTTOM_MARGIN As Single = _
     DATEPICKER_MARGIN
 
+Public Const DP_ACTION_BUTTON_RIGHT_MARGIN As Single = _
+    DATEPICKER_MARGIN
+
 
 '----------------------------------------
 ' Positioning
 '----------------------------------------
 
 Public Const DP_GRID_TOP As Single = _
-    DP_HEADER_TOP + DP_HEADER_HEIGHT + CALENDAR_SECTION_GAP
+    DP_HEADER_TOP + _
+    DP_HEADER_HEIGHT + _
+    CALENDAR_SECTION_GAP
 
 Public Const DP_PERIOD_GRID_TOP As Single = _
-    DP_HEADER_TOP + DP_HEADER_HEIGHT + PERIOD_SECTION_GAP
+    DP_HEADER_TOP + _
+    DP_HEADER_HEIGHT + _
+    PERIOD_SECTION_GAP
 
 
 Private Const PICKER_FIXED_HEIGHT As Single = _

@@ -49,7 +49,7 @@ Public Sub Setup(ByVal Form As Object, _
 
     With ArrowTextLabel
         .Caption = ArrowCaption
-        .Font.Size = DP_FONT_SIZE_ARROW * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_ARROW * DP_GetFontScale(ParentForm.InsideWidth)
         .TextAlign = fmTextAlignCenter
         .ForeColor = DP_ColorTextHeader()
         .BackStyle = fmBackStyleTransparent

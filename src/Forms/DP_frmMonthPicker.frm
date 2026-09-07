@@ -51,6 +51,7 @@ End Sub
 Private Sub BuildMonths()
 
     If Not MonthsInitialized Then
+        DP_RemoveUserFormTitleBar Me.Caption
         InitializeMonths
         MonthsInitialized = True
     Else
@@ -145,8 +146,13 @@ Private Sub CreateMonthLabels()
                            "MONTH", _
                            MonthNumber, _
                            CellDate, _
-                           DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, DP_MONTH_GRID_CELL_WIDTH), _
-                           DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, DP_PERIOD_GRID_CELL_HEIGHT), _
+                           DP_GridLeft(ColumnIndex, _
+                                       DP_PERIOD_GRID_LEFT, _
+                                       DP_MONTH_GRID_CELL_WIDTH, _
+                                       DP_MONTH_CELL_WIDTH), _
+                           DP_GridTop(RowIndex, _
+                                      DP_PERIOD_GRID_TOP, _
+                                      DP_PERIOD_GRID_CELL_HEIGHT), _
                            DP_MONTH_CELL_WIDTH
 
         MonthHandler.SetState IsCurrentMonth(MonthNumber), _
@@ -334,13 +340,6 @@ Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Y As Single)
 
     ResetAllHover
-
-End Sub
-
-
-Private Sub UserForm_Activate()
-
-    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 

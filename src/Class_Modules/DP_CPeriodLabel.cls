@@ -57,7 +57,7 @@ Public Sub Setup(ByVal Form As Object, _
 
     With PeriodTextLabel
         .Caption = GetPeriodCaption()
-        .Font.Size = DP_FONT_SIZE_PERIOD * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_PERIOD * DP_GetFontScale(ParentForm.InsideWidth)
         .TextAlign = fmTextAlignCenter
         .ForeColor = DP_ColorText()
         .BackStyle = fmBackStyleTransparent

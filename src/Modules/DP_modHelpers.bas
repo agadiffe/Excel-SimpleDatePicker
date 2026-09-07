@@ -98,6 +98,10 @@ Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
     With PickerForm
         .Width = FormWidth
         .Height = FormHeight
+
+        .Width = .Width + (FormWidth - .InsideWidth)
+        .Height = .Height + (FormHeight - .InsideHeight)
+
         .BackColor = DP_ColorBg()
     End With
 
@@ -146,9 +150,12 @@ End Function
 
 Public Function DP_GridLeft(ByVal ColumnIndex As Long, _
                             ByVal GridLeftPosition As Single, _
-                            ByVal GridCellWidth As Single) As Single
+                            ByVal GridCellWidth As Single, _
+                            ByVal CellWidth As Single) As Single
 
-    DP_GridLeft = GridLeftPosition + ColumnIndex * GridCellWidth
+    DP_GridLeft = GridLeftPosition + _
+                  ColumnIndex * GridCellWidth + _
+                  (GridCellWidth - CellWidth) / 2
 
 End Function
 

@@ -60,6 +60,7 @@ End Sub
 Private Sub BuildCalendar()
 
     If Not CalendarInitialized Then
+        DP_RemoveUserFormTitleBar Me.Caption
         InitializeCalendar
         CalendarInitialized = True
     Else
@@ -174,8 +175,13 @@ Private Sub CreateCalendarDay(ByVal CellDate As Date, _
 
     DayTextHandler.Setup Me, _
                          CellDate, _
-                         DP_GridLeft(ColumnIndex, DP_GRID_LEFT, DP_GRID_CELL_WIDTH), _
-                         DP_GridTop(RowIndex + 1, DP_GRID_TOP, DP_GRID_CELL_HEIGHT)
+                         DP_GridLeft(ColumnIndex, _
+                                     DP_GRID_LEFT, _
+                                     DP_GRID_CELL_WIDTH, _
+                                     DP_CALENDAR_CELL_WIDTH), _
+                         DP_GridTop(RowIndex + 1, _
+                                    DP_GRID_TOP, _
+                                    DP_GRID_CELL_HEIGHT)
 
     DayTextHandlers.Add DayTextHandler
 
@@ -361,13 +367,6 @@ Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Y As Single)
 
     ResetAllHover
-
-End Sub
-
-
-Private Sub UserForm_Activate()
-
-    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 

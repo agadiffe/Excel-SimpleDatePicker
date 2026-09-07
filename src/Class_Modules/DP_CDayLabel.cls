@@ -55,7 +55,7 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
 
     With DayTextLabel
         .Caption = GetDayTextCaption()
-        .Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(ParentForm.InsideWidth)
         .BackStyle = fmBackStyleTransparent
         .TextAlign = fmTextAlignCenter
         .WordWrap = False

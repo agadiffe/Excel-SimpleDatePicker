@@ -51,6 +51,7 @@ End Sub
 Private Sub BuildYears()
 
     If Not YearsInitialized Then
+        DP_RemoveUserFormTitleBar Me.Caption
         InitializeYears
         YearsInitialized = True
     Else
@@ -167,8 +168,13 @@ Private Sub CreateYearLabels()
                           "YEAR", _
                           DisplayYear, _
                           CellDate, _
-                          DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, DP_YEAR_GRID_CELL_WIDTH), _
-                          DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, DP_PERIOD_GRID_CELL_HEIGHT), _
+                          DP_GridLeft(ColumnIndex, _
+                                      DP_PERIOD_GRID_LEFT, _
+                                      DP_YEAR_GRID_CELL_WIDTH, _
+                                      DP_YEAR_CELL_WIDTH), _
+                          DP_GridTop(RowIndex, _
+                                     DP_PERIOD_GRID_TOP, _
+                                     DP_PERIOD_GRID_CELL_HEIGHT), _
                           DP_YEAR_CELL_WIDTH
 
         YearHandler.SetState IsCurrentYear(DisplayYear), _
@@ -320,13 +326,6 @@ Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Y As Single)
 
     ResetAllHover
-
-End Sub
-
-
-Private Sub UserForm_Activate()
-
-    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 
