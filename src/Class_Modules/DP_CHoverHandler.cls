@@ -44,7 +44,7 @@ Public Sub SetHover()
 
     If Not Hovered Then
         NormalBackColor = HoverLabel.BackColor
-        HoverLabel.BackColor = ColorBgHover()
+        HoverLabel.BackColor = DP_ColorBgHover()
         Hovered = True
     End If
 
@@ -65,10 +65,10 @@ End Sub
 
 Private Sub ApplyHoverColor()
 
-    If NormalBackColor = ColorBgSelected() Then
-        BackgroundLabel.BackColor = ColorBgSelectedHover()
+    If NormalBackColor = DP_ColorBgSelected() Then
+        BackgroundLabel.BackColor = DP_ColorBgSelectedHover()
     Else
-        BackgroundLabel.BackColor = ColorBgHover()
+        BackgroundLabel.BackColor = DP_ColorBgHover()
     End If
 
 End Sub

@@ -50,28 +50,28 @@ Public Sub Setup(ByVal Form As Object, _
         .Left = LeftPosition
         .Top = TopPosition
         .Width = CellWidth
-        .Height = PERIOD_CELL_HEIGHT
+        .Height = DP_PERIOD_CELL_HEIGHT
     End With
 
     Set PeriodTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With PeriodTextLabel
         .Caption = GetPeriodCaption()
-        .Font.Size = FONT_SIZE_PERIOD * GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_PERIOD * DP_GetFontScale(ParentForm.Width)
         .TextAlign = fmTextAlignCenter
-        .ForeColor = ColorText()
+        .ForeColor = DP_ColorText()
         .BackStyle = fmBackStyleTransparent
         .WordWrap = False
         .AutoSize = True
 
-        .Top = VerticalTextTop(PeriodLabel.Top, _
-                               PeriodLabel.Height, _
-                               .Height)
+        .Top = DP_VerticalTextTop(PeriodLabel.Top, _
+                                  PeriodLabel.Height, _
+                                  .Height)
 
         .AutoSize = False
         .Left = PeriodLabel.Left
         .Width = PeriodLabel.Width
-        .Height = PeriodLabel.Height
+        .Height = PeriodLabel.Top + PeriodLabel.Height - .Top
     End With
 
     Set HoverHandler = New DP_CHoverHandler
@@ -104,7 +104,7 @@ Private Function GetPeriodCaption() As String
 
     Select Case PeriodKind
         Case "MONTH"
-            If MONTH_GRID_COLUMNS > 3 Then
+            If DP_MONTH_GRID_COLUMNS > 3 Then
                 GetPeriodCaption = Format(PeriodDate, "mmm")
             Else
                 GetPeriodCaption = Format(PeriodDate, "mmmm")
@@ -127,23 +127,23 @@ Public Sub SetState(ByVal IsCurrent As Boolean, _
     ' Default state
     '--------------------
 
-    PeriodLabel.BackColor = ColorBg()
-    PeriodTextLabel.ForeColor = ColorText()
+    PeriodLabel.BackColor = DP_ColorBg()
+    PeriodTextLabel.ForeColor = DP_ColorText()
     PeriodTextLabel.Font.Bold = False
 
     ' Other period
     '--------------------
 
     If IsSecondary Then
-        PeriodTextLabel.ForeColor = ColorTextSecondary()
+        PeriodTextLabel.ForeColor = DP_ColorTextSecondary()
     End If
 
     ' Current
     '--------------------
 
     If IsCurrent Then
-        PeriodLabel.BackColor = ColorBgToday()
-        PeriodTextLabel.ForeColor = ColorTextToday()
+        PeriodLabel.BackColor = DP_ColorBgToday()
+        PeriodTextLabel.ForeColor = DP_ColorTextToday()
         PeriodTextLabel.Font.Bold = True
     End If
 
@@ -151,8 +151,8 @@ Public Sub SetState(ByVal IsCurrent As Boolean, _
     '--------------------
 
     If IsSelected Then
-        PeriodLabel.BackColor = ColorBgSelected()
-        PeriodTextLabel.ForeColor = ColorTextSelected()
+        PeriodLabel.BackColor = DP_ColorBgSelected()
+        PeriodTextLabel.ForeColor = DP_ColorTextSelected()
         PeriodTextLabel.Font.Bold = True
     End If
 

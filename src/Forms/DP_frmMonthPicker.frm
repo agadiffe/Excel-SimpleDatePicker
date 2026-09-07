@@ -19,7 +19,7 @@ Option Explicit
 '----------------------------------------
 
 Private Const MONTH_COUNT As Long = _
-    MONTH_GRID_COLUMNS * MONTH_GRID_ROWS
+    DP_MONTH_GRID_COLUMNS * DP_MONTH_GRID_ROWS
 
 Private ParentPicker As DP_frmDatePicker
 Private CurrentYear As Long
@@ -43,7 +43,7 @@ Public Sub ShowMonths(ByVal Picker As DP_frmDatePicker)
     CurrentYear = Year(ParentPicker.GetCurrentMonth)
 
     BuildMonths
-    ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
+    DP_ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
 
 End Sub
 
@@ -67,8 +67,8 @@ Private Sub InitializeMonths()
     Set MonthLabelHandlers = New Collection
     Set ArrowHandlers = New Collection
 
-    ClearPickerControls Me
-    InitializePicker Me, MONTHPICKER_WIDTH, MONTHPICKER_HEIGHT
+    DP_ClearPickerControls Me
+    DP_InitializePicker Me, DP_MONTHPICKER_WIDTH, DP_MONTHPICKER_HEIGHT
 
     ' Year
     '--------------------
@@ -80,7 +80,7 @@ Private Sub InitializeMonths()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "PREV_YEAR", ChrW(&H25B2), ARROW_PREV_LEFT
+    ArrowHandler.Setup Me, "PREV_YEAR", ChrW(&H25B2), DP_ARROW_PREV_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -88,7 +88,7 @@ Private Sub InitializeMonths()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "NEXT_YEAR", ChrW(&H25BC), ARROW_NEXT_LEFT
+    ArrowHandler.Setup Me, "NEXT_YEAR", ChrW(&H25BC), DP_ARROW_NEXT_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -136,8 +136,8 @@ Private Sub CreateMonthLabels()
         MonthNumber = CellIndex + 1
         CellDate = GetMonthDate(CellIndex)
 
-        ColumnIndex = GridColumn(CellIndex, MONTH_GRID_COLUMNS)
-        RowIndex = GridRow(CellIndex, MONTH_GRID_COLUMNS)
+        ColumnIndex = DP_GridColumn(CellIndex, DP_MONTH_GRID_COLUMNS)
+        RowIndex = DP_GridRow(CellIndex, DP_MONTH_GRID_COLUMNS)
 
         Set MonthHandler = New DP_CPeriodLabel
 
@@ -145,9 +145,9 @@ Private Sub CreateMonthLabels()
                            "MONTH", _
                            MonthNumber, _
                            CellDate, _
-                           GridLeft(ColumnIndex, PERIOD_GRID_LEFT, MONTH_GRID_CELL_WIDTH), _
-                           GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_CELL_HEIGHT), _
-                           MONTH_CELL_WIDTH
+                           DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, DP_MONTH_GRID_CELL_WIDTH), _
+                           DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, DP_PERIOD_GRID_CELL_HEIGHT), _
+                           DP_MONTH_CELL_WIDTH
 
         MonthHandler.SetState IsCurrentMonth(MonthNumber), _
                               IsSelectedMonth(MonthNumber), _
@@ -277,14 +277,14 @@ End Sub
 
 Public Sub ResetArrowHover()
 
-    ResetHoverCollection ArrowHandlers
+    DP_ResetHoverCollection ArrowHandlers
 
 End Sub
 
 
 Public Sub ResetMonthHover()
 
-    ResetHoverCollection MonthLabelHandlers
+    DP_ResetHoverCollection MonthLabelHandlers
 
 End Sub
 
@@ -319,7 +319,7 @@ End Sub
 
 Public Sub ResetMonthHoverExcept(ByVal CurrentMonth As DP_CPeriodLabel)
 
-    ResetHoverCollectionExcept MonthLabelHandlers, CurrentMonth
+    DP_ResetHoverCollectionExcept MonthLabelHandlers, CurrentMonth
 
 End Sub
 
@@ -340,7 +340,7 @@ End Sub
 
 Private Sub UserForm_Activate()
 
-    RemoveUserFormTitleBar Me.Caption
+    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 

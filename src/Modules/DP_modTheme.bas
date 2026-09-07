@@ -5,19 +5,19 @@ Option Explicit
 ' Font Size
 '----------------------------------------
 
-Public Const FONT_SIZE_HEADER As Long = 10
-Public Const FONT_SIZE_ARROW As Long = 10
-Public Const FONT_SIZE_DAY As Long = 9
-Public Const FONT_SIZE_WEEKDAY As Long = 8
-Public Const FONT_SIZE_PERIOD As Long = 9
-Public Const FONT_SIZE_ACTION_BUTTON As Long = 9
+Public Const DP_FONT_SIZE_HEADER As Long = 10
+Public Const DP_FONT_SIZE_ARROW As Long = 10
+Public Const DP_FONT_SIZE_DAY As Long = 9
+Public Const DP_FONT_SIZE_WEEKDAY As Long = 8
+Public Const DP_FONT_SIZE_PERIOD As Long = 9
+Public Const DP_FONT_SIZE_ACTION_BUTTON As Long = 9
 
 
 '----------------------------------------
 ' Theme
 '----------------------------------------
 
-Public Function IsDarkMode() As Boolean
+Private Function IsDarkMode() As Boolean
 
     If IsWindows() Then
         IsDarkMode = IsExcelDarkThemeActive()
@@ -159,56 +159,56 @@ End Function
 ' Background
 '--------------------
 
-Public Function ColorBg() As Long
+Public Function DP_ColorBg() As Long
 
     If IsDarkMode() Then
-        ColorBg = RGB(43, 44, 47)
+        DP_ColorBg = RGB(43, 44, 47)
     Else
-        ColorBg = RGB(248, 249, 251)
+        DP_ColorBg = RGB(248, 249, 251)
     End If
 
 End Function
 
 
-Public Function ColorBgToday() As Long
+Public Function DP_ColorBgToday() As Long
 
     If IsDarkMode() Then
-        ColorBgToday = RGB(48, 72, 96)
+        DP_ColorBgToday = RGB(48, 72, 96)
     Else
-        ColorBgToday = RGB(210, 232, 255)
+        DP_ColorBgToday = RGB(210, 232, 255)
     End If
 
 End Function
 
 
-Public Function ColorBgSelected() As Long
+Public Function DP_ColorBgSelected() As Long
 
     If IsDarkMode() Then
-        ColorBgSelected = RGB(65, 135, 205)
+        DP_ColorBgSelected = RGB(65, 135, 205)
     Else
-        ColorBgSelected = RGB(70, 145, 220)
+        DP_ColorBgSelected = RGB(70, 145, 220)
     End If
 
 End Function
 
 
-Public Function ColorBgHover() As Long
+Public Function DP_ColorBgHover() As Long
 
     If IsDarkMode() Then
-        ColorBgHover = RGB(70, 72, 77)
+        DP_ColorBgHover = RGB(70, 72, 77)
     Else
-        ColorBgHover = RGB(225, 230, 237)
+        DP_ColorBgHover = RGB(225, 230, 237)
     End If
 
 End Function
 
 
-Public Function ColorBgSelectedHover() As Long
+Public Function DP_ColorBgSelectedHover() As Long
 
     If IsDarkMode() Then
-        ColorBgSelectedHover = RGB(85, 155, 220)
+        DP_ColorBgSelectedHover = RGB(85, 155, 220)
     Else
-        ColorBgSelectedHover = RGB(95, 165, 230)
+        DP_ColorBgSelectedHover = RGB(95, 165, 230)
     End If
 
 End Function
@@ -217,53 +217,53 @@ End Function
 ' Text
 '--------------------
 
-Public Function ColorText() As Long
+Public Function DP_ColorText() As Long
 
     If IsDarkMode() Then
-        ColorText = RGB(228, 228, 231)
+        DP_ColorText = RGB(228, 228, 231)
     Else
-        ColorText = RGB(35, 40, 48)
+        DP_ColorText = RGB(35, 40, 48)
     End If
 
 End Function
 
 
-Public Function ColorTextSecondary() As Long
+Public Function DP_ColorTextSecondary() As Long
 
     If IsDarkMode() Then
-        ColorTextSecondary = RGB(148, 148, 155)
+        DP_ColorTextSecondary = RGB(148, 148, 155)
     Else
-        ColorTextSecondary = RGB(155, 160, 168)
+        DP_ColorTextSecondary = RGB(155, 160, 168)
     End If
 
 End Function
 
 
-Public Function ColorTextHeader() As Long
+Public Function DP_ColorTextHeader() As Long
 
     If IsDarkMode() Then
-        ColorTextHeader = RGB(220, 220, 223)
+        DP_ColorTextHeader = RGB(220, 220, 223)
     Else
-        ColorTextHeader = RGB(30, 50, 75)
+        DP_ColorTextHeader = RGB(30, 50, 75)
     End If
 
 End Function
 
 
-Public Function ColorTextToday() As Long
+Public Function DP_ColorTextToday() As Long
 
     If IsDarkMode() Then
-        ColorTextToday = RGB(100, 180, 240)
+        DP_ColorTextToday = RGB(100, 180, 240)
     Else
-        ColorTextToday = RGB(0, 90, 170)
+        DP_ColorTextToday = RGB(0, 90, 170)
     End If
 
 End Function
 
 
-Public Function ColorTextSelected() As Long
+Public Function DP_ColorTextSelected() As Long
 
-    ColorTextSelected = RGB(255, 255, 255)
+    DP_ColorTextSelected = RGB(255, 255, 255)
 
 End Function
 

@@ -37,32 +37,32 @@ Public Sub Setup(ByVal Form As Object, _
     Set HeaderLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With HeaderLabel
-        .Left = HEADER_LEFT
-        .Top = HEADER_TOP
-        .Width = HEADER_WIDTH
-        .Height = HEADER_HEIGHT
+        .Left = DP_HEADER_LEFT
+        .Top = DP_HEADER_TOP
+        .Width = DP_HEADER_WIDTH
+        .Height = DP_HEADER_HEIGHT
     End With
 
     Set HeaderTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With HeaderTextLabel
         .Caption = HeaderCaption
-        .Font.Size = FONT_SIZE_HEADER * GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_HEADER * DP_GetFontScale(ParentForm.Width)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
-        .ForeColor = ColorTextHeader()
+        .ForeColor = DP_ColorTextHeader()
         .BackStyle = fmBackStyleTransparent
         .WordWrap = False
         .AutoSize = True
 
-        .Top = VerticalTextTop(HeaderLabel.Top, _
-                               HeaderLabel.Height, _
-                               .Height)
+        .Top = DP_VerticalTextTop(HeaderLabel.Top, _
+                                  HeaderLabel.Height, _
+                                  .Height)
 
         .AutoSize = False
         .Left = HeaderLabel.Left
         .Width = HeaderLabel.Width
-        .Height = HeaderLabel.Height
+        .Height = HeaderLabel.Top + HeaderLabel.Height - .Top
     End With
 
     Set HoverHandler = New DP_CHoverHandler

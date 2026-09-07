@@ -11,8 +11,8 @@ Private Const POPUP_MARGIN As Single = 10
 Private Const CALIBRATION_POINTS_BASE As Double = 7200#
 
 
-Public Sub ShowPopupNextToCell(ByVal Popup As Object, _
-                               ByVal Target As Range)
+Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
+                                  ByVal Target As Range)
 
     Dim Position As Variant
 

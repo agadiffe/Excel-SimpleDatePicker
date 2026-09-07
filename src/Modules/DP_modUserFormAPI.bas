@@ -44,7 +44,7 @@ Private Const WS_CAPTION As Long = &HC00000
 ' Remove UserForm title bar
 '----------------------------------------
 
-Public Sub RemoveUserFormTitleBar(ByVal FormCaption As String)
+Public Sub DP_RemoveUserFormTitleBar(ByVal FormCaption As String)
 
 #If VBA7 And Not Mac Then
 

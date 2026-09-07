@@ -19,7 +19,7 @@ Option Explicit
 '----------------------------------------
 
 Private Const CALENDAR_DAY_COUNT As Long = _
-    CALENDAR_COLUMNS * CALENDAR_ROWS
+    DP_CALENDAR_COLUMNS * DP_CALENDAR_ROWS
 
 Private TargetCell As Range
 Private CurrentMonth As Date
@@ -52,7 +52,7 @@ Public Sub ShowPicker(ByVal Cell As Range)
     CurrentMonth = DateSerial(Year(InitialDate), Month(InitialDate), 1)
 
     BuildCalendar
-    ShowPopupNextToCell Me, Cell
+    DP_ShowPopupNextToCell Me, Cell
 
 End Sub
 
@@ -77,8 +77,8 @@ Private Sub InitializeCalendar()
     Set WeekdayHandlers = New Collection
     Set DayTextHandlers = New Collection
 
-    ClearPickerControls Me
-    InitializePicker Me, DATEPICKER_WIDTH, DATEPICKER_HEIGHT
+    DP_ClearPickerControls Me
+    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
 
     ' Month / Year
     '--------------------
@@ -90,7 +90,7 @@ Private Sub InitializeCalendar()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "PREV_MONTH", ChrW(&H25B2), ARROW_PREV_LEFT
+    ArrowHandler.Setup Me, "PREV_MONTH", ChrW(&H25B2), DP_ARROW_PREV_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -98,7 +98,7 @@ Private Sub InitializeCalendar()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "NEXT_MONTH", ChrW(&H25BC), ARROW_NEXT_LEFT
+    ArrowHandler.Setup Me, "NEXT_MONTH", ChrW(&H25BC), DP_ARROW_NEXT_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -167,15 +167,15 @@ Private Sub CreateCalendarDay(ByVal CellDate As Date, _
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
-    ColumnIndex = GridColumn(CellIndex, CALENDAR_COLUMNS)
-    RowIndex = GridRow(CellIndex, CALENDAR_COLUMNS)
+    ColumnIndex = DP_GridColumn(CellIndex, DP_CALENDAR_COLUMNS)
+    RowIndex = DP_GridRow(CellIndex, DP_CALENDAR_COLUMNS)
 
     Set DayTextHandler = New DP_CDayLabel
 
     DayTextHandler.Setup Me, _
                          CellDate, _
-                         GridLeft(ColumnIndex, GRID_LEFT, GRID_CELL_WIDTH), _
-                         GridTop(RowIndex + 1, GRID_TOP, GRID_CELL_HEIGHT)
+                         DP_GridLeft(ColumnIndex, DP_GRID_LEFT, DP_GRID_CELL_WIDTH), _
+                         DP_GridTop(RowIndex + 1, DP_GRID_TOP, DP_GRID_CELL_HEIGHT)
 
     DayTextHandlers.Add DayTextHandler
 
@@ -304,14 +304,14 @@ End Sub
 
 Public Sub ResetArrowHover()
 
-    ResetHoverCollection ArrowHandlers
+    DP_ResetHoverCollection ArrowHandlers
 
 End Sub
 
 
 Public Sub ResetDayTextHover()
 
-    ResetHoverCollection DayTextHandlers
+    DP_ResetHoverCollection DayTextHandlers
 
 End Sub
 
@@ -346,7 +346,7 @@ End Sub
 
 Public Sub ResetDayHoverExcept(ByVal CurrentDay As DP_CDayLabel)
 
-    ResetHoverCollectionExcept DayTextHandlers, CurrentDay
+    DP_ResetHoverCollectionExcept DayTextHandlers, CurrentDay
 
 End Sub
 
@@ -367,7 +367,7 @@ End Sub
 
 Private Sub UserForm_Activate()
 
-    RemoveUserFormTitleBar Me.Caption
+    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 

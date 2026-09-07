@@ -40,29 +40,29 @@ Public Sub Setup(ByVal Form As Object, _
 
     With ArrowLabel
         .Left = LeftPosition
-        .Top = ARROW_TOP
-        .Width = ARROW_WIDTH
-        .Height = ARROW_HEIGHT
+        .Top = DP_ARROW_TOP
+        .Width = DP_ARROW_WIDTH
+        .Height = DP_ARROW_HEIGHT
     End With
 
     Set ArrowTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With ArrowTextLabel
         .Caption = ArrowCaption
-        .Font.Size = FONT_SIZE_ARROW * GetFontScale(ParentForm.Width)
+        .Font.Size = DP_FONT_SIZE_ARROW * DP_GetFontScale(ParentForm.Width)
         .TextAlign = fmTextAlignCenter
-        .ForeColor = ColorTextHeader()
+        .ForeColor = DP_ColorTextHeader()
         .BackStyle = fmBackStyleTransparent
         .AutoSize = True
 
-        .Top = VerticalTextTop(ArrowLabel.Top, _
-                               ArrowLabel.Height, _
-                               .Height)
+        .Top = DP_VerticalTextTop(ArrowLabel.Top, _
+                                  ArrowLabel.Height, _
+                                  .Height)
 
         .AutoSize = False
         .Left = ArrowLabel.Left
         .Width = ArrowLabel.Width
-        .Height = ArrowLabel.Height
+        .Height = ArrowLabel.Top + ArrowLabel.Height - .Top
     End With
 
     Set HoverHandler = New DP_CHoverHandler

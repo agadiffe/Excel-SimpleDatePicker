@@ -18,6 +18,9 @@ Option Explicit
 ' References
 '----------------------------------------
 
+Private Const YEAR_COUNT As Long = _
+    DP_YEAR_GRID_COLUMNS * DP_YEAR_GRID_ROWS
+
 Private ParentPicker As DP_frmMonthPicker
 Private CurrentYear As Long
 
@@ -40,7 +43,7 @@ Public Sub ShowYears(ByVal Picker As DP_frmMonthPicker)
     CurrentYear = Picker.GetCurrentYear
 
     BuildYears
-    ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
+    DP_ShowPopupNextToCell Me, DP_frmDatePicker.GetTargetCell
 
 End Sub
 
@@ -66,14 +69,14 @@ Private Sub InitializeYears()
     Set YearLabelHandlers = New Collection
     Set ArrowHandlers = New Collection
 
-    ClearPickerControls Me
-    InitializePicker Me, YEARPICKER_WIDTH, YEARPICKER_HEIGHT
+    DP_ClearPickerControls Me
+    DP_InitializePicker Me, DP_YEARPICKER_WIDTH, DP_YEARPICKER_HEIGHT
 
     ' Year range
     '--------------------
 
     FirstYear = GetFirstDisplayedYear(CurrentYear)
-    LastYear = FirstYear + YEAR_BLOCK_SIZE - 1
+    LastYear = FirstYear + YEAR_COUNT - 1
 
     Set YearRangeLabelHandler = New DP_CHeaderLabel
     YearRangeLabelHandler.Setup Me, CStr(FirstYear) & " - " & CStr(LastYear)
@@ -84,7 +87,7 @@ Private Sub InitializeYears()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "PREV_RANGE_YEAR", ChrW(&H25B2), ARROW_PREV_LEFT
+    ArrowHandler.Setup Me, "PREV_RANGE_YEAR", ChrW(&H25B2), DP_ARROW_PREV_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -92,7 +95,7 @@ Private Sub InitializeYears()
     '--------------------
 
     Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "NEXT_RANGE_YEAR", ChrW(&H25BC), ARROW_NEXT_LEFT
+    ArrowHandler.Setup Me, "NEXT_RANGE_YEAR", ChrW(&H25BC), DP_ARROW_NEXT_LEFT
 
     ArrowHandlers.Add ArrowHandler
 
@@ -126,7 +129,7 @@ Private Sub UpdateYearRangeHeader()
     Dim LastYear As Long
 
     FirstYear = GetFirstDisplayedYear(CurrentYear)
-    LastYear = FirstYear + YEAR_BLOCK_SIZE - 1
+    LastYear = FirstYear + YEAR_COUNT - 1
 
     YearRangeLabelHandler.SetCaption CStr(FirstYear) & " - " & CStr(LastYear)
 
@@ -150,13 +153,13 @@ Private Sub CreateYearLabels()
 
     FirstYear = GetFirstDisplayedYear(CurrentYear)
 
-    For CellIndex = 0 To YEAR_BLOCK_SIZE - 1
+    For CellIndex = 0 To YEAR_COUNT - 1
 
         DisplayYear = FirstYear + CellIndex
         CellDate = DateSerial(DisplayYear, 1, 1)
 
-        ColumnIndex = GridColumn(CellIndex, YEAR_GRID_COLUMNS)
-        RowIndex = GridRow(CellIndex, YEAR_GRID_COLUMNS)
+        ColumnIndex = DP_GridColumn(CellIndex, DP_YEAR_GRID_COLUMNS)
+        RowIndex = DP_GridRow(CellIndex, DP_YEAR_GRID_COLUMNS)
 
         Set YearHandler = New DP_CPeriodLabel
 
@@ -164,9 +167,9 @@ Private Sub CreateYearLabels()
                           "YEAR", _
                           DisplayYear, _
                           CellDate, _
-                          GridLeft(ColumnIndex, PERIOD_GRID_LEFT, YEAR_GRID_CELL_WIDTH), _
-                          GridTop(RowIndex, PERIOD_GRID_TOP, PERIOD_CELL_HEIGHT), _
-                          YEAR_CELL_WIDTH
+                          DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, DP_YEAR_GRID_CELL_WIDTH), _
+                          DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, DP_PERIOD_GRID_CELL_HEIGHT), _
+                          DP_YEAR_CELL_WIDTH
 
         YearHandler.SetState IsCurrentYear(DisplayYear), _
                              IsSelectedYear(DisplayYear)
@@ -189,7 +192,7 @@ Private Sub UpdateYearLabels()
 
     FirstYear = GetFirstDisplayedYear(CurrentYear)
 
-    For CellIndex = 0 To YEAR_BLOCK_SIZE - 1
+    For CellIndex = 0 To YEAR_COUNT - 1
 
         DisplayYear = FirstYear + CellIndex
         CellDate = DateSerial(DisplayYear, 1, 1)
@@ -226,7 +229,7 @@ End Function
 
 Private Function GetFirstDisplayedYear(ByVal SelectedYear As Long) As Long
 
-    GetFirstDisplayedYear = ((SelectedYear - 1) \ YEAR_BLOCK_SIZE) * YEAR_BLOCK_SIZE + 1
+    GetFirstDisplayedYear = ((SelectedYear - 1) \ YEAR_COUNT) * YEAR_COUNT + 1
 
 End Function
 
@@ -244,9 +247,9 @@ Public Sub ArrowClicked(ByVal Action As String)
 
     Select Case Action
         Case "PREV_RANGE_YEAR"
-            CurrentYear = CurrentYear - YEAR_BLOCK_SIZE
+            CurrentYear = CurrentYear - YEAR_COUNT
         Case "NEXT_RANGE_YEAR"
-            CurrentYear = CurrentYear + YEAR_BLOCK_SIZE
+            CurrentYear = CurrentYear + YEAR_COUNT
     End Select
 
     BuildYears
@@ -270,14 +273,14 @@ End Sub
 
 Public Sub ResetArrowHover()
 
-    ResetHoverCollection ArrowHandlers
+    DP_ResetHoverCollection ArrowHandlers
 
 End Sub
 
 
 Public Sub ResetYearHover()
 
-    ResetHoverCollection YearLabelHandlers
+    DP_ResetHoverCollection YearLabelHandlers
 
 End Sub
 
@@ -302,7 +305,7 @@ End Sub
 
 Public Sub ResetYearHoverExcept(ByVal CurrentYearLabel As DP_CPeriodLabel)
 
-    ResetHoverCollectionExcept YearLabelHandlers, CurrentYearLabel
+    DP_ResetHoverCollectionExcept YearLabelHandlers, CurrentYearLabel
 
 End Sub
 
@@ -323,7 +326,7 @@ End Sub
 
 Private Sub UserForm_Activate()
 
-    RemoveUserFormTitleBar Me.Caption
+    DP_RemoveUserFormTitleBar Me.Caption
 
 End Sub
 

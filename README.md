@@ -14,7 +14,7 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 - Supports multiple languages based on Excel's interface language
 - Fully responsive with adjustable size
 
-> **Resizing:** To change the DatePicker size, modify the `DATEPICKER_WIDTH` constant in `DP_modLayout`.
+> **Resizing:** To change the DatePicker size, modify the `DP_DATEPICKER_WIDTH` constant in `DP_modLayout`.
 
 ## ⚙️ Installation
 
@@ -31,7 +31,7 @@ The DatePicker requires **Microsoft Excel with VBA support and macros enabled**.
    - **Forms** → import the `.frm` files
    - **Modules** → import the `.bas` files
 4. When importing a UserForm, keep its corresponding `.frx` file in the same folder as the `.frm` file.
-5. Copy the provided code from `Microsoft_Excel_Objects` into the corresponding Excel objects, such as `ThisWorkbook`.
+5. From the `Microsoft_Excel_Objects` folder, copy the provided code into the corresponding module in your workbook.
 6. Save your workbook as an `.xlsm` file.
 7. Enable macros when prompted.
 
@@ -63,10 +63,10 @@ For the optional automatic dark-mode detection, copy `DatePickerTheme.applescrip
 
 ## 📌 Remarks
 
-Supported formats include Excel's Short Date formats, the system-local Long Date format, and several common Long Date formats not tied to the system locale.
+Supported formats include Excel's Short Date formats, the system-local Long Date format, and several common Long Date formats not tied to the system locale.  
+Time-only formats are not supported, and custom date formats may not trigger the DatePicker.
 
-Time-only formats are not supported, and custom date formats may not trigger the DatePicker.  
-The double-click behavior can be customized in the `ThisWorkbook` code, including which cell formats trigger the DatePicker.
+The double-click behavior and which cell formats trigger the DatePicker can be customized in `DP_modHelpers`.
 
 Excel Online includes a built-in date picker, but this feature is currently not available in the desktop version of Excel.
 

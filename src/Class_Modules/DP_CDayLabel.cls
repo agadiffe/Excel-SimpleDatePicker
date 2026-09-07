@@ -44,8 +44,8 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
     With DayLabel
         .Left = LeftPosition
         .Top = TopPosition
-        .Width = CALENDAR_CELL_WIDTH
-        .Height = CALENDAR_CELL_HEIGHT
+        .Width = DP_CALENDAR_CELL_WIDTH
+        .Height = DP_CALENDAR_CELL_HEIGHT
     End With
 
     ' Day number
@@ -54,25 +54,21 @@ Public Sub Setup(ByVal Form As DP_frmDatePicker, _
     Set DayTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With DayTextLabel
-        .Font.Size = FONT_SIZE_DAY * GetFontScale(ParentForm.Width)
+        .Caption = GetDayTextCaption()
+        .Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(ParentForm.Width)
         .BackStyle = fmBackStyleTransparent
         .TextAlign = fmTextAlignCenter
         .WordWrap = False
-    End With
-
-    ' Center text vertically
-    '--------------------
-
-    With DayTextLabel
         .AutoSize = True
 
-        .Top = VerticalTextTop(DayLabel.Top, _
-                               DayLabel.Height, _
-                               .Height)
+        .Top = DP_VerticalTextTop(DayLabel.Top, _
+                                  DayLabel.Height, _
+                                  .Height)
 
         .AutoSize = False
         .Left = DayLabel.Left
         .Width = DayLabel.Width
+        .Height = DayLabel.Top + DayLabel.Height - .Top
     End With
 
     ' Hover
@@ -97,28 +93,28 @@ Public Sub UpdateDate(ByVal CalendarCellDate As Date)
 
     CellDate = CalendarCellDate
 
-    DayTextLabel.Caption = CStr(Day(CellDate))
+    DayTextLabel.Caption = GetDayTextCaption()
 
     ' Default state
     '--------------------
 
-    DayLabel.BackColor = ColorBg()
-    DayTextLabel.ForeColor = ColorText()
+    DayLabel.BackColor = DP_ColorBg()
+    DayTextLabel.ForeColor = DP_ColorText()
     DayTextLabel.Font.Bold = False
 
     ' Other month
     '--------------------
 
     If Month(CellDate) <> Month(ParentForm.GetCurrentMonth) Then
-        DayTextLabel.ForeColor = ColorTextSecondary()
+        DayTextLabel.ForeColor = DP_ColorTextSecondary()
     End If
 
     ' Today
     '--------------------
 
     If CellDate = DateValue(Date) Then
-        DayLabel.BackColor = ColorBgToday()
-        DayTextLabel.ForeColor = ColorTextToday()
+        DayLabel.BackColor = DP_ColorBgToday()
+        DayTextLabel.ForeColor = DP_ColorTextToday()
         DayTextLabel.Font.Bold = True
     End If
 
@@ -126,8 +122,8 @@ Public Sub UpdateDate(ByVal CalendarCellDate As Date)
     '--------------------
 
     If ParentForm.HasSelectedDate(CellDate) Then
-        DayLabel.BackColor = ColorBgSelected()
-        DayTextLabel.ForeColor = ColorTextSelected()
+        DayLabel.BackColor = DP_ColorBgSelected()
+        DayTextLabel.ForeColor = DP_ColorTextSelected()
         DayTextLabel.Font.Bold = True
     End If
 
@@ -150,6 +146,13 @@ Private Sub DayTextLabel_Click()
     ParentForm.DayLabelClicked CellDate
 
 End Sub
+
+
+Private Function GetDayTextCaption() As String
+
+    GetDayTextCaption = CStr(Day(CellDate))
+
+End Function
 
 
 '----------------------------------------

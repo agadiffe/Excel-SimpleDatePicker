@@ -39,42 +39,42 @@ Public Sub Setup(ByVal Form As Object, _
     Set ButtonLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With ButtonLabel
-        .Height = ACTION_BUTTON_HEIGHT
-        .Top = ParentForm.Height - .Height - ACTION_BUTTON_BOTTOM_MARGIN
+        .Height = DP_ACTION_BUTTON_HEIGHT
+        .Top = ParentForm.Height - .Height - DP_ACTION_BUTTON_BOTTOM_MARGIN
     End With
 
     Set ButtonTextLabel = ParentForm.Controls.Add("Forms.Label.1")
 
     With ButtonTextLabel
-        .Caption = GetDatePickerActionText(ActionKey)
-        .Font.Size = FONT_SIZE_ACTION_BUTTON * GetFontScale(ParentForm.Width)
+        .Caption = DP_GetDatePickerActionText(ActionKey)
+        .Font.Size = DP_FONT_SIZE_ACTION_BUTTON * DP_GetFontScale(ParentForm.Width)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
-        .ForeColor = ColorTextSecondary()
+        .ForeColor = DP_ColorTextSecondary()
         .BackStyle = fmBackStyleTransparent
         .WordWrap = False
         .AutoSize = True
 
-        .Top = VerticalTextTop(ButtonLabel.Top, _
-                               ButtonLabel.Height, _
-                               .Height)
+        .Top = DP_VerticalTextTop(ButtonLabel.Top, _
+                                  ButtonLabel.Height, _
+                                  .Height)
     End With
 
-    ButtonWidth = ButtonTextLabel.Width + DATEPICKER_WIDTH * 0.07
+    ButtonWidth = ButtonTextLabel.Width + DP_DATEPICKER_WIDTH * 0.07
 
     With ButtonLabel
         .Width = ButtonWidth
-        .Left = GRID_LEFT _
-                + (CALENDAR_COLUMNS - 1) * GRID_CELL_WIDTH _
-                + CALENDAR_CELL_WIDTH _
-                - .Width
+        .Left = DP_GRID_LEFT + _
+                (DP_CALENDAR_COLUMNS - 1) * DP_GRID_CELL_WIDTH + _
+                DP_CALENDAR_CELL_WIDTH - _
+                .Width
     End With
 
     With ButtonTextLabel
         .AutoSize = False
         .Left = ButtonLabel.Left
         .Width = ButtonLabel.Width
-        .Height = ButtonLabel.Height
+        .Height = ButtonLabel.Top + ButtonLabel.Height - .Top
     End With
 
     Set HoverHandler = New DP_CHoverHandler
