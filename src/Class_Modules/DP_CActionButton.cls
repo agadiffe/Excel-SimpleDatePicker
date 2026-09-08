@@ -60,7 +60,7 @@ Public Sub Setup(ByVal Form As Object, _
                                   .Height)
     End With
 
-    ButtonWidth = ButtonTextLabel.Width + DP_DATEPICKER_WIDTH * 0.1
+    ButtonWidth = ButtonTextLabel.Width + DP_DATEPICKER_WIDTH * 0.08
 
     With ButtonLabel
         .Width = ButtonWidth
