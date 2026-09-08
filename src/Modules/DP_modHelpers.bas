@@ -95,6 +95,10 @@ Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
                                ByVal FormWidth As Single, _
                                ByVal FormHeight As Single)
 
+    If Not DP_SHOW_TITLEBAR Then
+        DP_RemoveUserFormTitleBar PickerForm.Caption
+    End If
+
     With PickerForm
         .Width = FormWidth
         .Height = FormHeight
@@ -105,58 +109,10 @@ Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
         .BackColor = DP_ColorBg()
     End With
 
-    AddPickerBorder PickerForm
-
-End Sub
-
-
-Private Sub AddPickerBorder(ByVal PickerForm As Object)
-
-    Dim BorderWidth As Single
-
-    BorderWidth = DP_BORDER_WIDTH
-
-    ' Top
-    AddBorder PickerForm, _
-              0, 0, _
-              PickerForm.InsideWidth, BorderWidth
-
-    ' Bottom
-    AddBorder PickerForm, _
-               0, PickerForm.InsideHeight - BorderWidth, _
-               PickerForm.InsideWidth, BorderWidth
-
-    ' Left
-    AddBorder PickerForm, _
-               0, 0, _
-               BorderWidth, PickerForm.InsideHeight
-
-    ' Right
-    AddBorder PickerForm, _
-               PickerForm.InsideWidth - BorderWidth, 0, _
-               BorderWidth, PickerForm.InsideHeight
-
-End Sub
-
-
-Private Sub AddBorder(ByVal PickerForm As Object, _
-                      ByVal LeftPosition As Single, _
-                      ByVal TopPosition As Single, _
-                      ByVal BorderWidth As Single, _
-                      ByVal BorderHeight As Single)
-
-    Dim BorderLabel As MSForms.Label
-
-    Set BorderLabel = PickerForm.Controls.Add("Forms.Label.1")
-
-    With BorderLabel
-        .Left = LeftPosition
-        .Top = TopPosition
-        .Width = BorderWidth
-        .Height = BorderHeight
-        .BackColor = DP_ColorBorder()
-        .BorderStyle = fmBorderStyleNone
-    End With
+    If Not DP_SHOW_TITLEBAR Then
+        DP_ApplyRoundedCorners PickerForm
+        DP_ApplyBorderColor PickerForm
+    End If
 
 End Sub
 

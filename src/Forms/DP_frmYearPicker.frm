@@ -51,10 +51,6 @@ End Sub
 Private Sub BuildYears()
 
     If Not YearsInitialized Then
-        If Not DP_SHOW_TITLEBAR Then
-            DP_RemoveUserFormTitleBar Me.Caption
-        End If
-
         InitializeYears
         YearsInitialized = True
     ElseIf DP_DarkMode <> (Me.BackColor = DP_ColorBgDark) Then

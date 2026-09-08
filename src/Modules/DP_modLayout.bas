@@ -21,8 +21,6 @@ Public Const DP_YEARPICKER_WIDTH As Single = _
 
 Private Const SECTION_GAP_RATIO As Single = 0.11
 
-Public Const DP_BORDER_WIDTH As Single = 1
-
 
 '----------------------------------------
 ' Day

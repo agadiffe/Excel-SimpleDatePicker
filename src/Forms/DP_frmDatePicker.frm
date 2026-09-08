@@ -64,10 +64,6 @@ Private Sub BuildCalendar()
     CurrentDarkMode = DP_IsDarkMode()
 
     If Not CalendarInitialized Then
-        If Not DP_SHOW_TITLEBAR Then
-            DP_RemoveUserFormTitleBar Me.Caption
-        End If
-
         DP_DarkMode = CurrentDarkMode
         InitializeCalendar
         CalendarInitialized = True
