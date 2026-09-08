@@ -131,6 +131,7 @@ Private Sub RefreshCalendar()
 
     MonthLabelHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
     UpdateCalendarDays
+    UpdateArrowStates
 
 End Sub
 
@@ -223,6 +224,14 @@ End Function
 ' Date picker helpers
 '----------------------------------------
 
+Public Function IsDayOutsideRange(ByVal DayDate As Date) As Boolean
+
+    IsDayOutsideRange = DayDate < DP_MinDate() Or _
+                        DayDate > DP_MaxDate()
+
+End Function
+
+
 Public Function GetTargetCell() As Range
 
     Set GetTargetCell = TargetCell
@@ -265,20 +274,6 @@ Public Sub HeaderClicked()
 End Sub
 
 
-Public Sub ArrowClicked(ByVal Action As String)
-
-    Select Case Action
-        Case "PREV_MONTH"
-            CurrentMonth = DateAdd("m", -1, CurrentMonth)
-        Case "NEXT_MONTH"
-            CurrentMonth = DateAdd("m", 1, CurrentMonth)
-    End Select
-
-    BuildCalendar
-
-End Sub
-
-
 Public Sub DayLabelClicked(ByVal SelectedDate As Date)
 
     Dim ExistingTime As Double
@@ -307,6 +302,48 @@ Public Sub GoToToday()
     End If
 
     Me.Hide
+
+End Sub
+
+
+'----------------------------------------
+' Arrow
+'----------------------------------------
+
+Public Sub ArrowClicked(ByVal Action As String)
+
+    If Not IsArrowEnabled(Action) Then Exit Sub
+
+    Select Case Action
+        Case "PREV_MONTH"
+            CurrentMonth = DateAdd("m", -1, CurrentMonth)
+        Case "NEXT_MONTH"
+            CurrentMonth = DateAdd("m", 1, CurrentMonth)
+    End Select
+
+    BuildCalendar
+
+End Sub
+
+
+Public Function IsArrowEnabled(ByVal Action As String) As Boolean
+
+    Select Case Action
+        Case "PREV_MONTH"
+            IsArrowEnabled = DateAdd("m", -1, CurrentMonth) >= DP_MinDate()
+        Case "NEXT_MONTH"
+            IsArrowEnabled = DateAdd("m", 1, CurrentMonth) <= DP_MaxDate()
+        Case Else
+            IsArrowEnabled = True
+    End Select
+
+End Function
+
+
+Private Sub UpdateArrowStates()
+
+    ArrowHandlers.Item(1).SetState IsArrowEnabled("PREV_MONTH")
+    ArrowHandlers.Item(2).SetState IsArrowEnabled("NEXT_MONTH")
 
 End Sub
 

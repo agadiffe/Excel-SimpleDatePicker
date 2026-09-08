@@ -51,7 +51,6 @@ Public Sub Setup(ByVal Form As Object, _
         .Caption = ArrowCaption
         .Font.Size = DP_FONT_SIZE_ARROW * DP_GetFontScale(ParentForm.InsideWidth)
         .TextAlign = fmTextAlignCenter
-        .ForeColor = DP_ColorTextHeader()
         .BackStyle = fmBackStyleTransparent
         .AutoSize = True
 
@@ -68,6 +67,8 @@ Public Sub Setup(ByVal Form As Object, _
     Set HoverHandler = New DP_CHoverHandler
     HoverHandler.Setup ArrowLabel
 
+    SetState ParentForm.IsArrowEnabled(ActionKey)
+
 End Sub
 
 
@@ -75,14 +76,34 @@ End Sub
 ' Arrow
 '----------------------------------------
 
+Public Sub SetState(ByVal IsEnabled As Boolean)
+
+    If IsEnabled Then
+        ArrowTextLabel.ForeColor = DP_ColorTextHeader()
+    Else
+        ArrowTextLabel.ForeColor = DP_ColorTextDisabled()
+    End If
+
+End Sub
+
+
 Private Sub ArrowLabel_Click()
 
-    ParentForm.ArrowClicked ActionKey
+    HandleArrowClick
 
 End Sub
 
 
 Private Sub ArrowTextLabel_Click()
+
+    HandleArrowClick
+
+End Sub
+
+
+Private Sub HandleArrowClick()
+
+    If Not ParentForm.IsArrowEnabled(ActionKey) Then Exit Sub
 
     ParentForm.ArrowClicked ActionKey
 
@@ -94,7 +115,7 @@ Private Sub ArrowLabel_MouseDown(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    ArrowLabel.BackColor = DP_ColorBgArrowPressed()
+    HandleArrowMouseDown
 
 End Sub
 
@@ -103,6 +124,15 @@ Private Sub ArrowTextLabel_MouseDown(ByVal Button As Integer, _
                                      ByVal Shift As Integer, _
                                      ByVal X As Single, _
                                      ByVal Y As Single)
+
+    HandleArrowMouseDown
+
+End Sub
+
+
+Private Sub HandleArrowMouseDown()
+
+    If Not ParentForm.IsArrowEnabled(ActionKey) Then Exit Sub
 
     ArrowLabel.BackColor = DP_ColorBgArrowPressed()
 
@@ -136,7 +166,10 @@ End Sub
 Private Sub SetHover()
 
     ParentForm.ResetAllHover
-    HoverHandler.SetHover
+
+    If ParentForm.IsArrowEnabled(ActionKey) Then
+        HoverHandler.SetHover
+    End If
 
 End Sub
 

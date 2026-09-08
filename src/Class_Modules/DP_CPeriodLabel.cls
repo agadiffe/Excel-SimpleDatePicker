@@ -88,14 +88,15 @@ Public Sub UpdatePeriod(ByVal CellDate As Date, _
                         ByVal Value As Long, _
                         ByVal IsCurrent As Boolean, _
                         ByVal IsSelected As Boolean, _
-                        Optional ByVal IsSecondary As Boolean = False)
+                        ByVal IsSecondary As Boolean, _
+                        ByVal IsDisabled As Boolean)
 
     PeriodDate = CellDate
     PeriodValue = Value
 
     PeriodTextLabel.Caption = GetPeriodCaption()
 
-    SetState IsCurrent, IsSelected, IsSecondary
+    SetState IsCurrent, IsSelected, IsSecondary, IsDisabled
 
 End Sub
 
@@ -122,7 +123,8 @@ End Function
 
 Public Sub SetState(ByVal IsCurrent As Boolean, _
                     ByVal IsSelected As Boolean, _
-                    Optional ByVal IsSecondary As Boolean = False)
+                    ByVal IsSecondary As Boolean, _
+                    ByVal IsDisabled As Boolean)
 
     ' Default state
     '--------------------
@@ -136,6 +138,13 @@ Public Sub SetState(ByVal IsCurrent As Boolean, _
 
     If IsSecondary Then
         PeriodTextLabel.ForeColor = DP_ColorTextSecondary()
+    End If
+
+    ' Disabled
+    '--------------------
+
+    If IsDisabled Then
+        PeriodTextLabel.ForeColor = DP_ColorTextDisabled()
     End If
 
     ' Current
@@ -178,6 +187,8 @@ End Sub
 
 
 Private Sub HandlePeriodClick()
+
+    If ParentForm.IsPeriodOutsideRange(PeriodDate) Then Exit Sub
 
     Select Case PeriodKind
         Case "MONTH"
@@ -227,7 +238,9 @@ Private Sub SetHover()
             ParentForm.ResetCurrentYearHover
     End Select
 
-    HoverHandler.SetBackgroundHover
+    If Not ParentForm.IsPeriodOutsideRange(PeriodDate) Then
+        HoverHandler.SetBackgroundHover
+    End If
 
 End Sub
 

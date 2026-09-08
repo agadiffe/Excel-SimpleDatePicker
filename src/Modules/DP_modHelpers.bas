@@ -7,6 +7,8 @@ Option Explicit
 
 Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
 
+    Dim CellDate As Date
+
     ' Only process a single cell
     If Target.Cells.CountLarge <> 1 Then Exit Function
 
@@ -15,6 +17,10 @@ Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
 
     ' Only open the date picker for supported date cells
     If Not DP_IsDatePickerCell(Target) Then Exit Function
+
+    ' Existing date must be within the supported picker range
+    CellDate = DateValue(CDate(Target.Value))
+    If CellDate < DP_MinDate() Or CellDate > DP_MaxDate() Then Exit Function
 
     ' Show the date picker
     DP_frmDatePicker.ShowPicker Target
@@ -162,9 +168,9 @@ Public Function DP_GridLeft(ByVal ColumnIndex As Long, _
                             ByVal GridCellWidth As Single, _
                             ByVal CellWidth As Single) As Single
 
-    DP_GridLeft = GridLeftPosition + _
-                  ColumnIndex * GridCellWidth + _
-                  (GridCellWidth - CellWidth) / 2
+    DP_GridLeft = Round(GridLeftPosition + _
+                        ColumnIndex * GridCellWidth + _
+                        (GridCellWidth - CellWidth) / 2)
 
 End Function
 
@@ -173,7 +179,7 @@ Public Function DP_GridTop(ByVal RowIndex As Long, _
                            ByVal GridTopPosition As Single, _
                            ByVal GridCellHeight As Single) As Single
 
-    DP_GridTop = GridTopPosition + RowIndex * GridCellHeight
+    DP_GridTop = Round(GridTopPosition + RowIndex * GridCellHeight)
 
 End Function
 

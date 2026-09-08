@@ -115,6 +115,7 @@ Private Sub RefreshMonths()
     YearLabelHandler.SetCaption CStr(CurrentYear)
 
     UpdateMonthLabels
+    UpdateArrowStates
 
 End Sub
 
@@ -158,7 +159,8 @@ Private Sub CreateMonthLabels()
 
         MonthHandler.SetState IsCurrentMonth(MonthNumber), _
                               IsSelectedMonth(MonthNumber), _
-                              Year(CellDate) <> CurrentYear
+                              Year(CellDate) <> CurrentYear, _
+                              IsPeriodOutsideRange(CellDate)
 
         MonthLabelHandlers.Add MonthHandler
 
@@ -185,7 +187,9 @@ Private Sub UpdateMonthLabels()
         MonthHandler.UpdatePeriod CellDate, _
                                   MonthNumber, _
                                   IsCurrentMonth(MonthNumber), _
-                                  IsSelectedMonth(MonthNumber)
+                                  IsSelectedMonth(MonthNumber), _
+                                  Year(CellDate) <> CurrentYear, _
+                                  IsPeriodOutsideRange(CellDate)
 
     Next CellIndex
 
@@ -219,6 +223,14 @@ End Function
 ' Month picker helpers
 '----------------------------------------
 
+Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
+
+    IsPeriodOutsideRange = PeriodDate < DP_MinDate() Or _
+                           PeriodDate > DP_MaxDate()
+
+End Function
+
+
 Public Sub MonthLabelClicked(ByVal MonthNumber As Long)
 
     ParentPicker.SetMonthYear MonthNumber, CurrentYear
@@ -233,20 +245,6 @@ Public Sub HeaderClicked()
     Me.Hide
     DP_frmYearPicker.ShowYears Me
     Me.Show
-
-End Sub
-
-
-Public Sub ArrowClicked(ByVal Action As String)
-
-    Select Case Action
-        Case "PREV_YEAR"
-            CurrentYear = CurrentYear - 1
-        Case "NEXT_YEAR"
-            CurrentYear = CurrentYear + 1
-    End Select
-
-    BuildMonths
 
 End Sub
 
@@ -274,6 +272,48 @@ Public Sub GoToCurrentMonth()
     ParentPicker.SetMonthYear Month(Date), CurrentYear
 
     Me.Hide
+
+End Sub
+
+
+'----------------------------------------
+' Arrow
+'----------------------------------------
+
+Public Sub ArrowClicked(ByVal Action As String)
+
+    If Not IsArrowEnabled(Action) Then Exit Sub
+
+    Select Case Action
+        Case "PREV_YEAR"
+            CurrentYear = CurrentYear - 1
+        Case "NEXT_YEAR"
+            CurrentYear = CurrentYear + 1
+    End Select
+
+    BuildMonths
+
+End Sub
+
+
+Public Function IsArrowEnabled(ByVal Action As String) As Boolean
+
+    Select Case Action
+        Case "PREV_YEAR"
+            IsArrowEnabled = CurrentYear - 1 >= Year(DP_MinDate())
+        Case "NEXT_YEAR"
+            IsArrowEnabled = CurrentYear + 1 <= Year(DP_MaxDate())
+        Case Else
+            IsArrowEnabled = False
+    End Select
+
+End Function
+
+
+Private Sub UpdateArrowStates()
+
+    ArrowHandlers.Item(1).SetState IsArrowEnabled("PREV_YEAR")
+    ArrowHandlers.Item(2).SetState IsArrowEnabled("NEXT_YEAR")
 
 End Sub
 

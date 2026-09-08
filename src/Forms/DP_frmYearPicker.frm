@@ -121,6 +121,7 @@ Private Sub RefreshYears()
 
     UpdateYearRangeHeader
     UpdateYearLabels
+    UpdateArrowStates
 
 End Sub
 
@@ -179,7 +180,9 @@ Private Sub CreateYearLabels()
                           DP_YEAR_CELL_WIDTH
 
         YearHandler.SetState IsCurrentYear(DisplayYear), _
-                             IsSelectedYear(DisplayYear)
+                             IsSelectedYear(DisplayYear), _
+                             False, _
+                             IsPeriodOutsideRange(CellDate)
 
         YearLabelHandlers.Add YearHandler
 
@@ -209,7 +212,9 @@ Private Sub UpdateYearLabels()
         YearHandler.UpdatePeriod CellDate, _
                                  DisplayYear, _
                                  IsCurrentYear(DisplayYear), _
-                                 IsSelectedYear(DisplayYear)
+                                 IsSelectedYear(DisplayYear), _
+                                 False, _
+                                 IsPeriodOutsideRange(CellDate)
 
     Next CellIndex
 
@@ -234,9 +239,23 @@ End Function
 ' Year picker helpers
 '----------------------------------------
 
+Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
+
+    IsPeriodOutsideRange = PeriodDate < DP_MinDate() Or _
+                           PeriodDate > DP_MaxDate()
+
+End Function
+
+
 Private Function GetFirstDisplayedYear(ByVal SelectedYear As Long) As Long
 
-    GetFirstDisplayedYear = ((SelectedYear - 1) \ YEAR_COUNT) * YEAR_COUNT + 1
+    Dim MinYear As Long
+    Dim Offset As Long
+
+    MinYear = Year(DP_MinDate())
+    Offset = (SelectedYear - MinYear) \ YEAR_COUNT
+
+    GetFirstDisplayedYear = MinYear + Offset * YEAR_COUNT
 
 End Function
 
@@ -250,7 +269,23 @@ Public Sub YearLabelClicked(ByVal YearNumber As Long)
 End Sub
 
 
+Public Sub GoToCurrentYear()
+
+    CurrentYear = Year(Date)
+    ParentPicker.SetYear CurrentYear
+
+    Me.Hide
+
+End Sub
+
+
+'----------------------------------------
+' Arrow
+'----------------------------------------
+
 Public Sub ArrowClicked(ByVal Action As String)
+
+    If Not IsArrowEnabled(Action) Then Exit Sub
 
     Select Case Action
         Case "PREV_RANGE_YEAR"
@@ -264,12 +299,30 @@ Public Sub ArrowClicked(ByVal Action As String)
 End Sub
 
 
-Public Sub GoToCurrentYear()
+Public Function IsArrowEnabled(ByVal Action As String) As Boolean
 
-    CurrentYear = Year(Date)
-    ParentPicker.SetYear CurrentYear
+    Dim FirstYear As Long
+    Dim LastYear As Long
 
-    Me.Hide
+    FirstYear = GetFirstDisplayedYear(CurrentYear)
+    LastYear = FirstYear + YEAR_COUNT - 1
+
+    Select Case Action
+        Case "PREV_RANGE_YEAR"
+            IsArrowEnabled = FirstYear > Year(DP_MinDate())
+        Case "NEXT_RANGE_YEAR"
+            IsArrowEnabled = LastYear < Year(DP_MaxDate())
+        Case Else
+            IsArrowEnabled = False
+    End Select
+
+End Function
+
+
+Private Sub UpdateArrowStates()
+
+    ArrowHandlers.Item(1).SetState IsArrowEnabled("PREV_RANGE_YEAR")
+    ArrowHandlers.Item(2).SetState IsArrowEnabled("NEXT_RANGE_YEAR")
 
 End Sub
 

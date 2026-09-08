@@ -138,6 +138,17 @@ Public Function DP_ColorTextSecondary() As Long
 End Function
 
 
+Public Function DP_ColorTextDisabled() As Long
+
+    If DP_DarkMode Then
+        DP_ColorTextDisabled = RGB(105, 105, 112)
+    Else
+        DP_ColorTextDisabled = RGB(190, 194, 200)
+    End If
+
+End Function
+
+
 Public Function DP_ColorTextHeader() As Long
 
     If DP_DarkMode Then

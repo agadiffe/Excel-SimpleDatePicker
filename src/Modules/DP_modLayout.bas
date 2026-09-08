@@ -156,7 +156,7 @@ Public Const DP_ACTION_BUTTON_HEIGHT As Single = _
     DP_GRID_CELL_HEIGHT * 0.7
 
 Public Const DP_ACTION_BUTTON_BOTTOM_MARGIN As Single = _
-    DATEPICKER_MARGIN
+    DATEPICKER_MARGIN * 0.8
 
 Public Const DP_ACTION_BUTTON_RIGHT_MARGIN As Single = _
     DATEPICKER_MARGIN
@@ -205,4 +205,22 @@ Public Const DP_YEARPICKER_HEIGHT As Single = _
 ' Reference width for responsive scaling.
 ' Must remain 236. This is the original design width.
 Public Const DP_DATEPICKER_BASE_WIDTH As Long = 236
+
+
+'----------------------------------------
+' Date range
+'----------------------------------------
+
+Public Function DP_MinDate() As Date
+
+    DP_MinDate = DateSerial(1901, 1, 1)
+
+End Function
+
+
+Public Function DP_MaxDate() As Date
+
+    DP_MaxDate = DateSerial(Year(Date) + 100, 12, 31)
+
+End Function
 

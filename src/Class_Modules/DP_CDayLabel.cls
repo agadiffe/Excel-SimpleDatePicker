@@ -109,6 +109,13 @@ Public Sub UpdateDate(ByVal CalendarCellDate As Date)
         DayTextLabel.ForeColor = DP_ColorTextSecondary()
     End If
 
+    ' Disabled
+    '--------------------
+
+    If ParentForm.IsDayOutsideRange(CellDate) Then
+        DayTextLabel.ForeColor = DP_ColorTextDisabled()
+    End If
+
     ' Today
     '--------------------
 
@@ -126,6 +133,9 @@ Public Sub UpdateDate(ByVal CalendarCellDate As Date)
         DayTextLabel.ForeColor = DP_ColorTextSelected()
         DayTextLabel.Font.Bold = True
     End If
+    
+    DayTextLabel.Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(ParentForm.InsideWidth)
+
 
 End Sub
 
@@ -134,25 +144,34 @@ End Sub
 ' Day
 '----------------------------------------
 
+Private Function GetDayTextCaption() As String
+
+    GetDayTextCaption = CStr(Day(CellDate))
+
+End Function
+
+
 Private Sub DayLabel_Click()
 
-    ParentForm.DayLabelClicked CellDate
+    HandleDayClick
 
 End Sub
 
 
 Private Sub DayTextLabel_Click()
 
-    ParentForm.DayLabelClicked CellDate
+    HandleDayClick
 
 End Sub
 
 
-Private Function GetDayTextCaption() As String
+Private Sub HandleDayClick()
 
-    GetDayTextCaption = CStr(Day(CellDate))
+    If ParentForm.IsDayOutsideRange(CellDate) Then Exit Sub
 
-End Function
+    ParentForm.DayLabelClicked CellDate
+
+End Sub
 
 
 '----------------------------------------
@@ -186,7 +205,9 @@ Private Sub SetHover()
     ParentForm.ResetTodayHover
     ParentForm.ResetDayHoverExcept Me
 
-    HoverHandler.SetBackgroundHover
+    If Not ParentForm.IsDayOutsideRange(CellDate) Then
+        HoverHandler.SetBackgroundHover
+    End If
 
 End Sub
 
