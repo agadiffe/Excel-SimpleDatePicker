@@ -1,7 +1,10 @@
 Attribute VB_Name = "DP_modLocalization"
 Option Explicit
 
+'----------------------------------------
 ' Primary Language IDs
+'----------------------------------------
+
 Private Const LANG_ARABIC As Long = &H1
 Private Const LANG_CHINESE_SIMPLIFIED As Long = &H4
 Private Const LANG_GERMAN As Long = &H7
@@ -15,7 +18,10 @@ Private Const LANG_VIETNAMESE As Long = &H2A
 Private Const LANG_HINDI As Long = &H39
 
 
-' DP_GetDatePickerActionText
+'----------------------------------------
+' Localization
+'----------------------------------------
+
 Public Function DP_GetDatePickerActionText(ByVal ActionKey As String) As String
 
     Dim LanguageID As Long
@@ -26,9 +32,8 @@ Public Function DP_GetDatePickerActionText(ByVal ActionKey As String) As String
 
     Select Case ActionKey
 
-        '--------------------------------------------------
         ' Today
-        '--------------------------------------------------
+        '--------------------
         Case "GO_TO_TODAY"
 
             Select Case PrimaryLanguageID
@@ -70,9 +75,8 @@ Public Function DP_GetDatePickerActionText(ByVal ActionKey As String) As String
                     DP_GetDatePickerActionText = "Today"
             End Select
 
-        '--------------------------------------------------
         ' This Month
-        '--------------------------------------------------
+        '--------------------
         Case "GO_TO_CURRENT_MONTH"
 
             Select Case PrimaryLanguageID
@@ -122,9 +126,8 @@ Public Function DP_GetDatePickerActionText(ByVal ActionKey As String) As String
                     DP_GetDatePickerActionText = "This Month"
             End Select
 
-        '--------------------------------------------------
         ' This Year
-        '--------------------------------------------------
+        '--------------------
         Case "GO_TO_CURRENT_YEAR"
 
             Select Case PrimaryLanguageID

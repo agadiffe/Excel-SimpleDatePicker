@@ -1,15 +1,21 @@
 Attribute VB_Name = "DP_modPopup"
 Option Explicit
 
-
 ' Opens and positions a popup form next to the specified Excel cell,
 ' automatically adjusting its position to keep it within the Excel window.
 
+'----------------------------------------
+' Declarations
+'----------------------------------------
 
 Private Const POPUP_GAP As Single = 0
 Private Const POPUP_MARGIN As Single = 10
 Private Const CALIBRATION_POINTS_BASE As Double = 7200#
 
+
+'----------------------------------------
+' Popup
+'----------------------------------------
 
 Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
                                   ByVal Target As Range)
@@ -30,14 +36,18 @@ Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
 End Sub
 
 
+'----------------------------------------
+' Positioning
+'----------------------------------------
+
 Private Function GetPopupPosition(ByVal Target As Range) As Variant
 
     Dim CellRight As Double
     Dim CellTop As Double
 
     With ActiveWindow
-        CellRight = .ActivePane.PointsToScreenPixelsX(Target.Left + Target.Width) * GetPointsPerPixelX
-        CellTop = .ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY
+        CellRight = .ActivePane.PointsToScreenPixelsX(Target.Left + Target.Width) * GetPointsPerPixelX()
+        CellTop = .ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY()
     End With
 
     GetPopupPosition = Array(CellRight + POPUP_GAP, CellTop)
@@ -85,16 +95,20 @@ Private Sub AdjustPopupPosition(ByVal Popup As Object, _
 End Sub
 
 
+'----------------------------------------
+' Screen / Coordinate Helpers
+'----------------------------------------
+
 Private Function GetCellScreenLeft(ByVal Target As Range) As Double
 
-    GetCellScreenLeft = ActiveWindow.ActivePane.PointsToScreenPixelsX(Target.Left) * GetPointsPerPixelX
+    GetCellScreenLeft = ActiveWindow.ActivePane.PointsToScreenPixelsX(Target.Left) * GetPointsPerPixelX()
 
 End Function
 
 
 Private Function GetCellScreenTop(ByVal Target As Range) As Double
 
-    GetCellScreenTop = ActiveWindow.ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY
+    GetCellScreenTop = ActiveWindow.ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY()
 
 End Function
 

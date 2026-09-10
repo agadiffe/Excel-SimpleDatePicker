@@ -2,6 +2,34 @@ Attribute VB_Name = "DP_modHelpers"
 Option Explicit
 
 '----------------------------------------
+' Types
+'----------------------------------------
+
+Public Enum DP_NavigationDirection
+    DP_NAV_PREVIOUS = -1
+    DP_NAV_NEXT = 1
+End Enum
+
+
+'----------------------------------------
+' Date range
+'----------------------------------------
+
+Public Function DP_MinDate() As Date
+
+    DP_MinDate = DateSerial(1901, 1, 1)
+
+End Function
+
+
+Public Function DP_MaxDate() As Date
+
+    DP_MaxDate = DateSerial(Year(Date) + 100, 12, 31)
+
+End Function
+
+
+'----------------------------------------
 ' Date Picker
 '----------------------------------------
 
@@ -30,7 +58,7 @@ Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
 End Function
 
 
-Public Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
+Private Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
 
     Dim FormatType As String
     Dim NumFormat As String
@@ -83,47 +111,6 @@ End Function
 
 
 '----------------------------------------
-' Picker controls
-'----------------------------------------
-
-Public Sub DP_ClearPickerControls(ByVal PickerForm As Object)
-
-    Dim ControlIndex As Long
-
-    For ControlIndex = PickerForm.Controls.Count - 1 To 0 Step -1
-        PickerForm.Controls.Remove PickerForm.Controls(ControlIndex).Name
-    Next ControlIndex
-
-End Sub
-
-
-Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
-                               ByVal FormWidth As Single, _
-                               ByVal FormHeight As Single)
-
-    If Not DP_SHOW_TITLEBAR Then
-        DP_RemoveUserFormTitleBar PickerForm.Caption
-    End If
-
-    With PickerForm
-        .Width = FormWidth
-        .Height = FormHeight
-
-        .Width = .Width + (FormWidth - .InsideWidth)
-        .Height = .Height + (FormHeight - .InsideHeight)
-
-        .BackColor = DP_ColorBg()
-    End With
-
-    If Not DP_SHOW_TITLEBAR Then
-        DP_ApplyRoundedCorners PickerForm
-        DP_ApplyBorderColor PickerForm
-    End If
-
-End Sub
-
-
-'----------------------------------------
 ' Layout
 '----------------------------------------
 
@@ -163,23 +150,34 @@ Public Function DP_GridRow(ByVal CellIndex As Long, _
 End Function
 
 
+Private Function RoundPosition(ByVal Value As Single) As Single
+
+    'Use conventional rounding for stable UI positioning.
+    RoundPosition = Int(Value + 0.5)
+
+End Function
+
+
 Public Function DP_GridLeft(ByVal ColumnIndex As Long, _
                             ByVal GridLeftPosition As Single, _
                             ByVal GridCellWidth As Single, _
                             ByVal CellWidth As Single) As Single
 
-    DP_GridLeft = Round(GridLeftPosition + _
-                        ColumnIndex * GridCellWidth + _
-                        (GridCellWidth - CellWidth) / 2)
+    DP_GridLeft = RoundPosition(GridLeftPosition + _
+                                ColumnIndex * GridCellWidth + _
+                                (GridCellWidth - CellWidth) / 2)
 
 End Function
 
 
 Public Function DP_GridTop(ByVal RowIndex As Long, _
                            ByVal GridTopPosition As Single, _
-                           ByVal GridCellHeight As Single) As Single
+                           ByVal GridCellHeight As Single, _
+                           ByVal CellHeight As Single) As Single
 
-    DP_GridTop = Round(GridTopPosition + RowIndex * GridCellHeight)
+    DP_GridTop = RoundPosition(GridTopPosition + _
+                               RowIndex * GridCellHeight + _
+                               (GridCellHeight - CellHeight) / 2)
 
 End Function
 
@@ -187,6 +185,28 @@ End Function
 '----------------------------------------
 ' UI helpers
 '----------------------------------------
+
+Public Sub DP_RefreshThemeCollection(ByVal Handlers As Collection)
+
+    Dim Handler As Object
+
+    For Each Handler In Handlers
+        Handler.RefreshTheme
+    Next Handler
+
+End Sub
+
+
+Public Sub DP_UpdateStateCollection(ByVal Handlers As Collection)
+
+    Dim Handler As Object
+
+    For Each Handler In Handlers
+        Handler.UpdateState
+    Next Handler
+
+End Sub
+
 
 Public Sub DP_ResetHoverCollection(ByVal Handlers As Collection)
 

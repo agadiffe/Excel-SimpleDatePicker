@@ -15,335 +15,268 @@ Attribute VB_Exposed = False
 Option Explicit
 
 '----------------------------------------
-' References
+' Declarations
 '----------------------------------------
-
-Private Const CALENDAR_DAY_COUNT As Long = _
-    DP_CALENDAR_COLUMNS * DP_CALENDAR_ROWS
 
 Private TargetCell As Range
-Private CurrentMonth As Date
 
-Private CalendarInitialized As Boolean
+Private CurrentPickerSizeValue As DP_PickerSize
 
-Private MonthLabelHandler As DP_CHeaderLabel
-Private ArrowHandlers As Collection
-Private WeekdayHandlers As Collection
-Private DayTextHandlers As Collection
-Private TodayButtonHandler As DP_CActionButton
+Private InitialCellDate As Date
+Private CurrentMonthValue As Date
+Private SelectedMonthValue As Date
+Private SelectedYearValue As Long
+
+Private CalendarView As DP_CViewCalendar
+Private MonthView As DP_CViewMonth
+Private YearView As DP_CViewYear
 
 
 '----------------------------------------
-' Date picker
+' Initialization
 '----------------------------------------
+
+Private Sub UserForm_Initialize()
+
+    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
+
+    DP_IsDarkMode = DP_IsDarkThemeActive()
+    Me.BackColor = DP_ColorBg()
+
+    Set CalendarView = New DP_CViewCalendar
+    Set MonthView = New DP_CViewMonth
+    Set YearView = New DP_CViewYear
+
+    CalendarView.Attach Me
+    MonthView.Attach Me
+    YearView.Attach Me
+
+End Sub
+
 
 Public Sub ShowPicker(ByVal Cell As Range)
-
-    Dim InitialDate As Date
 
     Set TargetCell = Cell
 
     If IsDate(Cell.Value) Then
-        InitialDate = CDate(Cell.Value)
+        InitialCellDate = CDate(Cell.Value)
     Else
-        InitialDate = Date
+        InitialCellDate = Date
     End If
 
-    CurrentMonth = DateSerial(Year(InitialDate), Month(InitialDate), 1)
+    SelectedMonthValue = DateSerial(Year(InitialCellDate), Month(InitialCellDate), 1)
+    SelectedYearValue = Year(SelectedMonthValue)
+    CurrentMonthValue = SelectedMonthValue
 
-    BuildCalendar
+    RefreshPickerTheme
+    ShowPickerView DP_SIZE_DATE
     DP_ShowPopupNextToCell Me, Cell
 
 End Sub
 
 
-Private Sub BuildCalendar()
+Private Sub RefreshPickerTheme()
 
     Dim CurrentDarkMode As Boolean
 
-    CurrentDarkMode = DP_IsDarkMode()
+    CurrentDarkMode = DP_IsDarkThemeActive()
 
-    If Not CalendarInitialized Then
-        DP_DarkMode = CurrentDarkMode
-        InitializeCalendar
-        CalendarInitialized = True
-    ElseIf DP_DarkMode <> CurrentDarkMode Then
-        DP_DarkMode = CurrentDarkMode
-        InitializeCalendar
-    Else
-        RefreshCalendar
-    End If
+    If CurrentDarkMode = DP_IsDarkMode Then Exit Sub
 
-End Sub
+    DP_IsDarkMode = CurrentDarkMode
 
+    Me.BackColor = DP_ColorBg()
 
-Private Sub InitializeCalendar()
-
-    Dim ArrowHandler As DP_CArrowLabel
-
-    Set ArrowHandlers = New Collection
-    Set WeekdayHandlers = New Collection
-    Set DayTextHandlers = New Collection
-
-    DP_ClearPickerControls Me
-    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
-
-    ' Month / Year
-    '--------------------
-
-    Set MonthLabelHandler = New DP_CHeaderLabel
-    MonthLabelHandler.Setup Me, Format(CurrentMonth, "mmmm yyyy")
-
-    ' Previous month
-    '--------------------
-
-    Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "PREV_MONTH", ChrW(&H25B2), DP_ARROW_PREV_LEFT
-
-    ArrowHandlers.Add ArrowHandler
-
-    ' Next month
-    '--------------------
-
-    Set ArrowHandler = New DP_CArrowLabel
-    ArrowHandler.Setup Me, "NEXT_MONTH", ChrW(&H25BC), DP_ARROW_NEXT_LEFT
-
-    ArrowHandlers.Add ArrowHandler
-
-    ' Calendar dates
-    '--------------------
-
-    BuildWeekdaysHeader
-    CreateCalendarDays
-
-    ' Go To Today button
-    '--------------------
-
-    Set TodayButtonHandler = New DP_CActionButton
-    TodayButtonHandler.Setup Me, "GO_TO_TODAY"
+    CalendarView.RefreshTheme
+    MonthView.RefreshTheme
+    YearView.RefreshTheme
 
 End Sub
 
 
-Private Sub RefreshCalendar()
+'----------------------------------------
+' View
+'----------------------------------------
+
+Private Sub ShowPickerView(ByVal PickerSize As DP_PickerSize)
 
     ResetAllHover
 
-    MonthLabelHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
-    UpdateCalendarDays
-    UpdateArrowStates
+    DP_SetPickerSize Me, PickerSize
+    CurrentPickerSizeValue = PickerSize
+
+    CalendarView.SetVisible PickerSize = DP_SIZE_DATE
+    MonthView.SetVisible PickerSize = DP_SIZE_MONTH
+    YearView.SetVisible PickerSize = DP_SIZE_YEAR
+
+    Select Case PickerSize
+        Case DP_SIZE_DATE
+            CalendarView.UpdateView
+        Case DP_SIZE_MONTH
+            MonthView.UpdateView
+        Case DP_SIZE_YEAR
+            YearView.UpdateView
+    End Select
 
 End Sub
 
 
 '----------------------------------------
-' Build Calendar helpers
+' Properties
 '----------------------------------------
 
-Private Sub BuildWeekdaysHeader()
+Public Property Get CurrentPickerSize() As DP_PickerSize
 
-    Dim WeekdayHandler As DP_CWeekdayLabel
-    Dim WeekdayIndex As Long
+    CurrentPickerSize = CurrentPickerSizeValue
 
-    For WeekdayIndex = 0 To 6
-
-        Set WeekdayHandler = New DP_CWeekdayLabel
-        WeekdayHandler.Setup Me, WeekdayIndex
-
-        WeekdayHandlers.Add WeekdayHandler
-
-    Next WeekdayIndex
-
-End Sub
+End Property
 
 
-Private Sub CreateCalendarDays()
+Public Property Get SelectedMonth() As Date
 
-    Dim CellIndex As Long
+    SelectedMonth = SelectedMonthValue
 
-    For CellIndex = 0 To CALENDAR_DAY_COUNT - 1
-        CreateCalendarDay GetCalendarCellDate(CellIndex), CellIndex
-    Next CellIndex
-
-End Sub
+End Property
 
 
-Private Sub CreateCalendarDay(ByVal CellDate As Date, _
-                              ByVal CellIndex As Long)
+Public Property Get SelectedYear() As Long
 
-    Dim DayTextHandler As DP_CDayLabel
+    SelectedYear = SelectedYearValue
 
-    Dim ColumnIndex As Long
-    Dim RowIndex As Long
-
-    ColumnIndex = DP_GridColumn(CellIndex, DP_CALENDAR_COLUMNS)
-    RowIndex = DP_GridRow(CellIndex, DP_CALENDAR_COLUMNS)
-
-    Set DayTextHandler = New DP_CDayLabel
-
-    DayTextHandler.Setup Me, _
-                         CellDate, _
-                         DP_GridLeft(ColumnIndex, _
-                                     DP_GRID_LEFT, _
-                                     DP_GRID_CELL_WIDTH, _
-                                     DP_CALENDAR_CELL_WIDTH), _
-                         DP_GridTop(RowIndex + 1, _
-                                    DP_GRID_TOP, _
-                                    DP_GRID_CELL_HEIGHT)
-
-    DayTextHandlers.Add DayTextHandler
-
-End Sub
+End Property
 
 
-Private Sub UpdateCalendarDays()
+Public Property Get CurrentMonth() As Date
 
-    Dim CellIndex As Long
-    Dim DayTextHandler As DP_CDayLabel
+    CurrentMonth = CurrentMonthValue
 
-    For CellIndex = 0 To CALENDAR_DAY_COUNT - 1
-        Set DayTextHandler = DayTextHandlers.Item(CellIndex + 1)
-        DayTextHandler.UpdateDate GetCalendarCellDate(CellIndex)
-    Next CellIndex
-
-End Sub
-
-
-Private Function GetCalendarCellDate(ByVal CellIndex As Long) As Date
-
-    Dim FirstDayIndex As Long
-
-    FirstDayIndex = Weekday(CurrentMonth, vbMonday)
-
-    GetCalendarCellDate = CurrentMonth - FirstDayIndex + 1 + CellIndex
-
-End Function
+End Property
 
 
 '----------------------------------------
-' Date picker helpers
+' Queries
 '----------------------------------------
 
 Public Function IsDayOutsideRange(ByVal DayDate As Date) As Boolean
 
-    IsDayOutsideRange = DayDate < DP_MinDate() Or _
-                        DayDate > DP_MaxDate()
+    IsDayOutsideRange = DayDate < DP_MinDate() Or DayDate > DP_MaxDate()
 
 End Function
 
 
-Public Function GetTargetCell() As Range
+Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
 
-    Set GetTargetCell = TargetCell
-
-End Function
-
-
-Public Function GetCurrentMonth() As Date
-
-    GetCurrentMonth = CurrentMonth
+    IsPeriodOutsideRange = PeriodDate < DP_MinDate() Or PeriodDate > DP_MaxDate()
 
 End Function
 
 
-Public Function IsSelected(ByVal CellDate As Date) As Boolean
+Public Function IsDaySelected(ByVal CellDate As Date) As Boolean
 
-    If Not IsDate(TargetCell.Value) Then Exit Function
-
-    IsSelected = (CellDate = DateValue(TargetCell.Value))
+    IsDaySelected = CellDate = DateValue(InitialCellDate)
 
 End Function
+
+
+'----------------------------------------
+' Date Selection
+'----------------------------------------
+
+Public Sub DaySelected(ByVal SelectedDate As Date)
+
+    SetTargetDate SelectedDate
+    Me.Hide
+
+End Sub
+
+
+Public Sub MonthSelected(ByVal MonthNumber As Long, _
+                         ByVal YearNumber As Long)
+
+    SetMonthYear MonthNumber, YearNumber
+    ShowPickerView DP_SIZE_DATE
+
+End Sub
+
+
+Public Sub YearSelected(ByVal YearNumber As Long)
+
+    SetYear YearNumber
+    ShowPickerView DP_SIZE_MONTH
+
+End Sub
+
+
+Private Sub SetTargetDate(ByVal NewDate As Date)
+
+    Dim ExistingTime As Double
+
+    If IsDate(InitialCellDate) Then
+        ExistingTime = TimeValue(InitialCellDate)
+        TargetCell.Value = DateValue(NewDate) + ExistingTime
+    Else
+        TargetCell.Value = NewDate
+    End If
+
+End Sub
 
 
 Public Sub SetMonthYear(ByVal MonthNumber As Long, _
                         ByVal YearNumber As Long)
 
-    CurrentMonth = DateSerial(YearNumber, MonthNumber, 1)
-
-    BuildCalendar
-
-End Sub
-
-
-Public Sub HeaderClicked()
-
-    Me.Hide
-    DP_frmMonthPicker.ShowMonths Me
-    Me.Show
+    SelectedYearValue = YearNumber
+    SelectedMonthValue = DateSerial(YearNumber, MonthNumber, 1)
+    CurrentMonthValue = SelectedMonthValue
 
 End Sub
 
 
-Public Sub DayLabelClicked(ByVal SelectedDate As Date)
+Public Sub SetYear(ByVal YearNumber As Long)
 
-    Dim ExistingTime As Double
-
-    If IsDate(TargetCell.Value) Then
-        ExistingTime = TimeValue(TargetCell.Value)
-        TargetCell.Value = DateValue(SelectedDate) + ExistingTime
-    Else
-        TargetCell.Value = SelectedDate
-    End If
-
-    Me.Hide
-
-End Sub
-
-
-Public Sub GoToToday()
-
-    Dim ExistingTime As Double
-
-    If IsDate(TargetCell.Value) Then
-        ExistingTime = TimeValue(TargetCell.Value)
-        TargetCell.Value = Date + ExistingTime
-    Else
-        TargetCell.Value = Date
-    End If
-
-    Me.Hide
+    SelectedYearValue = YearNumber
+    CurrentMonthValue = DateSerial(YearNumber, Month(CurrentMonthValue), 1)
 
 End Sub
 
 
 '----------------------------------------
-' Arrow
+' Navigation
 '----------------------------------------
 
-Public Sub ArrowClicked(ByVal Action As String)
+Public Sub ChangeMonth(ByVal Amount As Long)
 
-    If Not IsArrowEnabled(Action) Then Exit Sub
-
-    Select Case Action
-        Case "PREV_MONTH"
-            CurrentMonth = DateAdd("m", -1, CurrentMonth)
-        Case "NEXT_MONTH"
-            CurrentMonth = DateAdd("m", 1, CurrentMonth)
-    End Select
-
-    BuildCalendar
+    CurrentMonthValue = DateAdd("m", Amount, CurrentMonthValue)
+    CalendarView.UpdateView
 
 End Sub
 
 
-Public Function IsArrowEnabled(ByVal Action As String) As Boolean
+Public Sub ChangeYear(ByVal Amount As Long)
 
-    Select Case Action
-        Case "PREV_MONTH"
-            IsArrowEnabled = DateAdd("m", -1, CurrentMonth) >= DP_MinDate()
-        Case "NEXT_MONTH"
-            IsArrowEnabled = DateAdd("m", 1, CurrentMonth) <= DP_MaxDate()
-        Case Else
-            IsArrowEnabled = True
-    End Select
+    CurrentMonthValue = DateAdd("yyyy", Amount, CurrentMonthValue)
+    MonthView.UpdateView
 
-End Function
+End Sub
 
 
-Private Sub UpdateArrowStates()
+Public Sub ChangeYearRange(ByVal Amount As Long)
 
-    ArrowHandlers.Item(1).SetState IsArrowEnabled("PREV_MONTH")
-    ArrowHandlers.Item(2).SetState IsArrowEnabled("NEXT_MONTH")
+    CurrentMonthValue = DateAdd("yyyy", Amount, CurrentMonthValue)
+    YearView.UpdateView
+
+End Sub
+
+
+Public Sub CalendarHeaderClicked()
+
+    ShowPickerView DP_SIZE_MONTH
+
+End Sub
+
+
+Public Sub MonthHeaderClicked()
+
+    ShowPickerView DP_SIZE_YEAR
 
 End Sub
 
@@ -352,51 +285,16 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetArrowHover()
-
-    DP_ResetHoverCollection ArrowHandlers
-
-End Sub
-
-
-Public Sub ResetDayTextHover()
-
-    DP_ResetHoverCollection DayTextHandlers
-
-End Sub
-
-
-Public Sub ResetHeaderHover()
-
-    If Not MonthLabelHandler Is Nothing Then
-        MonthLabelHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetTodayHover()
-
-    If Not TodayButtonHandler Is Nothing Then
-        TodayButtonHandler.ResetHover
-    End If
-
-End Sub
-
-
 Public Sub ResetAllHover()
 
-    ResetArrowHover
-    ResetHeaderHover
-    ResetDayTextHover
-    ResetTodayHover
-
-End Sub
-
-
-Public Sub ResetDayHoverExcept(ByVal CurrentDay As DP_CDayLabel)
-
-    DP_ResetHoverCollectionExcept DayTextHandlers, CurrentDay
+    Select Case CurrentPickerSizeValue
+        Case DP_SIZE_DATE
+            CalendarView.ResetAllHover
+        Case DP_SIZE_MONTH
+            MonthView.ResetAllHover
+        Case DP_SIZE_YEAR
+            YearView.ResetAllHover
+    End Select
 
 End Sub
 

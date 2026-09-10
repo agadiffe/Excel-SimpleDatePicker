@@ -10,7 +10,7 @@ Public Const DP_DATEPICKER_WIDTH As Long = 236
 Public Const DP_SHOW_TITLEBAR As Boolean = False
 
 Private Const DATEPICKER_MARGIN_RATIO As Single = 0.05
-Private Const DATEPICKER_MARGIN As Single = _
+Public Const DATEPICKER_MARGIN As Single = _
     DP_DATEPICKER_WIDTH * DATEPICKER_MARGIN_RATIO
 
 Public Const DP_MONTHPICKER_WIDTH As Single = _
@@ -19,7 +19,7 @@ Public Const DP_MONTHPICKER_WIDTH As Single = _
 Public Const DP_YEARPICKER_WIDTH As Single = _
     DP_DATEPICKER_WIDTH
 
-Private Const SECTION_GAP_RATIO As Single = 0.11
+Private Const SECTION_GAP_RATIO As Single = 0.12
 
 
 '----------------------------------------
@@ -56,8 +56,11 @@ Private Const CALENDAR_SECTION_GAP As Single = _
 
 
 '----------------------------------------
-' Period (Month or Year)
+' Period
 '----------------------------------------
+
+' Common
+'--------------------
 
 Public Const DP_PERIOD_GRID_CELL_HEIGHT As Single = _
     DP_GRID_CELL_HEIGHT
@@ -69,12 +72,10 @@ Public Const DP_PERIOD_GRID_LEFT As Single = _
     DATEPICKER_MARGIN
 
 Private Const PERIOD_SECTION_GAP As Single = _
-    DP_PERIOD_GRID_CELL_HEIGHT * SECTION_GAP_RATIO
+    DP_PERIOD_GRID_CELL_HEIGHT * SECTION_GAP_RATIO * 2
 
-
-'----------------------------------------
 ' Month
-'----------------------------------------
+'--------------------
 
 Public Const DP_MONTH_GRID_COLUMNS As Long = 3
 Public Const DP_MONTH_GRID_ROWS As Long = 4
@@ -91,10 +92,8 @@ Public Const DP_MONTH_CELL_WIDTH As Single = _
 Private Const MONTH_HEIGHT As Single = _
     DP_PERIOD_GRID_CELL_HEIGHT * DP_MONTH_GRID_ROWS
 
-
-'----------------------------------------
 ' Year
-'----------------------------------------
+'--------------------
 
 Public Const DP_YEAR_GRID_COLUMNS As Long = 4
 Public Const DP_YEAR_GRID_ROWS As Long = 4
@@ -116,11 +115,11 @@ Private Const YEAR_HEIGHT As Single = _
 ' Header
 '----------------------------------------
 
+' Period
+'--------------------
+
 Public Const DP_HEADER_TOP As Single = _
     DATEPICKER_MARGIN
-
-Public Const DP_HEADER_WIDTH As Single = _
-    DP_GRID_CELL_WIDTH * 5 * 0.98
 
 Public Const DP_HEADER_HEIGHT As Single = _
     DP_GRID_CELL_HEIGHT * 0.7
@@ -128,6 +127,8 @@ Public Const DP_HEADER_HEIGHT As Single = _
 Public Const DP_HEADER_LEFT As Single = _
     DP_GRID_LEFT
 
+' Arrow
+'--------------------
 
 Public Const DP_ARROW_HEIGHT As Single = _
     DP_HEADER_HEIGHT
@@ -138,25 +139,31 @@ Public Const DP_ARROW_WIDTH As Single = _
 Private Const CELL_RIGHT_OFFSET As Single = _
     (DP_GRID_CELL_WIDTH - DP_CALENDAR_CELL_WIDTH) * 0.5
 
+Private Const ARROW_RIGHT_BASE As Single = _
+    DP_DATEPICKER_WIDTH - _
+    DATEPICKER_MARGIN + _
+    CELL_RIGHT_OFFSET
+
 Public Const DP_ARROW_PREV_LEFT As Single = _
-    DP_GRID_LEFT + 5 * DP_GRID_CELL_WIDTH - CELL_RIGHT_OFFSET
+    ARROW_RIGHT_BASE - 2 * DP_GRID_CELL_WIDTH
 
 Public Const DP_ARROW_NEXT_LEFT As Single = _
-    DP_GRID_LEFT + 6 * DP_GRID_CELL_WIDTH - CELL_RIGHT_OFFSET
+    ARROW_RIGHT_BASE - DP_GRID_CELL_WIDTH
 
 Public Const DP_ARROW_TOP As Single = _
     DP_HEADER_TOP
 
 
+Public Const DP_HEADER_WIDTH As Single = _
+    DP_ARROW_PREV_LEFT - DP_GRID_LEFT - 4
+
+
 '----------------------------------------
-' Footer
+' Shortcut button
 '----------------------------------------
 
 Public Const DP_ACTION_BUTTON_HEIGHT As Single = _
     DP_GRID_CELL_HEIGHT * 0.7
-
-Public Const DP_ACTION_BUTTON_BOTTOM_MARGIN As Single = _
-    DATEPICKER_MARGIN * 0.8
 
 Public Const DP_ACTION_BUTTON_RIGHT_MARGIN As Single = _
     DATEPICKER_MARGIN
@@ -166,15 +173,14 @@ Public Const DP_ACTION_BUTTON_RIGHT_MARGIN As Single = _
 ' Positioning
 '----------------------------------------
 
+Private Const PICKER_HEADER_FIXED_HEIGHT As Single = _
+    DP_HEADER_TOP + DP_HEADER_HEIGHT
+
 Public Const DP_GRID_TOP As Single = _
-    DP_HEADER_TOP + _
-    DP_HEADER_HEIGHT + _
-    CALENDAR_SECTION_GAP
+    PICKER_HEADER_FIXED_HEIGHT + CALENDAR_SECTION_GAP
 
 Public Const DP_PERIOD_GRID_TOP As Single = _
-    DP_HEADER_TOP + _
-    DP_HEADER_HEIGHT + _
-    PERIOD_SECTION_GAP
+    PICKER_HEADER_FIXED_HEIGHT + PERIOD_SECTION_GAP
 
 
 Private Const PICKER_FIXED_HEIGHT As Single = _
@@ -184,7 +190,7 @@ Private Const PICKER_FIXED_HEIGHT As Single = _
 
 Public Const DP_DATEPICKER_HEIGHT As Single = _
     PICKER_FIXED_HEIGHT + _
-    CALENDAR_SECTION_GAP * 2 + _
+    CALENDAR_SECTION_GAP * 3 + _
     GRID_HEIGHT
 
 Public Const DP_MONTHPICKER_HEIGHT As Single = _
@@ -208,19 +214,22 @@ Public Const DP_DATEPICKER_BASE_WIDTH As Long = 236
 
 
 '----------------------------------------
-' Date range
+' Shortcut button top
 '----------------------------------------
 
-Public Function DP_MinDate() As Date
+Public Function DP_GetActionButtonTop(ByVal PickerSize As DP_PickerSize) As Single
 
-    DP_MinDate = DateSerial(1901, 1, 1)
-
-End Function
-
-
-Public Function DP_MaxDate() As Date
-
-    DP_MaxDate = DateSerial(Year(Date) + 100, 12, 31)
+    Select Case PickerSize
+        Case DP_SIZE_DATE
+            DP_GetActionButtonTop = _
+                DP_GRID_TOP + GRID_HEIGHT + CALENDAR_SECTION_GAP * 2
+        Case DP_SIZE_MONTH
+            DP_GetActionButtonTop = _
+                DP_PERIOD_GRID_TOP + MONTH_HEIGHT + PERIOD_SECTION_GAP
+        Case DP_SIZE_YEAR
+            DP_GetActionButtonTop = _
+                DP_PERIOD_GRID_TOP + YEAR_HEIGHT + PERIOD_SECTION_GAP
+    End Select
 
 End Function
 
