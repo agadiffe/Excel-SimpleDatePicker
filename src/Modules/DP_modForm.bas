@@ -59,6 +59,10 @@ Public Sub DP_SetPickerSize(ByVal PickerForm As Object, _
 
     With PickerForm
 
+        ' Appears to prevent an occasional white flash
+        ' on the clicked date-picker control while resizing
+        .BackColor = DP_ColorBg()
+
         If .Width <> PickerFormWidth(PickerSize) Then
             .Width = PickerFormWidth(PickerSize)
             SizeChanged = True
@@ -84,8 +88,9 @@ End Sub
 ' Cache
 '----------------------------------------
 
-'Cache the adjusted form dimensions to avoid flickering caused by resizing
-'the form twice when adjusting Width/Height to match InsideWidth/InsideHeight.
+' Cache the adjusted form dimensions to prevent an occasional white flash
+' on the clicked date-picker control caused by resizing the form twice
+' when adjusting Width/Height to match InsideWidth/InsideHeight.
 
 Private Sub CachePickerSizes(ByVal PickerForm As Object)
 
