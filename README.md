@@ -16,13 +16,31 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 
 > **Resizing:** To change the DatePicker size, modify the `DP_DATEPICKER_WIDTH` constant in `DP_modLayout`.
 
+## 🎬 Demo
+
+A ready-to-use example is available at `demo/DatePicker.xlsm`.
+
 ## ⚙️ Installation
 
 The DatePicker requires **Microsoft Excel with VBA support and macros enabled**.
 
+> **Note:** If Windows has blocked the downloaded files, unblock them before importing.
+
+### Add-in
+
+A ready-to-use Excel add-in is available at `add-in/Excel-SimpleDatePicker.xlam`.
+
+To install it:
+
+1. Open Excel.
+2. Go to **File > Options > Add-ins**.
+3. At the bottom, select **Excel Add-ins** from the **Manage** dropdown and click **Go**.
+4. Click **Browse...** and select `add-in/Excel-SimpleDatePicker.xlam`.
+5. Make sure **DatePicker** is checked in the Add-Ins list and click **OK**.
+
 ### Import the VBA components
 
-> **Note:** If Windows has blocked the downloaded files, unblock them before importing.
+Use this method to add the DatePicker directly to a specific workbook.
 
 1. Open your Excel workbook and press `Alt + F11` to open the VBA editor.
 2. In the **Project Explorer**, select your workbook's VBA project.
@@ -30,24 +48,38 @@ The DatePicker requires **Microsoft Excel with VBA support and macros enabled**.
    - **Class Modules**: import the `.cls` files
    - **Forms**: import the `.frm` files (keep each `.frx` file in the same folder)
    - **Modules**: import the `.bas` files
-4. Open the `ThisWorkbook` module and add the following code to the `Workbook_SheetBeforeDoubleClick` event:
+4. Open your `ThisWorkbook` module and add the following code to the `Workbook_SheetBeforeDoubleClick` event:
     ```vba
     If DP_HandleDatePickerDoubleClick(Target) Then
         Cancel = True ' Prevent other Excel actions
     End If
     ```
-5. Save your workbook as an `.xlsm` file.
+    `src/Microsoft_Excel_Objects/ThisWorkbook.cls` is provided for reference only.
+5. Save your workbook as an Excel Macro-Enabled file (`.xlsm`).
 
-### Using the included demo
+### Building the add-in
 
-A ready-to-use example is available in `demo/Excel-SimpleDatePicker.xlsm`.
+To build the add-in from source, follow the **Import the VBA components** steps above, with the following changes:
+
+1. Import the additional components from `src/addins/`:
+   - `CAppEvents.cls` as a **Class Module**
+   - `modAppEvents.bas` as a **Module**
+2. Replace the contents of the `ThisWorkbook` module with:
+    ```vba
+    Option Explicit
+
+    Private Sub Workbook_Open()
+        DP_InitializeAppEvents
+    End Sub
+    ```
+3. Save your workbook as an Excel Add-In file (`.xlam`).
 
 ## 🔒 Security
 
 The demo workbook contains VBA macros, so Excel may display its usual security warning when you open it.
 
-If Windows has blocked the downloaded file, Excel may prevent the macros from running without offering an option to enable them.  
-To unblock it, right-click the file, select **Properties**, check **Unblock**, then confirm.
+If Windows has blocked the downloaded files, Excel may prevent the macros from running.  
+To unblock them, right-click a file, select **Properties**, check **Unblock**, then confirm.
 
 The complete VBA source code is available in this repository for review.
 

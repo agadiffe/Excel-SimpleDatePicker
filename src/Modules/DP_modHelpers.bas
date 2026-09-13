@@ -47,8 +47,10 @@ Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
     If Not DP_IsDatePickerCell(Target) Then Exit Function
 
     ' Existing date must be within the supported picker range
-    CellDate = DateValue(CDate(Target.Value))
-    If CellDate < DP_MinDate() Or CellDate > DP_MaxDate() Then Exit Function
+    If Not IsEmpty(Target) Then
+        CellDate = DateValue(CDate(Target.Value))
+        If CellDate < DP_MinDate() Or CellDate > DP_MaxDate() Then Exit Function
+    End If
 
     ' Show the date picker
     DP_frmDatePicker.ShowPicker Target
