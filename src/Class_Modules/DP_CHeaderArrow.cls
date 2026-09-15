@@ -18,7 +18,7 @@ Attribute ArrowBackground.VB_VarHelpID = -1
 Private WithEvents ArrowText As MSForms.Label
 Attribute ArrowText.VB_VarHelpID = -1
 
-Private ParentView As Object
+Private ParentView As DP_IPickerView
 Private Direction As DP_NavigationDirection
 
 Private IsHovered As Boolean
@@ -29,8 +29,8 @@ Private IsPressed As Boolean
 ' Initialization
 '----------------------------------------
 
-Public Sub Initialize(ByVal View As Object, _
-                      ByVal ArrowCaption As String, _
+Public Sub Initialize(ByVal View As DP_IPickerView, _
+                      ByVal Caption As String, _
                       ByVal LeftPosition As Single, _
                       ByVal DirectionValue As DP_NavigationDirection)
 
@@ -49,9 +49,8 @@ Public Sub Initialize(ByVal View As Object, _
     Set ArrowText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With ArrowText
-        .Caption = ArrowCaption
-        .Font.Size = DP_FONT_SIZE_ARROW * _
-                     DP_GetFontScale(DP_DATEPICKER_WIDTH)
+        .Caption = Caption
+        .Font.Size = DP_FONT_SIZE_ARROW * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .TextAlign = fmTextAlignCenter
         .BackStyle = fmBackStyleTransparent
 
@@ -75,6 +74,20 @@ End Sub
 ' Render
 '----------------------------------------
 
+Public Sub UpdateState()
+
+    Render
+
+End Sub
+
+
+Public Sub RefreshTheme()
+
+    Render
+
+End Sub
+
+
 Private Sub Render()
 
     If Not ParentView.IsArrowEnabled(Direction) Then
@@ -94,23 +107,42 @@ Private Sub Render()
 End Sub
 
 
-Public Sub UpdateState()
+'----------------------------------------
+' Properties
+'----------------------------------------
 
+Private Property Let Hovered(ByVal Value As Boolean)
+
+    If IsHovered = Value Then Exit Property
+
+    IsHovered = Value
     Render
 
-End Sub
+End Property
 
 
-Public Sub RefreshTheme()
+Private Property Let Pressed(ByVal Value As Boolean)
 
+    If IsPressed = Value Then Exit Property
+
+    IsPressed = Value
     Render
 
-End Sub
+End Property
 
 
 '----------------------------------------
 ' Click
 '----------------------------------------
+
+Private Sub HandleClick()
+
+    If Not ParentView.IsArrowEnabled(Direction) Then Exit Sub
+
+    ParentView.ArrowClicked Direction
+
+End Sub
+
 
 Private Sub ArrowBackground_Click()
 
@@ -126,34 +158,21 @@ Private Sub ArrowText_Click()
 End Sub
 
 
-Private Sub HandleClick()
-
-    If Not ParentView.IsArrowEnabled(Direction) Then Exit Sub
-
-    ParentView.ArrowClicked Direction
-
-End Sub
-
-
 '----------------------------------------
 ' Pressed
 '----------------------------------------
 
-' Common
+' Mouse down
 '--------------------
 
-Private Sub SetPressed(ByVal Value As Boolean)
+Private Sub HandleMouseDown()
 
-    If IsPressed = Value Then Exit Sub
+    If Not ParentView.IsArrowEnabled(Direction) Then Exit Sub
 
-    IsPressed = Value
-    Render
+    Pressed = True
 
 End Sub
 
-
-' Mouse down
-'--------------------
 
 Private Sub ArrowBackground_MouseDown(ByVal Button As Integer, _
                                       ByVal Shift As Integer, _
@@ -175,15 +194,6 @@ Private Sub ArrowText_MouseDown(ByVal Button As Integer, _
 End Sub
 
 
-Private Sub HandleMouseDown()
-
-    If Not ParentView.IsArrowEnabled(Direction) Then Exit Sub
-
-    SetPressed True
-
-End Sub
-
-
 ' Mouse up
 '--------------------
 
@@ -192,7 +202,7 @@ Private Sub ArrowBackground_MouseUp(ByVal Button As Integer, _
                                     ByVal X As Single, _
                                     ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -202,7 +212,7 @@ Private Sub ArrowText_MouseUp(ByVal Button As Integer, _
                               ByVal X As Single, _
                               ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -211,12 +221,30 @@ End Sub
 ' Hover
 '----------------------------------------
 
+Public Sub ResetHover()
+
+    Hovered = False
+
+End Sub
+
+
+Private Sub HandleMouseHover()
+
+    ParentView.ResetAllHover
+
+    If ParentView.IsArrowEnabled(Direction) Then
+        Hovered = True
+    End If
+
+End Sub
+
+
 Private Sub ArrowBackground_MouseMove(ByVal Button As Integer, _
                                       ByVal Shift As Integer, _
                                       ByVal X As Single, _
                                       ByVal Y As Single)
 
-    SetHover
+    HandleMouseHover
 
 End Sub
 
@@ -226,35 +254,7 @@ Private Sub ArrowText_MouseMove(ByVal Button As Integer, _
                                 ByVal X As Single, _
                                 ByVal Y As Single)
 
-    SetHover
-
-End Sub
-
-
-Private Sub SetHover()
-
-    ParentView.ResetAllHover
-
-    If ParentView.IsArrowEnabled(Direction) Then
-        SetHovered True
-    End If
-
-End Sub
-
-
-Private Sub SetHovered(ByVal Value As Boolean)
-
-    If IsHovered = Value Then Exit Sub
-
-    IsHovered = Value
-    Render
-
-End Sub
-
-
-Public Sub ResetHover()
-
-    SetHovered False
+    HandleMouseHover
 
 End Sub
 

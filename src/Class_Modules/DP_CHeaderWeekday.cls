@@ -18,7 +18,7 @@ Attribute WeekdayBackground.VB_VarHelpID = -1
 Private WithEvents WeekdayText As MSForms.Label
 Attribute WeekdayText.VB_VarHelpID = -1
 
-Private ParentView As DP_CViewCalendar
+Private ParentView As DP_IPickerView
 
 
 '----------------------------------------
@@ -71,17 +71,17 @@ End Sub
 ' Render
 '----------------------------------------
 
-Private Sub Render()
+Public Sub RefreshTheme()
 
-    WeekdayBackground.BackColor = DP_ColorBg()
-    WeekdayText.ForeColor = DP_ColorTextHeader()
+    Render
 
 End Sub
 
 
-Public Sub RefreshTheme()
+Private Sub Render()
 
-    Render
+    WeekdayBackground.BackColor = DP_ColorBg()
+    WeekdayText.ForeColor = DP_ColorTextHeader()
 
 End Sub
 

@@ -19,7 +19,7 @@ Private PickerFormHeight(DP_SIZE_DATE To DP_SIZE_YEAR) As Single
 ' Initialization
 '----------------------------------------
 
-Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
+Public Sub DP_InitializePicker(ByVal PickerForm As DP_frmDatePicker, _
                                ByVal DesiredInsideWidth As Single, _
                                ByVal DesiredInsideHeight As Single)
 
@@ -33,6 +33,7 @@ Public Sub DP_InitializePicker(ByVal PickerForm As Object, _
     With PickerForm
         .Width = DesiredInsideWidth
         .Height = DesiredInsideHeight
+        .BackColor = DP_ColorBg()
     End With
 
     'Apply each desired inside size and cache the resulting form dimensions.
@@ -52,7 +53,7 @@ End Sub
 ' Size
 '----------------------------------------
 
-Public Sub DP_SetPickerSize(ByVal PickerForm As Object, _
+Public Sub DP_SetPickerSize(ByVal PickerForm As DP_frmDatePicker, _
                             ByVal PickerSize As DP_PickerSize)
 
     Dim SizeChanged As Boolean
@@ -92,7 +93,7 @@ End Sub
 ' on the clicked date-picker control caused by resizing the form twice
 ' when adjusting Width/Height to match InsideWidth/InsideHeight.
 
-Private Sub CachePickerSizes(ByVal PickerForm As Object)
+Private Sub CachePickerSizes(ByVal PickerForm As DP_frmDatePicker)
 
     CacheSize PickerForm, DP_SIZE_DATE, _
               DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
@@ -106,7 +107,7 @@ Private Sub CachePickerSizes(ByVal PickerForm As Object)
 End Sub
 
 
-Private Sub CacheSize(ByVal PickerForm As Object, _
+Private Sub CacheSize(ByVal PickerForm As DP_frmDatePicker, _
                       ByVal PickerSize As DP_PickerSize, _
                       ByVal DesiredInsideWidth As Single, _
                       ByVal DesiredInsideHeight As Single)

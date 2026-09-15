@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Implements DP_IPickerView
+
 '----------------------------------------
 ' Declarations
 '----------------------------------------
@@ -30,18 +32,11 @@ Private Const CALENDAR_DAY_COUNT As Long = _
 ' Initialization
 '----------------------------------------
 
-Public Sub Attach(ByVal Form As DP_frmDatePicker)
-
-    Set PickerForm = Form
-    InitializeView
-
-End Sub
-
-
-Private Sub InitializeView()
+Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 
     Dim ArrowHandler As DP_CHeaderArrow
 
+    Set PickerForm = Form
     Set ArrowHandlers = New Collection
     Set WeekdayHandlers = New Collection
     Set DayHandlers = New Collection
@@ -50,7 +45,7 @@ Private Sub InitializeView()
     '--------------------
 
     Set MonthHeaderHandler = New DP_CHeaderPeriod
-    MonthHeaderHandler.Initialize Me, Format(PickerForm.CurrentMonth, "mmmm yyyy")
+    MonthHeaderHandler.Initialize Me, Format(CurrentMonth, "mmmm yyyy")
 
     ' Previous month
     '--------------------
@@ -81,7 +76,9 @@ Private Sub InitializeView()
 
     Set TodayButtonHandler = New DP_CButtonShortcut
     TodayButtonHandler.Initialize _
-        Me, DP_GetDatePickerActionText("GO_TO_TODAY")
+        Me, _
+        DP_GetDatePickerActionText("GO_TO_TODAY"), _
+        DP_GetActionButtonTop(DP_SIZE_DATE)
 
 
 End Sub
@@ -132,7 +129,7 @@ Private Sub CreateDay(ByVal CellIndex As Long)
     Set Handler = New DP_CButtonDay
 
     Handler.Initialize Me, _
-                       GetCalendarCellDate(CellIndex), _
+                       GetCellDate(CellIndex), _
                        DP_GridLeft(ColumnIndex, DP_GRID_LEFT, _
                                    DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH), _
                        DP_GridTop(RowIndex + 1, DP_GRID_TOP, _
@@ -143,13 +140,13 @@ Private Sub CreateDay(ByVal CellIndex As Long)
 End Sub
 
 
-Private Function GetCalendarCellDate(ByVal CellIndex As Long) As Date
+Private Function GetCellDate(ByVal CellIndex As Long) As Date
 
     Dim FirstDayIndex As Long
 
-    FirstDayIndex = Weekday(PickerForm.CurrentMonth, vbMonday)
+    FirstDayIndex = Weekday(CurrentMonth, vbMonday)
 
-    GetCalendarCellDate = PickerForm.CurrentMonth - FirstDayIndex + 1 + CellIndex
+    GetCellDate = CurrentMonth - FirstDayIndex + 1 + CellIndex
 
 End Function
 
@@ -158,27 +155,27 @@ End Function
 ' Update
 '----------------------------------------
 
-Public Sub UpdateView()
+Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
     Dim Handler As DP_CButtonDay
 
-    MonthHeaderHandler.SetCaption Format(PickerForm.CurrentMonth, "mmmm yyyy")
+    MonthHeaderHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
 
     For Index = 0 To CALENDAR_DAY_COUNT - 1
         Set Handler = DayHandlers.Item(Index + 1)
-        Handler.UpdateDate GetCalendarCellDate(Index)
+        Handler.UpdateDate GetCellDate(Index)
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
-    TodayButtonHandler.Recreate DP_GetDatePickerActionText("GO_TO_TODAY")
 
 End Sub
 
 
-Public Sub RefreshTheme()
+Private Sub DP_IPickerView_RefreshTheme()
 
-    ' Day handlers and shortcut button are handled by UpdateView.
+    ' Day handlers are handled by UpdateView.
+    ' Shortcut button is handled by SetVisible.
 
     MonthHeaderHandler.RefreshTheme
     DP_RefreshThemeCollection ArrowHandlers
@@ -191,9 +188,16 @@ End Sub
 ' Properties
 '----------------------------------------
 
-Public Property Get ParentForm() As DP_frmDatePicker
+Private Property Get DP_IPickerView_ParentForm() As DP_frmDatePicker
 
-    Set ParentForm = PickerForm
+    Set DP_IPickerView_ParentForm = PickerForm
+
+End Property
+
+
+Private Property Get CurrentMonth() As Date
+
+    CurrentMonth = PickerForm.CurrentMonth
 
 End Property
 
@@ -202,31 +206,38 @@ End Property
 ' Queries
 '----------------------------------------
 
-Public Function IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
+Private Function DP_IPickerView_IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
 
     Dim NewDate As Date
 
-    NewDate = DateAdd("m", Direction, PickerForm.CurrentMonth)
+    NewDate = DateAdd("m", Direction, CurrentMonth)
 
     If Direction = DP_NAV_PREVIOUS Then
-        IsArrowEnabled = NewDate >= DateSerial(Year(DP_MinDate()), Month(DP_MinDate()), 1)
+        DP_IPickerView_IsArrowEnabled = NewDate >= DateSerial(Year(DP_MinDate()), Month(DP_MinDate()), 1)
     Else
-        IsArrowEnabled = NewDate <= DateSerial(Year(DP_MaxDate()), Month(DP_MaxDate()), 1)
+        DP_IPickerView_IsArrowEnabled = NewDate <= DateSerial(Year(DP_MaxDate()), Month(DP_MaxDate()), 1)
     End If
 
 End Function
 
 
-Public Function IsDayOutsideRange(ByVal DayDate As Date) As Boolean
+Private Function DP_IPickerView_IsDateSelected(ByVal CellDate As Date) As Boolean
 
-    IsDayOutsideRange = PickerForm.IsDayOutsideRange(DayDate)
+    DP_IPickerView_IsDateSelected = CellDate = DateValue(PickerForm.InitialCellDate)
 
 End Function
 
 
-Public Function IsDaySelected(ByVal CellDate As Date) As Boolean
+Private Function DP_IPickerView_IsCurrentPeriod(ByVal CellDate As Date) As Boolean
 
-    IsDaySelected = PickerForm.IsDaySelected(CellDate)
+    DP_IPickerView_IsCurrentPeriod = CellDate = DateValue(Date)
+
+End Function
+
+
+Private Function DP_IPickerView_IsSecondaryPeriod(ByVal CellDate As Date) As Boolean
+    
+    DP_IPickerView_IsSecondaryPeriod = Month(CellDate) <> Month(CurrentMonth)
 
 End Function
 
@@ -235,32 +246,32 @@ End Function
 ' Click
 '----------------------------------------
 
-Public Sub HeaderClicked()
+Private Sub DP_IPickerView_HeaderClicked()
 
-    PickerForm.CalendarHeaderClicked
-
-End Sub
-
-
-Public Sub ArrowClicked(ByVal Direction As DP_NavigationDirection)
-
-    If Not IsArrowEnabled(Direction) Then Exit Sub
-
-    PickerForm.ChangeMonth Direction
+    PickerForm.HeaderClicked DP_SIZE_MONTH
 
 End Sub
 
 
-Public Sub DayClicked(ByVal SelectedDate As Date)
+Private Sub DP_IPickerView_ArrowClicked(ByVal Direction As DP_NavigationDirection)
 
-    If IsDayOutsideRange(SelectedDate) Then Exit Sub
+    If Not DP_IPickerView_IsArrowEnabled(Direction) Then Exit Sub
+
+    PickerForm.ChangePeriod Direction, "m"
+
+End Sub
+
+
+Private Sub DP_IPickerView_GridButtonClicked(ByVal SelectedDate As Date)
+
+    If DP_IsDateOutsideRange(SelectedDate) Then Exit Sub
 
     PickerForm.DaySelected SelectedDate
 
 End Sub
 
 
-Public Sub ActionButtonClicked()
+Private Sub DP_IPickerView_ActionButtonClicked()
 
     PickerForm.DaySelected Date
 
@@ -271,51 +282,13 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetArrowHover()
+Private Sub DP_IPickerView_ResetAllHover()
+
+    MonthHeaderHandler.ResetHover
+    TodayButtonHandler.ResetHover
 
     DP_ResetHoverCollection ArrowHandlers
-
-End Sub
-
-
-Public Sub ResetDayHover()
-
     DP_ResetHoverCollection DayHandlers
-
-End Sub
-
-
-Public Sub ResetDayHoverExcept(ByVal CurrentDay As DP_CButtonDay)
-
-    DP_ResetHoverCollectionExcept DayHandlers, CurrentDay
-
-End Sub
-
-
-Public Sub ResetHeaderHover()
-
-    If Not MonthHeaderHandler Is Nothing Then
-        MonthHeaderHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetTodayHover()
-
-    If Not TodayButtonHandler Is Nothing Then
-        TodayButtonHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetAllHover()
-
-    ResetArrowHover
-    ResetDayHover
-    ResetHeaderHover
-    ResetTodayHover
 
 End Sub
 
@@ -324,28 +297,19 @@ End Sub
 ' Visibility
 '----------------------------------------
 
-Public Sub SetVisible(ByVal IsVisible As Boolean)
+Private Sub DP_IPickerView_SetVisible(ByVal IsVisible As Boolean)
 
-    Dim Handler As Object
+    MonthHeaderHandler.SetVisible IsVisible
+    TodayButtonHandler.SetVisible IsVisible
 
-    If Not MonthHeaderHandler Is Nothing Then
-        MonthHeaderHandler.SetVisible IsVisible
-    End If
+    DP_SetVisibleCollection ArrowHandlers, IsVisible
+    DP_SetVisibleCollection WeekdayHandlers, IsVisible
+    DP_SetVisibleCollection DayHandlers, IsVisible
 
-    For Each Handler In ArrowHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    For Each Handler In WeekdayHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    For Each Handler In DayHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    If Not TodayButtonHandler Is Nothing Then
-        TodayButtonHandler.SetVisible IsVisible
+    If IsVisible Then
+        TodayButtonHandler.Recreate _
+            DP_GetDatePickerActionText("GO_TO_TODAY"), _
+            DP_GetActionButtonTop(DP_SIZE_DATE)
     End If
 
 End Sub

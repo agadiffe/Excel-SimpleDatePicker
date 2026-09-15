@@ -12,30 +12,10 @@ End Enum
 
 
 '----------------------------------------
-' Date range
-'----------------------------------------
-
-Public Function DP_MinDate() As Date
-
-    DP_MinDate = DateSerial(1901, 1, 1)
-
-End Function
-
-
-Public Function DP_MaxDate() As Date
-
-    DP_MaxDate = DateSerial(Year(Date) + 100, 12, 31)
-
-End Function
-
-
-'----------------------------------------
 ' Date Picker
 '----------------------------------------
 
 Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
-
-    Dim CellDate As Date
 
     ' Only process a single cell
     If Target.Cells.CountLarge <> 1 Then Exit Function
@@ -44,12 +24,11 @@ Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
     If Target.HasFormula Then Exit Function
 
     ' Only open the date picker for supported date cells
-    If Not DP_IsDatePickerCell(Target) Then Exit Function
+    If Not IsDatePickerCell(Target) Then Exit Function
 
     ' Existing date must be within the supported picker range
     If Not IsEmpty(Target) Then
-        CellDate = DateValue(CDate(Target.Value))
-        If CellDate < DP_MinDate() Or CellDate > DP_MaxDate() Then Exit Function
+        If DP_IsDateOutsideRange(CDate(Target.Value)) Then Exit Function
     End If
 
     ' Show the date picker
@@ -60,7 +39,7 @@ Public Function DP_HandleDatePickerDoubleClick(ByVal Target As Range) As Boolean
 End Function
 
 
-Private Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
+Private Function IsDatePickerCell(ByVal Cell As Range) As Boolean
 
     Dim FormatType As String
     Dim NumFormat As String
@@ -74,7 +53,7 @@ Private Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
 
     Select Case FormatType
         Case "D1", "D2", "D3", "D4", "D5"
-            DP_IsDatePickerCell = True
+            IsDatePickerCell = True
             Exit Function
     End Select
 
@@ -83,7 +62,7 @@ Private Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
 
     ' Excel's system Long Date format
     If Left$(NumFormat, Len("[$-f800]")) = "[$-f800]" Then
-        DP_IsDatePickerCell = True
+        IsDatePickerCell = True
         Exit Function
     End If
 
@@ -102,12 +81,40 @@ Private Function DP_IsDatePickerCell(ByVal Cell As Range) As Boolean
              "d-mmmm-yyyy", _
              "dd-mmmm-yyyy"
 
-            DP_IsDatePickerCell = True
+            IsDatePickerCell = True
             Exit Function
     End Select
 
 NotDate:
-    DP_IsDatePickerCell = False
+    IsDatePickerCell = False
+
+End Function
+
+
+'----------------------------------------
+' Date range
+'----------------------------------------
+
+Public Function DP_MinDate() As Date
+
+    DP_MinDate = DateSerial(1901, 1, 1)
+
+End Function
+
+
+Public Function DP_MaxDate() As Date
+
+    DP_MaxDate = DateSerial(Year(Date) + 100, 12, 31)
+
+End Function
+
+
+Public Function DP_IsDateOutsideRange(ByVal CellDate As Date) As Boolean
+
+    ' strip the time
+    CellDate = DateValue(CellDate)
+
+    DP_IsDateOutsideRange = CellDate < DP_MinDate() Or CellDate > DP_MaxDate()
 
 End Function
 
@@ -188,6 +195,18 @@ End Function
 ' UI helpers
 '----------------------------------------
 
+Public Sub DP_SetVisibleCollection(ByVal Handlers As Collection, _
+                                   ByVal IsVisible As Boolean)
+
+    Dim Handler As Object
+
+    For Each Handler In Handlers
+        Handler.SetVisible IsVisible
+    Next Handler
+
+End Sub
+
+
 Public Sub DP_RefreshThemeCollection(ByVal Handlers As Collection)
 
     Dim Handler As Object
@@ -216,20 +235,6 @@ Public Sub DP_ResetHoverCollection(ByVal Handlers As Collection)
 
     For Each Handler In Handlers
         Handler.ResetHover
-    Next Handler
-
-End Sub
-
-
-Public Sub DP_ResetHoverCollectionExcept(ByVal Handlers As Collection, _
-                                         ByVal KeepHandler As Object)
-
-    Dim Handler As Object
-
-    For Each Handler In Handlers
-        If Not Handler Is KeepHandler Then
-            Handler.ResetHover
-        End If
     Next Handler
 
 End Sub

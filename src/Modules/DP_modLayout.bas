@@ -221,14 +221,11 @@ Public Function DP_GetActionButtonTop(ByVal PickerSize As DP_PickerSize) As Sing
 
     Select Case PickerSize
         Case DP_SIZE_DATE
-            DP_GetActionButtonTop = _
-                DP_GRID_TOP + GRID_HEIGHT + CALENDAR_SECTION_GAP * 2
+            DP_GetActionButtonTop = DP_GRID_TOP + GRID_HEIGHT + CALENDAR_SECTION_GAP * 2
         Case DP_SIZE_MONTH
-            DP_GetActionButtonTop = _
-                DP_PERIOD_GRID_TOP + MONTH_HEIGHT + PERIOD_SECTION_GAP
+            DP_GetActionButtonTop = DP_PERIOD_GRID_TOP + MONTH_HEIGHT + PERIOD_SECTION_GAP
         Case DP_SIZE_YEAR
-            DP_GetActionButtonTop = _
-                DP_PERIOD_GRID_TOP + YEAR_HEIGHT + PERIOD_SECTION_GAP
+            DP_GetActionButtonTop = DP_PERIOD_GRID_TOP + YEAR_HEIGHT + PERIOD_SECTION_GAP
     End Select
 
 End Function

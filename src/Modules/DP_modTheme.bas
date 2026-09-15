@@ -190,7 +190,7 @@ End Function
 Public Function DP_IsDarkThemeActive() As Boolean
 
     If IsWindows() Then
-        DP_IsDarkThemeActive = IsExcelDarkThemeActive()
+        DP_IsDarkThemeActive = IsWindowsDarkThemeActive()
     Else
         DP_IsDarkThemeActive = IsMacDarkThemeActive()
     End If
@@ -212,7 +212,7 @@ End Function
 ' Windows
 '--------------------
 
-Private Function IsExcelDarkThemeActive() As Boolean
+Private Function IsWindowsDarkThemeActive() As Boolean
 
     Const OfficeThemeKey As String = _
         "HKCU\Software\Microsoft\Office\16.0\Common\UI Theme"
@@ -248,13 +248,13 @@ Private Function IsExcelDarkThemeActive() As Boolean
     Select Case officeTheme
         Case 3, 4
             ' Office explicitly uses a dark theme
-            IsExcelDarkThemeActive = True
+            IsWindowsDarkThemeActive = True
         Case 6
             ' Office follows the Windows system theme
-            IsExcelDarkThemeActive = (windowsLightTheme = 0)
+            IsWindowsDarkThemeActive = (windowsLightTheme = 0)
         Case Else
             ' White, Color, or unknown
-            IsExcelDarkThemeActive = False
+            IsWindowsDarkThemeActive = False
     End Select
 
 End Function

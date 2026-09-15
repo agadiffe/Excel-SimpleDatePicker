@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Implements DP_IPickerView
+
 '----------------------------------------
 ' Declarations
 '----------------------------------------
@@ -29,18 +31,11 @@ Private Const YEAR_COUNT As Long = _
 ' Initialization
 '----------------------------------------
 
-Public Sub Attach(ByVal Form As DP_frmDatePicker)
-
-    Set PickerForm = Form
-    InitializeView
-
-End Sub
-
-
-Private Sub InitializeView()
+Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 
     Dim ArrowHandler As DP_CHeaderArrow
 
+    Set PickerForm = Form
     Set ArrowHandlers = New Collection
     Set YearHandlers = New Collection
 
@@ -48,7 +43,8 @@ Private Sub InitializeView()
     '--------------------
 
     Set YearRangeHeaderHandler = New DP_CHeaderPeriod
-    YearRangeHeaderHandler.Initialize Me, YearRangeCaption
+    YearRangeHeaderHandler.Initialize Me, _
+        CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
     YearRangeHeaderHandler.SetInteractive False
 
     ' Previous range
@@ -72,14 +68,16 @@ Private Sub InitializeView()
     ' Years
     '--------------------
 
-    CreateYearLabels
+    CreateYears
 
     ' Shortcut
     '--------------------
 
     Set CurrentYearButtonHandler = New DP_CButtonShortcut
     CurrentYearButtonHandler.Initialize _
-        Me, DP_GetDatePickerActionText("GO_TO_CURRENT_YEAR")
+        Me, _
+        DP_GetDatePickerActionText("GO_TO_CURRENT_YEAR"), _
+        DP_GetActionButtonTop(DP_SIZE_YEAR)
 
 End Sub
 
@@ -88,11 +86,11 @@ End Sub
 ' Grid
 '----------------------------------------
 
-Private Sub CreateYearLabels()
+Private Sub CreateYears()
 
     Dim Handler As DP_CButtonPeriod
     Dim Index As Long
-    Dim DisplayYear As Long
+    Dim DisplayedYear As Long
     Dim FirstYear As Long
     Dim CellDate As Date
 
@@ -103,8 +101,8 @@ Private Sub CreateYearLabels()
 
     For Index = 0 To YEAR_COUNT - 1
 
-        DisplayYear = FirstYear + Index
-        CellDate = DateSerial(DisplayYear, 1, 1)
+        DisplayedYear = FirstYear + Index
+        CellDate = DateSerial(DisplayedYear, 1, 1)
 
         ColumnIndex = DP_GridColumn(Index, DP_YEAR_GRID_COLUMNS)
         RowIndex = DP_GridRow(Index, DP_YEAR_GRID_COLUMNS)
@@ -112,8 +110,7 @@ Private Sub CreateYearLabels()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
-                           CStr(DisplayYear), _
-                           DisplayYear, _
+                           CStr(DisplayedYear), _
                            CellDate, _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_YEAR_GRID_CELL_WIDTH, DP_YEAR_CELL_WIDTH), _
@@ -132,10 +129,10 @@ End Sub
 ' Update
 '----------------------------------------
 
-Public Sub UpdateView()
+Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
-    Dim DisplayYear As Long
+    Dim DisplayedYear As Long
     Dim FirstYear As Long
     Dim CellDate As Date
 
@@ -143,30 +140,28 @@ Public Sub UpdateView()
 
     FirstYear = FirstDisplayedYear
 
-    YearRangeHeaderHandler.SetCaption YearRangeCaption
+    YearRangeHeaderHandler.SetCaption _
+        CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
 
     For Index = 0 To YEAR_COUNT - 1
 
-        DisplayYear = FirstYear + Index
-        CellDate = DateSerial(DisplayYear, 1, 1)
+        DisplayedYear = FirstYear + Index
+        CellDate = DateSerial(DisplayedYear, 1, 1)
 
         Set Handler = YearHandlers.Item(Index + 1)
-        Handler.UpdatePeriod CStr(DisplayYear), _
-                             CellDate, _
-                             DisplayYear
+        Handler.UpdatePeriod CStr(DisplayedYear), CellDate
 
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
-    CurrentYearButtonHandler.Recreate _
-        DP_GetDatePickerActionText("GO_TO_CURRENT_YEAR")
 
 End Sub
 
 
-Public Sub RefreshTheme()
+Private Sub DP_IPickerView_RefreshTheme()
 
-    ' Year handlers and shortcut button are handled by UpdateView.
+    ' Year handlers are handled by UpdateView.
+    ' Shortcut button is handled by SetVisible.
 
     YearRangeHeaderHandler.RefreshTheme
     DP_RefreshThemeCollection ArrowHandlers
@@ -178,9 +173,9 @@ End Sub
 ' Properties
 '----------------------------------------
 
-Public Property Get ParentForm() As DP_frmDatePicker
+Private Property Get DP_IPickerView_ParentForm() As DP_frmDatePicker
 
-    Set ParentForm = PickerForm
+    Set DP_IPickerView_ParentForm = PickerForm
 
 End Property
 
@@ -204,54 +199,38 @@ Private Property Get LastDisplayedYear() As Long
 End Property
 
 
-Private Property Get YearRangeCaption() As String
-
-    YearRangeCaption = CStr(FirstDisplayedYear) & _
-                       " - " & _
-                       CStr(LastDisplayedYear)
-
-End Property
-
-
 '----------------------------------------
 ' Queries
 '----------------------------------------
 
-Public Function IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
+Private Function DP_IPickerView_IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
 
     If Direction = DP_NAV_PREVIOUS Then
-        IsArrowEnabled = FirstDisplayedYear > Year(DP_MinDate())
+        DP_IPickerView_IsArrowEnabled = FirstDisplayedYear > Year(DP_MinDate())
     Else
-        IsArrowEnabled = LastDisplayedYear < Year(DP_MaxDate())
+        DP_IPickerView_IsArrowEnabled = LastDisplayedYear < Year(DP_MaxDate())
     End If
 
 End Function
 
 
-Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
+Private Function DP_IPickerView_IsDateSelected(ByVal CellDate As Date) As Boolean
 
-    IsPeriodOutsideRange = PickerForm.IsPeriodOutsideRange(PeriodDate)
-
-End Function
-
-
-Public Function IsPeriodSelected(ByVal CellDate As Date) As Boolean
-
-    IsPeriodSelected = Year(CellDate) = PickerForm.SelectedYear
+    DP_IPickerView_IsDateSelected = Year(CellDate) = PickerForm.SelectedYear
 
 End Function
 
 
-Public Function IsCurrentPeriod(ByVal DisplayYear As Long) As Boolean
+Private Function DP_IPickerView_IsCurrentPeriod(ByVal CellDate As Date) As Boolean
 
-    IsCurrentPeriod = DisplayYear = Year(Date)
+    DP_IPickerView_IsCurrentPeriod = Year(CellDate) = Year(Date)
 
 End Function
 
 
-Public Function IsSecondaryPeriod(ByVal PeriodDate As Date) As Boolean
+Private Function DP_IPickerView_IsSecondaryPeriod(ByVal PeriodDate As Date) As Boolean
 
-    IsSecondaryPeriod = False
+    DP_IPickerView_IsSecondaryPeriod = False
 
 End Function
 
@@ -260,25 +239,32 @@ End Function
 ' Click
 '----------------------------------------
 
-Public Sub ArrowClicked(ByVal Direction As DP_NavigationDirection)
+Private Sub DP_IPickerView_HeaderClicked()
 
-    If Not IsArrowEnabled(Direction) Then Exit Sub
-
-    PickerForm.ChangeYearRange Direction * YEAR_COUNT
+    ' Latest view level. Header has no further navigation target.
 
 End Sub
 
 
-Public Sub PeriodClicked(ByVal YearNumber As Long)
+Private Sub DP_IPickerView_ArrowClicked(ByVal Direction As DP_NavigationDirection)
 
-    If IsPeriodOutsideRange(DateSerial(YearNumber, 1, 1)) Then Exit Sub
+    If Not DP_IPickerView_IsArrowEnabled(Direction) Then Exit Sub
 
-    PickerForm.YearSelected YearNumber
+    PickerForm.ChangePeriod Direction * YEAR_COUNT, "yyyy"
 
 End Sub
 
 
-Public Sub ActionButtonClicked()
+Private Sub DP_IPickerView_GridButtonClicked(ByVal SelectedDate As Date)
+
+    If DP_IsDateOutsideRange(SelectedDate) Then Exit Sub
+
+    PickerForm.YearSelected Year(SelectedDate)
+
+End Sub
+
+
+Private Sub DP_IPickerView_ActionButtonClicked()
 
     PickerForm.YearSelected Year(Date)
 
@@ -289,41 +275,12 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetArrowHover()
+Private Sub DP_IPickerView_ResetAllHover()
+
+    CurrentYearButtonHandler.ResetHover
 
     DP_ResetHoverCollection ArrowHandlers
-
-End Sub
-
-
-Public Sub ResetYearHover()
-
     DP_ResetHoverCollection YearHandlers
-
-End Sub
-
-
-Public Sub ResetPeriodHoverExcept(ByVal CurrentYearLabel As DP_CButtonPeriod)
-
-    DP_ResetHoverCollectionExcept YearHandlers, CurrentYearLabel
-
-End Sub
-
-
-Public Sub ResetActionButtonHover()
-
-    If Not CurrentYearButtonHandler Is Nothing Then
-        CurrentYearButtonHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetAllHover()
-
-    ResetArrowHover
-    ResetYearHover
-    ResetActionButtonHover
 
 End Sub
 
@@ -332,24 +289,18 @@ End Sub
 ' Visibility
 '----------------------------------------
 
-Public Sub SetVisible(ByVal IsVisible As Boolean)
+Private Sub DP_IPickerView_SetVisible(ByVal IsVisible As Boolean)
 
-    Dim Handler As Object
+    YearRangeHeaderHandler.SetVisible IsVisible
+    CurrentYearButtonHandler.SetVisible IsVisible
 
-    If Not YearRangeHeaderHandler Is Nothing Then
-        YearRangeHeaderHandler.SetVisible IsVisible
-    End If
+    DP_SetVisibleCollection ArrowHandlers, IsVisible
+    DP_SetVisibleCollection YearHandlers, IsVisible
 
-    For Each Handler In ArrowHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    For Each Handler In YearHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    If Not CurrentYearButtonHandler Is Nothing Then
-        CurrentYearButtonHandler.SetVisible IsVisible
+    If IsVisible Then
+        CurrentYearButtonHandler.Recreate _
+            DP_GetDatePickerActionText("GO_TO_CURRENT_YEAR"), _
+            DP_GetActionButtonTop(DP_SIZE_YEAR)
     End If
 
 End Sub

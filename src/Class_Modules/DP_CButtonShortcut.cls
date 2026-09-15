@@ -18,7 +18,7 @@ Attribute ButtonBackground.VB_VarHelpID = -1
 Private WithEvents ButtonText As MSForms.Label
 Attribute ButtonText.VB_VarHelpID = -1
 
-Private ParentView As Object
+Private ParentView As DP_IPickerView
 
 Private IsHovered As Boolean
 Private IsPressed As Boolean
@@ -28,8 +28,9 @@ Private IsPressed As Boolean
 ' Initialization
 '----------------------------------------
 
-Public Sub Initialize(ByVal View As Object, _
-                      ByVal Caption As String)
+Public Sub Initialize(ByVal View As DP_IPickerView, _
+                      ByVal Caption As String, _
+                      ByVal TopPosition As Single)
 
     Dim ButtonWidth As Single
 
@@ -39,15 +40,14 @@ Public Sub Initialize(ByVal View As Object, _
 
     With ButtonBackground
         .Height = DP_ACTION_BUTTON_HEIGHT
-        .Top = DP_GetActionButtonTop(ParentView.ParentForm.CurrentPickerSize)
+        .Top = TopPosition
     End With
 
     Set ButtonText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With ButtonText
         .Caption = Caption
-        .Font.Size = DP_FONT_SIZE_ACTION_BUTTON * _
-                     DP_GetFontScale(DP_DATEPICKER_WIDTH)
+        .Font.Size = DP_FONT_SIZE_ACTION_BUTTON * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
         .BackStyle = fmBackStyleTransparent
@@ -78,7 +78,11 @@ Public Sub Initialize(ByVal View As Object, _
 End Sub
 
 
-Public Sub Recreate(ByVal Caption As String)
+Public Sub Recreate(ByVal Caption As String, _
+                    ByVal TopPosition As Single)
+
+    ' Recreate because the button position depends on the
+    ' active view's grid height.
 
     ButtonBackground.Parent.Controls.Remove ButtonBackground.Name
     ButtonText.Parent.Controls.Remove ButtonText.Name
@@ -86,7 +90,7 @@ Public Sub Recreate(ByVal Caption As String)
     Set ButtonBackground = Nothing
     Set ButtonText = Nothing
 
-    Initialize ParentView, Caption
+    Initialize ParentView, Caption, TopPosition
 
 End Sub
 
@@ -111,6 +115,30 @@ End Sub
 
 
 '----------------------------------------
+' Properties
+'----------------------------------------
+
+Private Property Let Hovered(ByVal Value As Boolean)
+
+    If IsHovered = Value Then Exit Property
+
+    IsHovered = Value
+    Render
+
+End Property
+
+
+Private Property Let Pressed(ByVal Value As Boolean)
+
+    If IsPressed = Value Then Exit Property
+
+    IsPressed = Value
+    Render
+
+End Property
+
+
+'----------------------------------------
 ' Click
 '----------------------------------------
 
@@ -132,19 +160,6 @@ End Sub
 ' Pressed
 '----------------------------------------
 
-' Common
-'--------------------
-
-Private Sub SetPressed(ByVal Value As Boolean)
-
-    If IsPressed = Value Then Exit Sub
-
-    IsPressed = Value
-    Render
-
-End Sub
-
-
 ' Mouse down
 '--------------------
 
@@ -153,7 +168,7 @@ Private Sub ButtonBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    SetPressed True
+    Pressed = True
 
 End Sub
 
@@ -163,7 +178,7 @@ Private Sub ButtonText_MouseDown(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    SetPressed True
+    Pressed = True
 
 End Sub
 
@@ -176,7 +191,7 @@ Private Sub ButtonBackground_MouseUp(ByVal Button As Integer, _
                                      ByVal X As Single, _
                                      ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -186,7 +201,7 @@ Private Sub ButtonText_MouseUp(ByVal Button As Integer, _
                                ByVal X As Single, _
                                ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -195,12 +210,27 @@ End Sub
 ' Hover
 '----------------------------------------
 
+Public Sub ResetHover()
+
+    Hovered = False
+
+End Sub
+
+
+Private Sub HandleMouseHover()
+
+    ParentView.ResetAllHover
+    Hovered = True
+
+End Sub
+
+
 Private Sub ButtonBackground_MouseMove(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    SetHover
+    HandleMouseHover
 
 End Sub
 
@@ -210,32 +240,7 @@ Private Sub ButtonText_MouseMove(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    SetHover
-
-End Sub
-
-
-Private Sub SetHover()
-
-    ParentView.ResetAllHover
-    SetHovered True
-
-End Sub
-
-
-Private Sub SetHovered(ByVal Value As Boolean)
-
-    If IsHovered = Value Then Exit Sub
-
-    IsHovered = Value
-    Render
-
-End Sub
-
-
-Public Sub ResetHover()
-
-    SetHovered False
+    HandleMouseHover
 
 End Sub
 

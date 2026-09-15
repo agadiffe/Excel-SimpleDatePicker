@@ -18,7 +18,7 @@ Attribute DayBackground.VB_VarHelpID = -1
 Private WithEvents DayText As MSForms.Label
 Attribute DayText.VB_VarHelpID = -1
 
-Private ParentView As DP_CViewCalendar
+Private ParentView As DP_IPickerView
 Private CellDate As Date
 
 Private IsHovered As Boolean
@@ -30,12 +30,12 @@ Private IsPressed As Boolean
 '----------------------------------------
 
 Public Sub Initialize(ByVal View As DP_CViewCalendar, _
-                      ByVal CalendarCellDate As Date, _
+                      ByVal CellDateValue As Date, _
                       ByVal LeftPosition As Single, _
                       ByVal TopPosition As Single)
 
     Set ParentView = View
-    CellDate = CalendarCellDate
+    CellDate = CellDateValue
 
     Set DayBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
@@ -49,9 +49,8 @@ Public Sub Initialize(ByVal View As DP_CViewCalendar, _
     Set DayText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With DayText
-        .Caption = GetDayTextCaption()
-        .Font.Size = DP_FONT_SIZE_DAY * _
-                     DP_GetFontScale(DP_DATEPICKER_WIDTH)
+        .Caption = CStr(Day(CellDate))
+        .Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .BackStyle = fmBackStyleTransparent
         .TextAlign = fmTextAlignCenter
         .WordWrap = False
@@ -72,16 +71,19 @@ Public Sub Initialize(ByVal View As DP_CViewCalendar, _
 End Sub
 
 
-Private Function GetDayTextCaption() As String
-
-    GetDayTextCaption = CStr(Day(CellDate))
-
-End Function
-
-
 '----------------------------------------
 ' Render
 '----------------------------------------
+
+Public Sub UpdateDate(ByVal CellDateValue As Date)
+
+    CellDate = CellDateValue
+    DayText.Caption = CStr(Day(CellDate))
+
+    Render
+
+End Sub
+
 
 Private Sub Render()
 
@@ -99,21 +101,21 @@ Private Sub Render()
     ' Other month
     '--------------------
 
-    If Month(CellDate) <> Month(ParentView.ParentForm.CurrentMonth) Then
+    If ParentView.IsSecondaryPeriod(CellDate) Then
         TextColor = DP_ColorTextSecondary()
     End If
 
     ' Disabled
     '--------------------
 
-    If ParentView.IsDayOutsideRange(CellDate) Then
+    If DP_IsDateOutsideRange(CellDate) Then
         TextColor = DP_ColorTextDisabled()
     End If
 
     ' Today
     '--------------------
 
-    If CellDate = DateValue(Date) Then
+    If ParentView.IsCurrentPeriod(CellDate) Then
         BackgroundColor = DP_ColorBgToday()
         TextColor = DP_ColorTextToday()
     End If
@@ -121,7 +123,7 @@ Private Sub Render()
     ' Selected
     '--------------------
 
-    If ParentView.IsDaySelected(CellDate) Then
+    If ParentView.IsDateSelected(CellDate) Then
         BackgroundColor = DP_ColorBgSelected()
         TextColor = DP_ColorTextSelected()
         IsBold = True
@@ -131,7 +133,7 @@ Private Sub Render()
     '--------------------
 
     If IsHovered Then
-        If ParentView.IsDaySelected(CellDate) Then
+        If ParentView.IsDateSelected(CellDate) Then
             BackgroundColor = DP_ColorBgSelectedHover()
         Else
             BackgroundColor = DP_ColorBgHover()
@@ -142,7 +144,7 @@ Private Sub Render()
     '--------------------
 
     If IsPressed Then
-        If ParentView.IsDaySelected(CellDate) Then
+        If ParentView.IsDateSelected(CellDate) Then
             BackgroundColor = DP_ColorBgSelectedPressed()
         Else
             BackgroundColor = DP_ColorBgPressed()
@@ -159,19 +161,42 @@ Private Sub Render()
 End Sub
 
 
-Public Sub UpdateDate(ByVal CalendarCellDate As Date)
+'----------------------------------------
+' Properties
+'----------------------------------------
 
-    CellDate = CalendarCellDate
-    DayText.Caption = GetDayTextCaption()
+Private Property Let Hovered(ByVal Value As Boolean)
 
+    If IsHovered = Value Then Exit Property
+
+    IsHovered = Value
     Render
 
-End Sub
+End Property
+
+
+Private Property Let Pressed(ByVal Value As Boolean)
+
+    If IsPressed = Value Then Exit Property
+
+    IsPressed = Value
+    Render
+
+End Property
 
 
 '----------------------------------------
 ' Click
 '----------------------------------------
+
+Private Sub HandleDayClick()
+
+    If DP_IsDateOutsideRange(CellDate) Then Exit Sub
+
+    ParentView.GridButtonClicked CellDate
+
+End Sub
+
 
 Private Sub DayBackground_Click()
 
@@ -187,34 +212,21 @@ Private Sub DayText_Click()
 End Sub
 
 
-Private Sub HandleDayClick()
-
-    If ParentView.IsDayOutsideRange(CellDate) Then Exit Sub
-
-    ParentView.DayClicked CellDate
-
-End Sub
-
-
 '----------------------------------------
 ' Pressed
 '----------------------------------------
 
-' Common
+' Mouse down
 '--------------------
 
-Private Sub SetPressed(ByVal Value As Boolean)
+Private Sub HandleMouseDown()
 
-    If IsPressed = Value Then Exit Sub
+    If DP_IsDateOutsideRange(CellDate) Then Exit Sub
 
-    IsPressed = Value
-    Render
+    Pressed = True
 
 End Sub
 
-
-' Mouse down
-'--------------------
 
 Private Sub DayBackground_MouseDown(ByVal Button As Integer, _
                                     ByVal Shift As Integer, _
@@ -236,15 +248,6 @@ Private Sub DayText_MouseDown(ByVal Button As Integer, _
 End Sub
 
 
-Private Sub HandleMouseDown()
-
-    If ParentView.IsDayOutsideRange(CellDate) Then Exit Sub
-
-    SetPressed True
-
-End Sub
-
-
 ' Mouse up
 '--------------------
 
@@ -253,7 +256,7 @@ Private Sub DayBackground_MouseUp(ByVal Button As Integer, _
                                   ByVal X As Single, _
                                   ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -263,7 +266,7 @@ Private Sub DayText_MouseUp(ByVal Button As Integer, _
                             ByVal X As Single, _
                             ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -272,12 +275,30 @@ End Sub
 ' Hover
 '----------------------------------------
 
+Public Sub ResetHover()
+
+    Hovered = False
+
+End Sub
+
+
+Private Sub HandleMouseHover()
+
+    ParentView.ResetAllHover
+
+    If Not DP_IsDateOutsideRange(CellDate) Then
+        Hovered = True
+    End If
+
+End Sub
+
+
 Private Sub DayBackground_MouseMove(ByVal Button As Integer, _
                                     ByVal Shift As Integer, _
                                     ByVal X As Single, _
                                     ByVal Y As Single)
 
-    SetHover
+    HandleMouseHover
 
 End Sub
 
@@ -287,38 +308,7 @@ Private Sub DayText_MouseMove(ByVal Button As Integer, _
                               ByVal X As Single, _
                               ByVal Y As Single)
 
-    SetHover
-
-End Sub
-
-
-Private Sub SetHover()
-
-    ParentView.ResetArrowHover
-    ParentView.ResetHeaderHover
-    ParentView.ResetTodayHover
-    ParentView.ResetDayHoverExcept Me
-
-    If Not ParentView.IsDayOutsideRange(CellDate) Then
-        SetHovered True
-    End If
-
-End Sub
-
-
-Private Sub SetHovered(ByVal Value As Boolean)
-
-    If IsHovered = Value Then Exit Sub
-
-    IsHovered = Value
-    Render
-
-End Sub
-
-
-Public Sub ResetHover()
-
-    SetHovered False
+    HandleMouseHover
 
 End Sub
 

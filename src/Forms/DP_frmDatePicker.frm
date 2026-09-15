@@ -20,16 +20,16 @@ Option Explicit
 
 Private TargetCell As Range
 
-Private CurrentPickerSizeValue As DP_PickerSize
+Private CurrentPickerSize As DP_PickerSize
 
-Private InitialCellDate As Date
+Private InitialCellDateValue As Date
 Private CurrentMonthValue As Date
 Private SelectedMonthValue As Date
 Private SelectedYearValue As Long
 
-Private CalendarView As DP_CViewCalendar
-Private MonthView As DP_CViewMonth
-Private YearView As DP_CViewYear
+Private CalendarView As DP_IPickerView
+Private MonthView As DP_IPickerView
+Private YearView As DP_IPickerView
 
 
 '----------------------------------------
@@ -38,18 +38,17 @@ Private YearView As DP_CViewYear
 
 Private Sub UserForm_Initialize()
 
-    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
-
     DP_IsDarkMode = DP_IsDarkThemeActive()
-    Me.BackColor = DP_ColorBg()
+
+    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
 
     Set CalendarView = New DP_CViewCalendar
     Set MonthView = New DP_CViewMonth
     Set YearView = New DP_CViewYear
 
-    CalendarView.Attach Me
-    MonthView.Attach Me
-    YearView.Attach Me
+    CalendarView.InitializeView Me
+    MonthView.InitializeView Me
+    YearView.InitializeView Me
 
 End Sub
 
@@ -58,19 +57,19 @@ Public Sub ShowPicker(ByVal Cell As Range)
 
     Set TargetCell = Cell
 
-    If IsDate(Cell.Value) Then
-        InitialCellDate = CDate(Cell.Value)
+    If IsDate(TargetCell.Value) Then
+        InitialCellDateValue = CDate(TargetCell.Value)
     Else
-        InitialCellDate = Date
+        InitialCellDateValue = Date
     End If
 
-    SelectedMonthValue = DateSerial(Year(InitialCellDate), Month(InitialCellDate), 1)
+    SelectedMonthValue = DateSerial(Year(InitialCellDateValue), Month(InitialCellDateValue), 1)
     SelectedYearValue = Year(SelectedMonthValue)
     CurrentMonthValue = SelectedMonthValue
 
     RefreshPickerTheme
     ShowPickerView DP_SIZE_DATE
-    DP_ShowPopupNextToCell Me, Cell
+    DP_ShowPopupNextToCell Me, TargetCell
 
 End Sub
 
@@ -100,37 +99,41 @@ End Sub
 
 Private Sub ShowPickerView(ByVal PickerSize As DP_PickerSize)
 
-    ResetAllHover
+    Dim PickerView As DP_IPickerView
+
+    Set PickerView = GetPickerView(PickerSize)
+
+    PickerView.ResetAllHover
 
     DP_SetPickerSize Me, PickerSize
-    CurrentPickerSizeValue = PickerSize
+    CurrentPickerSize = PickerSize
 
     CalendarView.SetVisible PickerSize = DP_SIZE_DATE
     MonthView.SetVisible PickerSize = DP_SIZE_MONTH
     YearView.SetVisible PickerSize = DP_SIZE_YEAR
 
-    Select Case PickerSize
-        Case DP_SIZE_DATE
-            CalendarView.UpdateView
-        Case DP_SIZE_MONTH
-            MonthView.UpdateView
-        Case DP_SIZE_YEAR
-            YearView.UpdateView
-    End Select
+    PickerView.UpdateView
 
 End Sub
+
+
+Private Function GetPickerView(ByVal PickerSize As DP_PickerSize) As DP_IPickerView
+
+    Select Case PickerSize
+        Case DP_SIZE_DATE
+            Set GetPickerView = CalendarView
+        Case DP_SIZE_MONTH
+            Set GetPickerView = MonthView
+        Case DP_SIZE_YEAR
+            Set GetPickerView = YearView
+    End Select
+
+End Function
 
 
 '----------------------------------------
 ' Properties
 '----------------------------------------
-
-Public Property Get CurrentPickerSize() As DP_PickerSize
-
-    CurrentPickerSize = CurrentPickerSizeValue
-
-End Property
-
 
 Public Property Get SelectedMonth() As Date
 
@@ -153,29 +156,11 @@ Public Property Get CurrentMonth() As Date
 End Property
 
 
-'----------------------------------------
-' Queries
-'----------------------------------------
+Public Property Get InitialCellDate() As Date
 
-Public Function IsDayOutsideRange(ByVal DayDate As Date) As Boolean
+    InitialCellDate = InitialCellDateValue
 
-    IsDayOutsideRange = DayDate < DP_MinDate() Or DayDate > DP_MaxDate()
-
-End Function
-
-
-Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
-
-    IsPeriodOutsideRange = PeriodDate < DP_MinDate() Or PeriodDate > DP_MaxDate()
-
-End Function
-
-
-Public Function IsDaySelected(ByVal CellDate As Date) As Boolean
-
-    IsDaySelected = CellDate = DateValue(InitialCellDate)
-
-End Function
+End Property
 
 
 '----------------------------------------
@@ -184,7 +169,15 @@ End Function
 
 Public Sub DaySelected(ByVal SelectedDate As Date)
 
-    SetTargetDate SelectedDate
+    Dim ExistingTime As Double
+
+    If IsDate(InitialCellDateValue) Then
+        ExistingTime = TimeValue(InitialCellDateValue)
+        TargetCell.Value = DateValue(SelectedDate) + ExistingTime
+    Else
+        TargetCell.Value = SelectedDate
+    End If
+
     Me.Hide
 
 End Sub
@@ -193,7 +186,10 @@ End Sub
 Public Sub MonthSelected(ByVal MonthNumber As Long, _
                          ByVal YearNumber As Long)
 
-    SetMonthYear MonthNumber, YearNumber
+    SelectedYearValue = YearNumber
+    SelectedMonthValue = DateSerial(SelectedYearValue, MonthNumber, 1)
+    CurrentMonthValue = SelectedMonthValue
+
     ShowPickerView DP_SIZE_DATE
 
 End Sub
@@ -201,40 +197,10 @@ End Sub
 
 Public Sub YearSelected(ByVal YearNumber As Long)
 
-    SetYear YearNumber
+    SelectedYearValue = YearNumber
+    CurrentMonthValue = DateSerial(SelectedYearValue, Month(CurrentMonthValue), 1)
+
     ShowPickerView DP_SIZE_MONTH
-
-End Sub
-
-
-Private Sub SetTargetDate(ByVal NewDate As Date)
-
-    Dim ExistingTime As Double
-
-    If IsDate(InitialCellDate) Then
-        ExistingTime = TimeValue(InitialCellDate)
-        TargetCell.Value = DateValue(NewDate) + ExistingTime
-    Else
-        TargetCell.Value = NewDate
-    End If
-
-End Sub
-
-
-Public Sub SetMonthYear(ByVal MonthNumber As Long, _
-                        ByVal YearNumber As Long)
-
-    SelectedYearValue = YearNumber
-    SelectedMonthValue = DateSerial(YearNumber, MonthNumber, 1)
-    CurrentMonthValue = SelectedMonthValue
-
-End Sub
-
-
-Public Sub SetYear(ByVal YearNumber As Long)
-
-    SelectedYearValue = YearNumber
-    CurrentMonthValue = DateSerial(YearNumber, Month(CurrentMonthValue), 1)
 
 End Sub
 
@@ -243,58 +209,18 @@ End Sub
 ' Navigation
 '----------------------------------------
 
-Public Sub ChangeMonth(ByVal Amount As Long)
+Public Sub ChangePeriod(ByVal Amount As Long, _
+                        ByVal Interval As String)
 
-    CurrentMonthValue = DateAdd("m", Amount, CurrentMonthValue)
-    CalendarView.UpdateView
-
-End Sub
-
-
-Public Sub ChangeYear(ByVal Amount As Long)
-
-    CurrentMonthValue = DateAdd("yyyy", Amount, CurrentMonthValue)
-    MonthView.UpdateView
+    CurrentMonthValue = DateAdd(Interval, Amount, CurrentMonthValue)
+    GetPickerView(CurrentPickerSize).UpdateView
 
 End Sub
 
 
-Public Sub ChangeYearRange(ByVal Amount As Long)
+Public Sub HeaderClicked(ByVal PickerSize As DP_PickerSize)
 
-    CurrentMonthValue = DateAdd("yyyy", Amount, CurrentMonthValue)
-    YearView.UpdateView
-
-End Sub
-
-
-Public Sub CalendarHeaderClicked()
-
-    ShowPickerView DP_SIZE_MONTH
-
-End Sub
-
-
-Public Sub MonthHeaderClicked()
-
-    ShowPickerView DP_SIZE_YEAR
-
-End Sub
-
-
-'----------------------------------------
-' Hover
-'----------------------------------------
-
-Public Sub ResetAllHover()
-
-    Select Case CurrentPickerSizeValue
-        Case DP_SIZE_DATE
-            CalendarView.ResetAllHover
-        Case DP_SIZE_MONTH
-            MonthView.ResetAllHover
-        Case DP_SIZE_YEAR
-            YearView.ResetAllHover
-    End Select
+    ShowPickerView PickerSize
 
 End Sub
 
@@ -305,10 +231,10 @@ End Sub
 
 Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Shift As Integer, _
-                               ByVal X As Single, _
+                               ByVal x As Single, _
                                ByVal Y As Single)
 
-    ResetAllHover
+    GetPickerView(CurrentPickerSize).ResetAllHover
 
 End Sub
 

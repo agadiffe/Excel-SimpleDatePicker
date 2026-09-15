@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Implements DP_IPickerView
+
 '----------------------------------------
 ' Declarations
 '----------------------------------------
@@ -29,18 +31,11 @@ Private Const MONTH_COUNT As Long = _
 ' Initialization
 '----------------------------------------
 
-Public Sub Attach(ByVal Form As DP_frmDatePicker)
-
-    Set PickerForm = Form
-    InitializeView
-
-End Sub
-
-
-Private Sub InitializeView()
+Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 
     Dim ArrowHandler As DP_CHeaderArrow
 
+    Set PickerForm = Form
     Set ArrowHandlers = New Collection
     Set MonthHandlers = New Collection
 
@@ -78,7 +73,9 @@ Private Sub InitializeView()
 
     Set CurrentMonthButtonHandler = New DP_CButtonShortcut
     CurrentMonthButtonHandler.Initialize _
-        Me, DP_GetDatePickerActionText("GO_TO_CURRENT_MONTH")
+        Me, _
+        DP_GetDatePickerActionText("GO_TO_CURRENT_MONTH"), _
+        DP_GetActionButtonTop(DP_SIZE_MONTH)
 
 End Sub
 
@@ -91,7 +88,6 @@ Private Sub CreateMonths()
 
     Dim Handler As DP_CButtonPeriod
     Dim Index As Long
-    Dim MonthNumber As Long
     Dim CellDate As Date
 
     Dim ColumnIndex As Long
@@ -99,7 +95,6 @@ Private Sub CreateMonths()
 
     For Index = 0 To MONTH_COUNT - 1
 
-        MonthNumber = Index + 1
         CellDate = GetMonthDate(Index)
         ColumnIndex = DP_GridColumn(Index, DP_MONTH_GRID_COLUMNS)
         RowIndex = DP_GridRow(Index, DP_MONTH_GRID_COLUMNS)
@@ -107,15 +102,14 @@ Private Sub CreateMonths()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
-                           GetMonthCaption(MonthNumber), _
-                           MonthNumber, _
+                           GetCaption(Index + 1), _
                            CellDate, _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_MONTH_GRID_CELL_WIDTH, DP_MONTH_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
                                       DP_PERIOD_GRID_CELL_HEIGHT, DP_PERIOD_CELL_HEIGHT), _
                            DP_MONTH_CELL_WIDTH
-
+                           
         MonthHandlers.Add Handler
 
     Next Index
@@ -123,42 +117,54 @@ Private Sub CreateMonths()
 End Sub
 
 
+Private Function GetCaption(ByVal MonthNumber As Long) As String
+
+    If DP_MONTH_GRID_COLUMNS > 3 Then
+        GetCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmm")
+    Else
+        GetCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmmm")
+    End If
+
+End Function
+
+
+Private Function GetMonthDate(ByVal CellIndex As Long) As Date
+
+    GetMonthDate = DateSerial(CurrentYear, CellIndex + 1, 1)
+
+End Function
+
+
 '----------------------------------------
 ' Update
 '----------------------------------------
 
-Public Sub UpdateView()
+Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
-    Dim MonthNumber As Long
     Dim CellDate As Date
-
     Dim Handler As DP_CButtonPeriod
 
     YearHeaderHandler.SetCaption CStr(CurrentYear)
 
     For Index = 0 To MONTH_COUNT - 1
 
-        MonthNumber = Index + 1
         CellDate = GetMonthDate(Index)
 
         Set Handler = MonthHandlers.Item(Index + 1)
-        Handler.UpdatePeriod GetMonthCaption(MonthNumber), _
-                             CellDate, _
-                             MonthNumber
+        Handler.UpdatePeriod GetCaption(Index + 1), CellDate
 
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
-    CurrentMonthButtonHandler.Recreate _
-        DP_GetDatePickerActionText("GO_TO_CURRENT_MONTH")
 
 End Sub
 
 
-Public Sub RefreshTheme()
+Private Sub DP_IPickerView_RefreshTheme()
 
-    ' Month handlers and shortcut button are handled by UpdateView.
+    ' Month handlers are handled by UpdateView.
+    ' Shortcut button is handled by SetVisible.
 
     YearHeaderHandler.RefreshTheme
     DP_RefreshThemeCollection ArrowHandlers
@@ -170,9 +176,9 @@ End Sub
 ' Properties
 '----------------------------------------
 
-Public Property Get ParentForm() As DP_frmDatePicker
+Private Property Get DP_IPickerView_ParentForm() As DP_frmDatePicker
 
-    Set ParentForm = PickerForm
+    Set DP_IPickerView_ParentForm = PickerForm
 
 End Property
 
@@ -188,67 +194,38 @@ End Property
 ' Queries
 '----------------------------------------
 
-Public Function IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
+Private Function DP_IPickerView_IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
 
     Dim TargetYear As Long
 
     TargetYear = CurrentYear + Direction
 
     If Direction = DP_NAV_PREVIOUS Then
-        IsArrowEnabled = TargetYear >= Year(DP_MinDate())
+        DP_IPickerView_IsArrowEnabled = TargetYear >= Year(DP_MinDate())
     Else
-        IsArrowEnabled = TargetYear <= Year(DP_MaxDate())
+        DP_IPickerView_IsArrowEnabled = TargetYear <= Year(DP_MaxDate())
     End If
 
 End Function
 
 
-Public Function IsPeriodOutsideRange(ByVal PeriodDate As Date) As Boolean
+Private Function DP_IPickerView_IsDateSelected(ByVal CellDate As Date) As Boolean
 
-    IsPeriodOutsideRange = PickerForm.IsPeriodOutsideRange(PeriodDate)
-
-End Function
-
-
-Public Function IsPeriodSelected(ByVal CellDate As Date) As Boolean
-
-    IsPeriodSelected = CellDate = PickerForm.SelectedMonth
+    DP_IPickerView_IsDateSelected = CellDate = PickerForm.SelectedMonth
 
 End Function
 
 
-Public Function IsCurrentPeriod(ByVal MonthNumber As Long) As Boolean
+Private Function DP_IPickerView_IsCurrentPeriod(ByVal CellDate As Date) As Boolean
 
-    IsCurrentPeriod = MonthNumber = Month(Date) And CurrentYear = Year(Date)
-
-End Function
-
-
-Public Function IsSecondaryPeriod(ByVal PeriodDate As Date) As Boolean
-
-    IsSecondaryPeriod = Year(PeriodDate) <> CurrentYear
+    DP_IPickerView_IsCurrentPeriod = Month(CellDate) = Month(Date) And CurrentYear = Year(Date)
 
 End Function
 
 
-'----------------------------------------
-' Month
-'----------------------------------------
+Private Function DP_IPickerView_IsSecondaryPeriod(ByVal CellDate As Date) As Boolean
 
-Private Function GetMonthCaption(ByVal MonthNumber As Long) As String
-
-    If DP_MONTH_GRID_COLUMNS > 3 Then
-        GetMonthCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmm")
-    Else
-        GetMonthCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmmm")
-    End If
-
-End Function
-
-
-Private Function GetMonthDate(ByVal CellIndex As Long) As Date
-
-    GetMonthDate = DateSerial(CurrentYear, CellIndex + 1, 1)
+    DP_IPickerView_IsSecondaryPeriod = Year(CellDate) <> CurrentYear
 
 End Function
 
@@ -257,32 +234,32 @@ End Function
 ' Click
 '----------------------------------------
 
-Public Sub HeaderClicked()
+Private Sub DP_IPickerView_HeaderClicked()
 
-    PickerForm.MonthHeaderClicked
-
-End Sub
-
-
-Public Sub ArrowClicked(ByVal Direction As DP_NavigationDirection)
-
-    If Not IsArrowEnabled(Direction) Then Exit Sub
-
-    PickerForm.ChangeYear Direction
+    PickerForm.HeaderClicked DP_SIZE_YEAR
 
 End Sub
 
 
-Public Sub PeriodClicked(ByVal MonthNumber As Long)
+Private Sub DP_IPickerView_ArrowClicked(ByVal Direction As DP_NavigationDirection)
 
-    If IsPeriodOutsideRange(DateSerial(CurrentYear, MonthNumber, 1)) Then Exit Sub
+    If Not DP_IPickerView_IsArrowEnabled(Direction) Then Exit Sub
 
-    PickerForm.MonthSelected MonthNumber, CurrentYear
+    PickerForm.ChangePeriod Direction, "yyyy"
 
 End Sub
 
 
-Public Sub ActionButtonClicked()
+Private Sub DP_IPickerView_GridButtonClicked(ByVal SelectedDate As Date)
+
+    If DP_IsDateOutsideRange(SelectedDate) Then Exit Sub
+
+    PickerForm.MonthSelected Month(SelectedDate), Year(SelectedDate)
+
+End Sub
+
+
+Private Sub DP_IPickerView_ActionButtonClicked()
 
     PickerForm.MonthSelected Month(Date), Year(Date)
 
@@ -293,52 +270,13 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetArrowHover()
+Private Sub DP_IPickerView_ResetAllHover()
+
+    YearHeaderHandler.ResetHover
+    CurrentMonthButtonHandler.ResetHover
 
     DP_ResetHoverCollection ArrowHandlers
-
-End Sub
-
-
-Public Sub ResetMonthHover()
-
     DP_ResetHoverCollection MonthHandlers
-
-End Sub
-
-
-Public Sub ResetPeriodHoverExcept(ByVal CurrentMonthLabel As DP_CButtonPeriod)
-
-    DP_ResetHoverCollectionExcept MonthHandlers, CurrentMonthLabel
-    ResetHeaderHover
-
-End Sub
-
-
-Private Sub ResetHeaderHover()
-
-    If Not YearHeaderHandler Is Nothing Then
-        YearHeaderHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetActionButtonHover()
-
-    If Not CurrentMonthButtonHandler Is Nothing Then
-        CurrentMonthButtonHandler.ResetHover
-    End If
-
-End Sub
-
-
-Public Sub ResetAllHover()
-
-    ResetArrowHover
-    ResetMonthHover
-    ResetHeaderHover
-    ResetActionButtonHover
 
 End Sub
 
@@ -347,24 +285,18 @@ End Sub
 ' Visibility
 '----------------------------------------
 
-Public Sub SetVisible(ByVal IsVisible As Boolean)
+Private Sub DP_IPickerView_SetVisible(ByVal IsVisible As Boolean)
 
-    Dim Handler As Object
+    YearHeaderHandler.SetVisible IsVisible
+    CurrentMonthButtonHandler.SetVisible IsVisible
 
-    If Not YearHeaderHandler Is Nothing Then
-        YearHeaderHandler.SetVisible IsVisible
-    End If
+    DP_SetVisibleCollection ArrowHandlers, IsVisible
+    DP_SetVisibleCollection MonthHandlers, IsVisible
 
-    For Each Handler In ArrowHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    For Each Handler In MonthHandlers
-        Handler.SetVisible IsVisible
-    Next Handler
-
-    If Not CurrentMonthButtonHandler Is Nothing Then
-        CurrentMonthButtonHandler.SetVisible IsVisible
+    If IsVisible Then
+        CurrentMonthButtonHandler.Recreate _
+            DP_GetDatePickerActionText("GO_TO_CURRENT_MONTH"), _
+            DP_GetActionButtonTop(DP_SIZE_MONTH)
     End If
 
 End Sub

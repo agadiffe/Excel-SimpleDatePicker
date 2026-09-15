@@ -284,7 +284,7 @@ Private Const DP_CORNER_RADIUS As Long = 12
 
 #If VBA7 And Not Mac Then
 
-Private Function DP_GetPickerHwnd( _
+Private Function GetPickerHwnd( _
     ByVal FormCaption As String) As LongPtr
 
     '--------------------------------------------------------
@@ -311,14 +311,14 @@ Private Function DP_GetPickerHwnd( _
 
     End If
 
-    DP_GetPickerHwnd = m_PickerHwnd
+    GetPickerHwnd = m_PickerHwnd
 
 End Function
 
 
 #ElseIf Not Mac Then
 
-Private Function DP_GetPickerHwnd( _
+Private Function GetPickerHwnd( _
     ByVal FormCaption As String) As Long
 
     '--------------------------------------------------------
@@ -345,7 +345,7 @@ Private Function DP_GetPickerHwnd( _
 
     End If
 
-    DP_GetPickerHwnd = m_PickerHwnd
+    GetPickerHwnd = m_PickerHwnd
 
 End Function
 
@@ -448,7 +448,7 @@ Public Sub DP_RemoveUserFormTitleBar(ByVal FormCaption As String)
     ' Get cached HWND
     '========================================================
 
-    FormWindowHandle = DP_GetPickerHwnd(FormCaption)
+    FormWindowHandle = GetPickerHwnd(FormCaption)
 
     If FormWindowHandle = 0 Then Exit Sub
 
@@ -579,7 +579,7 @@ Public Function DP_ApplyRoundedCorners( _
     ' Get cached HWND
     '========================================================
 
-    FormWindowHandle = DP_GetPickerHwnd( _
+    FormWindowHandle = GetPickerHwnd( _
         PickerForm.Caption)
 
     If FormWindowHandle = 0 Then Exit Function
@@ -748,7 +748,7 @@ Public Sub DP_ApplyBorderColor(ByVal PickerForm As Object)
     ' Get cached HWND
     '========================================================
 
-    FormWindowHandle = DP_GetPickerHwnd( _
+    FormWindowHandle = GetPickerHwnd( _
         PickerForm.Caption)
 
     If FormWindowHandle = 0 Then Exit Sub

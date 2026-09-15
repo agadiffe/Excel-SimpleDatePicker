@@ -18,7 +18,7 @@ Attribute HeaderBackground.VB_VarHelpID = -1
 Private WithEvents HeaderText As MSForms.Label
 Attribute HeaderText.VB_VarHelpID = -1
 
-Private ParentView As Object
+Private ParentView As DP_IPickerView
 
 Private Interactive As Boolean
 Private IsHovered As Boolean
@@ -29,11 +29,10 @@ Private IsPressed As Boolean
 ' Initialization
 '----------------------------------------
 
-Public Sub Initialize(ByVal View As Object, _
-                      ByVal HeaderCaption As String)
+Public Sub Initialize(ByVal View As DP_IPickerView, _
+                      ByVal Caption As String)
 
     Set ParentView = View
-
     Interactive = True
 
     Set HeaderBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
@@ -48,7 +47,7 @@ Public Sub Initialize(ByVal View As Object, _
     Set HeaderText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With HeaderText
-        .Caption = HeaderCaption
+        .Caption = Caption
         .Font.Size = DP_FONT_SIZE_HEADER * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter
@@ -71,9 +70,30 @@ Public Sub Initialize(ByVal View As Object, _
 End Sub
 
 
+Public Sub SetCaption(ByVal Caption As String)
+
+    HeaderText.Caption = Caption
+
+End Sub
+
+
+Public Sub SetInteractive(ByVal Value As Boolean)
+
+    Interactive = Value
+
+End Sub
+
+
 '----------------------------------------
 ' Render
 '----------------------------------------
+
+Public Sub RefreshTheme()
+
+    Render
+
+End Sub
+
 
 Private Sub Render()
 
@@ -91,34 +111,42 @@ Private Sub Render()
 End Sub
 
 
-Public Sub RefreshTheme()
+'----------------------------------------
+' Properties
+'----------------------------------------
 
+Private Property Let Hovered(ByVal Value As Boolean)
+
+    If IsHovered = Value Then Exit Property
+
+    IsHovered = Value
     Render
 
-End Sub
+End Property
 
 
-'----------------------------------------
-' Header
-'----------------------------------------
+Private Property Let Pressed(ByVal Value As Boolean)
 
-Public Sub SetCaption(ByVal Caption As String)
+    If IsPressed = Value Then Exit Property
 
-    HeaderText.Caption = Caption
+    IsPressed = Value
+    Render
 
-End Sub
-
-
-Public Sub SetInteractive(ByVal Value As Boolean)
-
-    Interactive = Value
-
-End Sub
+End Property
 
 
 '----------------------------------------
 ' Click
 '----------------------------------------
+
+Private Sub HandleClick()
+
+    If Not Interactive Then Exit Sub
+
+    ParentView.HeaderClicked
+
+End Sub
+
 
 Private Sub HeaderBackground_Click()
 
@@ -134,34 +162,21 @@ Private Sub HeaderText_Click()
 End Sub
 
 
-Private Sub HandleClick()
-
-    If Not Interactive Then Exit Sub
-
-    ParentView.HeaderClicked
-
-End Sub
-
-
 '----------------------------------------
 ' Pressed
 '----------------------------------------
 
-' Common
+' Mouse down
 '--------------------
 
-Private Sub SetPressed(ByVal Value As Boolean)
+Private Sub HandleMouseDown()
 
-    If IsPressed = Value Then Exit Sub
+    If Not Interactive Then Exit Sub
 
-    IsPressed = Value
-    Render
+    Pressed = True
 
 End Sub
 
-
-' Mouse down
-'--------------------
 
 Private Sub HeaderBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
@@ -183,15 +198,6 @@ Private Sub HeaderText_MouseDown(ByVal Button As Integer, _
 End Sub
 
 
-Private Sub HandleMouseDown()
-
-    If Not Interactive Then Exit Sub
-
-    SetPressed True
-
-End Sub
-
-
 ' Mouse up
 '--------------------
 
@@ -200,7 +206,7 @@ Private Sub HeaderBackground_MouseUp(ByVal Button As Integer, _
                                      ByVal X As Single, _
                                      ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -210,7 +216,7 @@ Private Sub HeaderText_MouseUp(ByVal Button As Integer, _
                                ByVal X As Single, _
                                ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -219,12 +225,30 @@ End Sub
 ' Hover
 '----------------------------------------
 
+Public Sub ResetHover()
+
+    Hovered = False
+
+End Sub
+
+
+Private Sub HandleMouseHover()
+
+    ParentView.ResetAllHover
+
+    If Interactive Then
+        Hovered = True
+    End If
+
+End Sub
+
+
 Private Sub HeaderBackground_MouseMove(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    SetHover
+    HandleMouseHover
 
 End Sub
 
@@ -234,35 +258,7 @@ Private Sub HeaderText_MouseMove(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    SetHover
-
-End Sub
-
-
-Private Sub SetHover()
-
-    ParentView.ResetAllHover
-
-    If Interactive Then
-        SetHovered True
-    End If
-
-End Sub
-
-
-Private Sub SetHovered(ByVal Value As Boolean)
-
-    If IsHovered = Value Then Exit Sub
-
-    IsHovered = Value
-    Render
-
-End Sub
-
-
-Public Sub ResetHover()
-
-    SetHovered False
+    HandleMouseHover
 
 End Sub
 

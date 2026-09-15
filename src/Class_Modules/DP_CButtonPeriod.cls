@@ -18,10 +18,8 @@ Attribute PeriodBackground.VB_VarHelpID = -1
 Private WithEvents PeriodText As MSForms.Label
 Attribute PeriodText.VB_VarHelpID = -1
 
-Private ParentView As Object
-
-Private PeriodValue As Long
-Private PeriodDate As Date
+Private ParentView As DP_IPickerView
+Private CellDate As Date
 
 Private IsHovered As Boolean
 Private IsPressed As Boolean
@@ -31,18 +29,15 @@ Private IsPressed As Boolean
 ' Initialization
 '----------------------------------------
 
-Public Sub Initialize(ByVal View As Object, _
+Public Sub Initialize(ByVal View As DP_IPickerView, _
                       ByVal Caption As String, _
-                      ByVal Value As Long, _
-                      ByVal CellDate As Date, _
+                      ByVal CellDateValue As Date, _
                       ByVal LeftPosition As Single, _
                       ByVal TopPosition As Single, _
                       ByVal CellWidth As Single)
 
     Set ParentView = View
-
-    PeriodDate = CellDate
-    PeriodValue = Value
+    CellDate = CellDateValue
 
     Set PeriodBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
@@ -57,8 +52,7 @@ Public Sub Initialize(ByVal View As Object, _
 
     With PeriodText
         .Caption = Caption
-        .Font.Size = DP_FONT_SIZE_PERIOD * _
-                     DP_GetFontScale(DP_DATEPICKER_WIDTH)
+        .Font.Size = DP_FONT_SIZE_PERIOD * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .TextAlign = fmTextAlignCenter
         .BackStyle = fmBackStyleTransparent
         .WordWrap = False
@@ -83,6 +77,17 @@ End Sub
 ' Render
 '----------------------------------------
 
+Public Sub UpdatePeriod(ByVal Caption As String, _
+                        ByVal CellDateValue As Date)
+
+    CellDate = CellDateValue
+    PeriodText.Caption = Caption
+
+    Render
+
+End Sub
+
+
 Private Sub Render()
 
     Dim BackgroundColor As Long
@@ -99,21 +104,21 @@ Private Sub Render()
     ' Other period
     '--------------------
 
-    If ParentView.IsSecondaryPeriod(PeriodDate) Then
+    If ParentView.IsSecondaryPeriod(CellDate) Then
         TextColor = DP_ColorTextSecondary()
     End If
 
     ' Disabled
     '--------------------
 
-    If ParentView.IsPeriodOutsideRange(PeriodDate) Then
+    If DP_IsDateOutsideRange(CellDate) Then
         TextColor = DP_ColorTextDisabled()
     End If
 
     ' Current
     '--------------------
 
-    If ParentView.IsCurrentPeriod(PeriodValue) Then
+    If ParentView.IsCurrentPeriod(CellDate) Then
         BackgroundColor = DP_ColorBgToday()
         TextColor = DP_ColorTextToday()
     End If
@@ -121,7 +126,7 @@ Private Sub Render()
     ' Selected
     '--------------------
 
-    If ParentView.IsPeriodSelected(PeriodDate) Then
+    If ParentView.IsDateSelected(CellDate) Then
         BackgroundColor = DP_ColorBgSelected()
         TextColor = DP_ColorTextSelected()
         IsBold = True
@@ -131,7 +136,7 @@ Private Sub Render()
     '--------------------
 
     If IsHovered Then
-        If ParentView.IsPeriodSelected(PeriodDate) Then
+        If ParentView.IsDateSelected(CellDate) Then
             BackgroundColor = DP_ColorBgSelectedHover()
         Else
             BackgroundColor = DP_ColorBgHover()
@@ -142,7 +147,7 @@ Private Sub Render()
     '--------------------
 
     If IsPressed Then
-        If ParentView.IsPeriodSelected(PeriodDate) Then
+        If ParentView.IsDateSelected(CellDate) Then
             BackgroundColor = DP_ColorBgSelectedPressed()
         Else
             BackgroundColor = DP_ColorBgPressed()
@@ -159,23 +164,42 @@ Private Sub Render()
 End Sub
 
 
-Public Sub UpdatePeriod(ByVal Caption As String, _
-                        ByVal CellDate As Date, _
-                        ByVal Value As Long)
+'----------------------------------------
+' Properties
+'----------------------------------------
 
-    PeriodDate = CellDate
-    PeriodValue = Value
+Private Property Let Hovered(ByVal Value As Boolean)
 
-    PeriodText.Caption = Caption
+    If IsHovered = Value Then Exit Property
 
+    IsHovered = Value
     Render
 
-End Sub
+End Property
+
+
+Private Property Let Pressed(ByVal Value As Boolean)
+
+    If IsPressed = Value Then Exit Property
+
+    IsPressed = Value
+    Render
+
+End Property
 
 
 '----------------------------------------
 ' Click
 '----------------------------------------
+
+Private Sub HandlePeriodClick()
+
+    If DP_IsDateOutsideRange(CellDate) Then Exit Sub
+
+    ParentView.GridButtonClicked CellDate
+
+End Sub
+
 
 Private Sub PeriodBackground_Click()
 
@@ -191,34 +215,21 @@ Private Sub PeriodText_Click()
 End Sub
 
 
-Private Sub HandlePeriodClick()
-
-    If ParentView.IsPeriodOutsideRange(PeriodDate) Then Exit Sub
-
-    ParentView.PeriodClicked PeriodValue
-
-End Sub
-
-
 '----------------------------------------
 ' Pressed
 '----------------------------------------
 
-' Common
+' Mouse down
 '--------------------
 
-Private Sub SetPressed(ByVal Value As Boolean)
+Private Sub HandleMouseDown()
 
-    If IsPressed = Value Then Exit Sub
+    If DP_IsDateOutsideRange(CellDate) Then Exit Sub
 
-    IsPressed = Value
-    Render
+    Pressed = True
 
 End Sub
 
-
-' Mouse down
-'--------------------
 
 Private Sub PeriodBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
@@ -240,15 +251,6 @@ Private Sub PeriodText_MouseDown(ByVal Button As Integer, _
 End Sub
 
 
-Private Sub HandleMouseDown()
-
-    If ParentView.IsPeriodOutsideRange(PeriodDate) Then Exit Sub
-
-    SetPressed True
-
-End Sub
-
-
 ' Mouse up
 '--------------------
 
@@ -257,7 +259,7 @@ Private Sub PeriodBackground_MouseUp(ByVal Button As Integer, _
                                      ByVal X As Single, _
                                      ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -267,7 +269,7 @@ Private Sub PeriodText_MouseUp(ByVal Button As Integer, _
                                ByVal X As Single, _
                                ByVal Y As Single)
 
-    SetPressed False
+    Pressed = False
 
 End Sub
 
@@ -276,12 +278,30 @@ End Sub
 ' Hover
 '----------------------------------------
 
+Public Sub ResetHover()
+
+    Hovered = False
+
+End Sub
+
+
+Private Sub HandleMouseHover()
+
+    ParentView.ResetAllHover
+
+    If Not DP_IsDateOutsideRange(CellDate) Then
+        Hovered = True
+    End If
+
+End Sub
+
+
 Private Sub PeriodBackground_MouseMove(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    SetHover
+    HandleMouseHover
 
 End Sub
 
@@ -291,39 +311,7 @@ Private Sub PeriodText_MouseMove(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    SetHover
-
-End Sub
-
-
-Private Sub SetHover()
-
-    ' ResetHeaderHover (Month) is handled in ResetPeriodHoverExcept.
-
-    ParentView.ResetArrowHover
-    ParentView.ResetPeriodHoverExcept Me
-    ParentView.ResetActionButtonHover
-
-    If Not ParentView.IsPeriodOutsideRange(PeriodDate) Then
-        SetHovered True
-    End If
-
-End Sub
-
-
-Private Sub SetHovered(ByVal Value As Boolean)
-
-    If IsHovered = Value Then Exit Sub
-
-    IsHovered = Value
-    Render
-
-End Sub
-
-
-Public Sub ResetHover()
-
-    SetHovered False
+    HandleMouseHover
 
 End Sub
 
