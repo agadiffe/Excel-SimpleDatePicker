@@ -9,47 +9,14 @@ Option Explicit
 '   - VBA6 / VBA7 compatible
 '   - 32-bit / 64-bit Office compatible
 '   - Mac-safe compilation
-'   - Cached UserForm HWND
-'   - Cached DWM support state
-'   - DWM rounded corners applied only once
+'   - UserForm HWND resolved directly when needed
+'   - DWM rounded corners
 '   - CreateRoundRectRgn fallback for older Windows
-'   - Fallback region recreated only when window size changes
+'   - Fallback region recreated when rounded corners are
+'     reapplied
 '   - Correct HRGN ownership handling
 '   - DWM border color
 '============================================================
-
-
-'============================================================
-' Cached window state
-'============================================================
-
-#If VBA7 And Not Mac Then
-
-Private m_PickerHwnd As LongPtr
-
-#ElseIf Not Mac Then
-
-Private m_PickerHwnd As Long
-
-#End If
-
-
-'------------------------------------------------------------
-' DWM state
-'
-' m_DwmSupportChecked
-'
-'   False = DWM rounded-corner support has not been tested.
-'   True  = the test has already been performed.
-'
-' m_DwmRoundedCorners
-'
-'   True  = DWM rounding is active.
-'   False = GDI region fallback is being used.
-'------------------------------------------------------------
-
-Private m_DwmSupportChecked As Boolean
-Private m_DwmRoundedCorners As Boolean
 
 
 '============================================================
@@ -65,9 +32,6 @@ Private m_DwmRoundedCorners As Boolean
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" ( _
     ByVal WindowClassName As String, _
     ByVal WindowCaption As String) As LongPtr
-
-Private Declare PtrSafe Function IsWindow Lib "user32" ( _
-    ByVal FormWindowHandle As LongPtr) As Long
 
 Private Declare PtrSafe Function GetWindowLongPtr Lib "user32" Alias "GetWindowLongPtrA" ( _
     ByVal FormWindowHandle As LongPtr, _
@@ -131,9 +95,6 @@ Private Declare PtrSafe Function DwmSetWindowAttribute Lib "dwmapi" ( _
 Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" ( _
     ByVal WindowClassName As String, _
     ByVal WindowCaption As String) As Long
-
-Private Declare Function IsWindow Lib "user32" ( _
-    ByVal FormWindowHandle As Long) As Long
 
 Private Declare Function GetWindowLongPtr Lib "user32" Alias "GetWindowLongA" ( _
     ByVal FormWindowHandle As Long, _
@@ -273,45 +234,27 @@ Private Const DP_CORNER_RADIUS As Long = 12
 
 
 '============================================================
-' Get / cache the UserForm HWND
+' Get the UserForm HWND
 '
-' The HWND normally remains the same while the UserForm
-' switches between Day / Month / Year.
+' The HWND is resolved directly from the UserForm caption
+' whenever an API operation needs it.
 '
-' IsWindow is used to protect against a stale cached HWND
-' if the UserForm was unloaded and recreated.
+' No HWND is cached.
+'
+' This avoids retaining a handle across UserForm destruction
+' and recreation.
 '============================================================
 
 #If VBA7 And Not Mac Then
 
 Private Function GetPickerHwnd( _
-    ByVal FormCaption As String) As LongPtr
+    ByVal PickerForm As Object) As LongPtr
 
-    '--------------------------------------------------------
-    ' Check whether the cached handle is still valid.
-    '--------------------------------------------------------
+    If PickerForm Is Nothing Then Exit Function
 
-    If m_PickerHwnd <> 0 Then
-
-        If IsWindow(m_PickerHwnd) = 0 Then
-            m_PickerHwnd = 0
-        End If
-
-    End If
-
-    '--------------------------------------------------------
-    ' Find the window only if necessary.
-    '--------------------------------------------------------
-
-    If m_PickerHwnd = 0 Then
-
-        m_PickerHwnd = FindWindow( _
-            "ThunderDFrame", _
-            FormCaption)
-
-    End If
-
-    GetPickerHwnd = m_PickerHwnd
+    GetPickerHwnd = FindWindow( _
+        "ThunderDFrame", _
+        PickerForm.Caption)
 
 End Function
 
@@ -319,86 +262,17 @@ End Function
 #ElseIf Not Mac Then
 
 Private Function GetPickerHwnd( _
-    ByVal FormCaption As String) As Long
+    ByVal PickerForm As Object) As Long
 
-    '--------------------------------------------------------
-    ' Check whether the cached handle is still valid.
-    '--------------------------------------------------------
+    If PickerForm Is Nothing Then Exit Function
 
-    If m_PickerHwnd <> 0 Then
-
-        If IsWindow(m_PickerHwnd) = 0 Then
-            m_PickerHwnd = 0
-        End If
-
-    End If
-
-    '--------------------------------------------------------
-    ' Find the window only if necessary.
-    '--------------------------------------------------------
-
-    If m_PickerHwnd = 0 Then
-
-        m_PickerHwnd = FindWindow( _
-            "ThunderDFrame", _
-            FormCaption)
-
-    End If
-
-    GetPickerHwnd = m_PickerHwnd
-
-End Function
-
-#End If
-
-
-'============================================================
-' Explicitly cache the UserForm window
-'
-' Call this if you want to force the cache to refer to the
-' current UserForm instance.
-'
-' It also resets DWM state because this is potentially a
-' completely new HWND.
-'============================================================
-
-Public Sub DP_CachePickerWindow(ByVal PickerForm As Object)
-
-#If Mac Then
-
-    Exit Sub
-
-#Else
-
-    m_PickerHwnd = FindWindow( _
+    GetPickerHwnd = FindWindow( _
         "ThunderDFrame", _
         PickerForm.Caption)
 
-    m_DwmSupportChecked = False
-    m_DwmRoundedCorners = False
+End Function
 
 #End If
-
-End Sub
-
-
-'============================================================
-' Is DWM rounded-corner rendering active?
-'
-' True:
-'   Windows 11 DWM rounded corners are active.
-'
-' False:
-'   GDI CreateRoundRectRgn fallback is being used.
-'
-' Used by DP_SetPickerSize.
-'============================================================
-
-Public Function DP_IsUsingDwmCorners() As Boolean
-
-    DP_IsUsingDwmCorners = m_DwmRoundedCorners
-
-End Function
 
 
 '============================================================
@@ -422,7 +296,8 @@ End Function
 ' WS_EX_CLIENTEDGE.
 '============================================================
 
-Public Sub DP_RemoveUserFormTitleBar(ByVal FormCaption As String)
+Public Sub DP_RemoveUserFormTitleBar( _
+    ByVal PickerForm As Object)
 
 #If Mac Then
 
@@ -445,10 +320,10 @@ Public Sub DP_RemoveUserFormTitleBar(ByVal FormCaption As String)
 #If Not Mac Then
 
     '========================================================
-    ' Get cached HWND
+    ' Get current HWND
     '========================================================
 
-    FormWindowHandle = GetPickerHwnd(FormCaption)
+    FormWindowHandle = GetPickerHwnd(PickerForm)
 
     If FormWindowHandle = 0 Then Exit Sub
 
@@ -526,7 +401,7 @@ End Sub
 '
 ' Windows 11:
 '
-'   DWM rounded corners are requested once.
+'   DWM rounded corners are requested.
 '
 ' Older Windows:
 '
@@ -535,10 +410,10 @@ End Sub
 ' Return value:
 '
 '   True
-'       DWM rounded corners are active.
+'       Rounded corners were successfully applied.
 '
 '   False
-'       GDI region fallback is active.
+'       Rounded corners could not be applied.
 '
 ' IMPORTANT:
 '
@@ -576,22 +451,31 @@ Public Function DP_ApplyRoundedCorners( _
     Dim WindowHeight As Long
 
     '========================================================
-    ' Get cached HWND
+    ' Get current HWND
     '========================================================
 
     FormWindowHandle = GetPickerHwnd( _
-        PickerForm.Caption)
+        PickerForm)
 
     If FormWindowHandle = 0 Then Exit Function
 
     '========================================================
-    ' DWM has already been successfully enabled.
+    ' Try DWM.
     '
-    ' No API call is required again when the UserForm
-    ' changes size.
+    ' If DWM accepts the rounded-corner preference, there is
+    ' no need to create a GDI region.
+    '
+    ' It is safe to call again when the UserForm changes
+    ' size or view.
     '========================================================
 
-    If m_DwmRoundedCorners Then
+    CornerPreference = DWMWCP_ROUND
+
+    If DwmSetWindowAttribute( _
+        FormWindowHandle, _
+        DWMWA_WINDOW_CORNER_PREFERENCE, _
+        CornerPreference, _
+        4) = 0 Then
 
         DP_ApplyRoundedCorners = True
 
@@ -600,51 +484,10 @@ Public Function DP_ApplyRoundedCorners( _
     End If
 
     '========================================================
-    ' Try DWM only once for this HWND.
-    '
-    ' DWMWA_WINDOW_CORNER_PREFERENCE is supported starting
-    ' with Windows 11 build 22000.
-    '========================================================
-
-    If Not m_DwmSupportChecked Then
-
-        CornerPreference = DWMWCP_ROUND
-
-        If DwmSetWindowAttribute( _
-            FormWindowHandle, _
-            DWMWA_WINDOW_CORNER_PREFERENCE, _
-            CornerPreference, _
-            4) = 0 Then
-
-            '------------------------------------------------
-            ' DWM succeeded.
-            '------------------------------------------------
-
-            m_DwmRoundedCorners = True
-            m_DwmSupportChecked = True
-
-            DP_ApplyRoundedCorners = True
-
-            Exit Function
-
-        End If
-
-        '----------------------------------------------------
-        ' DWM failed.
-        '
-        ' Remember this so we don't retry it on every view
-        ' change.
-        '----------------------------------------------------
-
-        m_DwmSupportChecked = True
-
-    End If
-
-    '========================================================
     ' GDI FALLBACK
     '
-    ' The region must be recreated when the window size
-    ' changes because its geometry is based on the current
+    ' The region is recreated each time this fallback is
+    ' applied because its geometry is based on the current
     ' window dimensions.
     '========================================================
 
@@ -692,7 +535,7 @@ Public Function DP_ApplyRoundedCorners( _
         ' DO NOT call DeleteObject here.
         '----------------------------------------------------
 
-        DP_ApplyRoundedCorners = False
+        DP_ApplyRoundedCorners = True
 
     Else
 
@@ -745,11 +588,10 @@ Public Sub DP_ApplyBorderColor(ByVal PickerForm As Object)
     Dim BorderColor As Long
 
     '========================================================
-    ' Get cached HWND
+    ' Get current HWND
     '========================================================
 
-    FormWindowHandle = GetPickerHwnd( _
-        PickerForm.Caption)
+    FormWindowHandle = GetPickerHwnd(PickerForm)
 
     If FormWindowHandle = 0 Then Exit Sub
 
@@ -762,46 +604,17 @@ Public Sub DP_ApplyBorderColor(ByVal PickerForm As Object)
     '========================================================
     ' Apply DWM border color.
     '
-    ' Older Windows versions may simply reject this
-    ' attribute. WS_BORDER remains as fallback.
+    ' Windows versions that do not support this attribute
+    ' reject the request. WS_BORDER remains as fallback.
     '========================================================
 
     DwmSetWindowAttribute _
         FormWindowHandle, _
         DWMWA_BORDER_COLOR, _
         BorderColor, _
-4
+        4
 
 #End If
-
-End Sub
-
-
-'============================================================
-' Reset cached window state
-'
-' IMPORTANT:
-'
-' Do NOT call this when switching:
-'
-'   Day -> Month
-'   Month -> Year
-'   Year -> Day
-'
-' Only call it when the UserForm is actually destroyed and
-' a completely new window will later be created.
-'============================================================
-
-Public Sub DP_ResetWindowCache()
-
-#If Not Mac Then
-
-    m_PickerHwnd = 0
-
-#End If
-
-    m_DwmSupportChecked = False
-    m_DwmRoundedCorners = False
 
 End Sub
 

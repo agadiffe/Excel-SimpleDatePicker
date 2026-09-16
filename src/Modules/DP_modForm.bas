@@ -23,11 +23,8 @@ Public Sub DP_InitializePicker(ByVal PickerForm As DP_frmDatePicker, _
                                ByVal DesiredInsideWidth As Single, _
                                ByVal DesiredInsideHeight As Single)
 
-    'Get the HWND for THIS UserForm instance.
-    DP_CachePickerWindow PickerForm
-
     If Not DP_SHOW_TITLEBAR Then
-        DP_RemoveUserFormTitleBar PickerForm.Caption
+        DP_RemoveUserFormTitleBar PickerForm
     End If
 
     With PickerForm
@@ -39,14 +36,20 @@ Public Sub DP_InitializePicker(ByVal PickerForm As DP_frmDatePicker, _
     'Apply each desired inside size and cache the resulting form dimensions.
     CachePickerSizes PickerForm
 
-    DP_SetPickerSize PickerForm, DP_SIZE_DATE
-
     If Not DP_SHOW_TITLEBAR Then
-        DP_ApplyRoundedCorners PickerForm
         DP_ApplyBorderColor PickerForm
     End If
 
 End Sub
+
+
+Public Function DP_CreateWindowCaption() As String
+
+    DP_CreateWindowCaption = "SimpleDatePicker_" & _
+                             Format$(Now, "yyyymmdd_hhnnss") & "_" & _
+                             Format$(CLng((Timer - Int(Timer)) * 1000), "000")
+
+End Function
 
 
 '----------------------------------------
@@ -77,16 +80,14 @@ Public Sub DP_SetPickerSize(ByVal PickerForm As DP_frmDatePicker, _
     End With
 
     If SizeChanged Then
-        If Not DP_IsUsingDwmCorners() Then
-            DP_ApplyRoundedCorners PickerForm
-        End If
+        DP_ApplyRoundedCorners PickerForm
     End If
 
 End Sub
 
 
 '----------------------------------------
-' Cache
+' Size cache
 '----------------------------------------
 
 ' Cache the adjusted form dimensions to prevent an occasional white flash

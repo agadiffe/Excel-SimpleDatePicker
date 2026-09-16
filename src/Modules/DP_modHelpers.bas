@@ -127,7 +127,7 @@ Public Function DP_VerticalTextTop(ByVal ContainerTop As Single, _
                                    ByVal ContainerHeight As Single, _
                                    ByVal TextHeight As Single) As Single
 
-    Const TEXT_VERTICAL_CORRECTION As Single = 0.033
+    Const TEXT_VERTICAL_CORRECTION As Single = 0.03
 
     DP_VerticalTextTop = ContainerTop + _
                          (ContainerHeight - TextHeight) / 2 - _

@@ -38,6 +38,10 @@ Private YearView As DP_IPickerView
 
 Private Sub UserForm_Initialize()
 
+    #If Not Mac Then
+        Me.Caption = DP_CreateWindowCaption()
+    #End If
+
     DP_IsDarkMode = DP_IsDarkThemeActive()
 
     DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
@@ -231,7 +235,7 @@ End Sub
 
 Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Shift As Integer, _
-                               ByVal x As Single, _
+                               ByVal X As Single, _
                                ByVal Y As Single)
 
     GetPickerView(CurrentPickerSize).ResetAllHover
