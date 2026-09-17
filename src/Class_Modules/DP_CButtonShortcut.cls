@@ -210,17 +210,16 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetHover()
+Public Sub SetHovered(ByVal Value As Boolean)
 
-    Hovered = False
+    Hovered = Value
 
 End Sub
 
 
 Private Sub HandleMouseHover()
 
-    ParentView.ResetAllHover
-    Hovered = True
+    ParentView.SetHoveredButton Me
 
 End Sub
 

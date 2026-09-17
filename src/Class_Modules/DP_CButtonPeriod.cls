@@ -278,19 +278,19 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Public Sub ResetHover()
+Public Sub SetHovered(ByVal Value As Boolean)
 
-    Hovered = False
+    Hovered = Value
 
 End Sub
 
 
 Private Sub HandleMouseHover()
 
-    ParentView.ResetAllHover
-
-    If Not DP_IsDateOutsideRange(CellDate) Then
-        Hovered = True
+    If DP_IsDateOutsideRange(CellDate) Then
+        ParentView.ClearHoveredButton
+    Else
+        ParentView.SetHoveredButton Me
     End If
 
 End Sub

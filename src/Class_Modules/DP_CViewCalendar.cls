@@ -24,6 +24,8 @@ Private ArrowHandlers As Collection
 Private WeekdayHandlers As Collection
 Private DayHandlers As Collection
 
+Private HoveredButton As Object
+
 Private Const CALENDAR_DAY_COUNT As Long = _
     DP_CALENDAR_COLUMNS * DP_CALENDAR_ROWS
 
@@ -107,48 +109,34 @@ End Sub
 
 Private Sub CreateDays()
 
-    Dim Index As Long
-
-    For Index = 0 To CALENDAR_DAY_COUNT - 1
-        CreateDay Index
-    Next Index
-
-End Sub
-
-
-Private Sub CreateDay(ByVal CellIndex As Long)
-
     Dim Handler As DP_CButtonDay
+    Dim Index As Long
+    Dim MonthStartWeekday As Long
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
-    ColumnIndex = DP_GridColumn(CellIndex, DP_CALENDAR_COLUMNS)
-    RowIndex = DP_GridRow(CellIndex, DP_CALENDAR_COLUMNS)
+    MonthStartWeekday = CurrentMonth - Weekday(CurrentMonth, vbMonday) + 1
 
-    Set Handler = New DP_CButtonDay
+    For Index = 0 To CALENDAR_DAY_COUNT - 1
 
-    Handler.Initialize Me, _
-                       GetCellDate(CellIndex), _
-                       DP_GridLeft(ColumnIndex, DP_GRID_LEFT, _
-                                   DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH), _
-                       DP_GridTop(RowIndex + 1, DP_GRID_TOP, _
-                                  DP_GRID_CELL_HEIGHT, DP_CALENDAR_CELL_HEIGHT)
+        ColumnIndex = DP_GridColumn(Index, DP_CALENDAR_COLUMNS)
+        RowIndex = DP_GridRow(Index, DP_CALENDAR_COLUMNS)
 
-    DayHandlers.Add Handler
+        Set Handler = New DP_CButtonDay
+
+        Handler.Initialize Me, _
+                           MonthStartWeekday + Index, _
+                           DP_GridLeft(ColumnIndex, DP_GRID_LEFT, _
+                                       DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH), _
+                           DP_GridTop(RowIndex + 1, DP_GRID_TOP, _
+                                      DP_GRID_CELL_HEIGHT, DP_CALENDAR_CELL_HEIGHT)
+
+        DayHandlers.Add Handler
+
+    Next Index
 
 End Sub
-
-
-Private Function GetCellDate(ByVal CellIndex As Long) As Date
-
-    Dim FirstDayIndex As Long
-
-    FirstDayIndex = Weekday(CurrentMonth, vbMonday)
-
-    GetCellDate = CurrentMonth - FirstDayIndex + 1 + CellIndex
-
-End Function
 
 
 '----------------------------------------
@@ -158,13 +146,18 @@ End Function
 Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
+    Dim MonthStartWeekday As Long
     Dim Handler As DP_CButtonDay
+
+    DP_IPickerView_ClearHoveredButton
 
     MonthHeaderHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
 
+    MonthStartWeekday = CurrentMonth - Weekday(CurrentMonth, vbMonday) + 1
+
     For Index = 0 To CALENDAR_DAY_COUNT - 1
         Set Handler = DayHandlers.Item(Index + 1)
-        Handler.UpdateDate GetCellDate(Index)
+        Handler.UpdateDate MonthStartWeekday + Index
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
@@ -208,14 +201,14 @@ End Property
 
 Private Function DP_IPickerView_IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
 
-    Dim NewDate As Date
+    Dim TargetMonth As Date
 
-    NewDate = DateAdd("m", Direction, CurrentMonth)
+    TargetMonth = DateAdd("m", Direction, CurrentMonth)
 
     If Direction = DP_NAV_PREVIOUS Then
-        DP_IPickerView_IsArrowEnabled = NewDate >= DateSerial(Year(DP_MinDate()), Month(DP_MinDate()), 1)
+        DP_IPickerView_IsArrowEnabled = TargetMonth >= DateSerial(Year(DP_MinDate()), Month(DP_MinDate()), 1)
     Else
-        DP_IPickerView_IsArrowEnabled = NewDate <= DateSerial(Year(DP_MaxDate()), Month(DP_MaxDate()), 1)
+        DP_IPickerView_IsArrowEnabled = TargetMonth <= DateSerial(Year(DP_MaxDate()), Month(DP_MaxDate()), 1)
     End If
 
 End Function
@@ -282,13 +275,26 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Private Sub DP_IPickerView_ResetAllHover()
+Private Sub DP_IPickerView_SetHoveredButton(ByVal Button As Object)
 
-    MonthHeaderHandler.ResetHover
-    TodayButtonHandler.ResetHover
+    If HoveredButton Is Button Then Exit Sub
 
-    DP_ResetHoverCollection ArrowHandlers
-    DP_ResetHoverCollection DayHandlers
+    If Not HoveredButton Is Nothing Then
+        HoveredButton.SetHovered False
+    End If
+
+    Set HoveredButton = Button
+    HoveredButton.SetHovered True
+
+End Sub
+
+
+Private Sub DP_IPickerView_ClearHoveredButton()
+
+    If HoveredButton Is Nothing Then Exit Sub
+
+    HoveredButton.SetHovered False
+    Set HoveredButton = Nothing
 
 End Sub
 

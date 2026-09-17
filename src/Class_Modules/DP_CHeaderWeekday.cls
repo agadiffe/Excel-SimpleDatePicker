@@ -95,7 +95,7 @@ Private Sub WeekdayBackground_MouseMove(ByVal Button As Integer, _
                                         ByVal X As Single, _
                                         ByVal Y As Single)
 
-    ParentView.ResetAllHover
+    ParentView.ClearHoveredButton
 
 End Sub
 
@@ -105,7 +105,7 @@ Private Sub WeekdayText_MouseMove(ByVal Button As Integer, _
                                   ByVal X As Single, _
                                   ByVal Y As Single)
 
-    ParentView.ResetAllHover
+    ParentView.ClearHoveredButton
 
 End Sub
 

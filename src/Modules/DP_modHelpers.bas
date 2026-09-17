@@ -228,14 +228,3 @@ Public Sub DP_UpdateStateCollection(ByVal Handlers As Collection)
 
 End Sub
 
-
-Public Sub DP_ResetHoverCollection(ByVal Handlers As Collection)
-
-    Dim Handler As Object
-
-    For Each Handler In Handlers
-        Handler.ResetHover
-    Next Handler
-
-End Sub
-

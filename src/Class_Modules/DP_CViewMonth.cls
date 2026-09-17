@@ -23,6 +23,8 @@ Private CurrentMonthButtonHandler As DP_CButtonShortcut
 Private ArrowHandlers As Collection
 Private MonthHandlers As Collection
 
+Private HoveredButton As Object
+
 Private Const MONTH_COUNT As Long = _
     DP_MONTH_GRID_COLUMNS * DP_MONTH_GRID_ROWS
 
@@ -88,14 +90,12 @@ Private Sub CreateMonths()
 
     Dim Handler As DP_CButtonPeriod
     Dim Index As Long
-    Dim CellDate As Date
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
     For Index = 0 To MONTH_COUNT - 1
 
-        CellDate = GetMonthDate(Index)
         ColumnIndex = DP_GridColumn(Index, DP_MONTH_GRID_COLUMNS)
         RowIndex = DP_GridRow(Index, DP_MONTH_GRID_COLUMNS)
 
@@ -103,7 +103,7 @@ Private Sub CreateMonths()
 
         Handler.Initialize Me, _
                            GetCaption(Index + 1), _
-                           CellDate, _
+                           DateSerial(CurrentYear, Index + 1, 1), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_MONTH_GRID_CELL_WIDTH, DP_MONTH_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
@@ -128,13 +128,6 @@ Private Function GetCaption(ByVal MonthNumber As Long) As String
 End Function
 
 
-Private Function GetMonthDate(ByVal CellIndex As Long) As Date
-
-    GetMonthDate = DateSerial(CurrentYear, CellIndex + 1, 1)
-
-End Function
-
-
 '----------------------------------------
 ' Update
 '----------------------------------------
@@ -142,18 +135,15 @@ End Function
 Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
-    Dim CellDate As Date
     Dim Handler As DP_CButtonPeriod
+
+    DP_IPickerView_ClearHoveredButton
 
     YearHeaderHandler.SetCaption CStr(CurrentYear)
 
     For Index = 0 To MONTH_COUNT - 1
-
-        CellDate = GetMonthDate(Index)
-
         Set Handler = MonthHandlers.Item(Index + 1)
-        Handler.UpdatePeriod GetCaption(Index + 1), CellDate
-
+        Handler.UpdatePeriod GetCaption(Index + 1), DateSerial(CurrentYear, Index + 1, 1)
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
@@ -270,13 +260,26 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Private Sub DP_IPickerView_ResetAllHover()
+Private Sub DP_IPickerView_SetHoveredButton(ByVal Button As Object)
 
-    YearHeaderHandler.ResetHover
-    CurrentMonthButtonHandler.ResetHover
+    If HoveredButton Is Button Then Exit Sub
 
-    DP_ResetHoverCollection ArrowHandlers
-    DP_ResetHoverCollection MonthHandlers
+    If Not HoveredButton Is Nothing Then
+        HoveredButton.SetHovered False
+    End If
+
+    Set HoveredButton = Button
+    HoveredButton.SetHovered True
+
+End Sub
+
+
+Private Sub DP_IPickerView_ClearHoveredButton()
+
+    If HoveredButton Is Nothing Then Exit Sub
+
+    HoveredButton.SetHovered False
+    Set HoveredButton = Nothing
 
 End Sub
 

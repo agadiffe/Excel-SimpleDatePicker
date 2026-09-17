@@ -13,65 +13,39 @@ Option Explicit
 ' Initialization
 '----------------------------------------
 
-Public Sub InitializeView(ByVal Form As DP_frmDatePicker)
-End Sub
-
+Sub InitializeView(ByVal Form As DP_frmDatePicker)
 
 '----------------------------------------
 ' View
 '----------------------------------------
 
-Public Sub UpdateView()
-End Sub
-
-Public Sub RefreshTheme()
-End Sub
-
-Public Sub SetVisible(ByVal IsVisible As Boolean)
-End Sub
-
-Public Sub ResetAllHover()
-End Sub
-
+Sub UpdateView()
+Sub RefreshTheme()
+Sub SetVisible(ByVal IsVisible As Boolean)
+Sub SetHoveredButton(ByVal Button As Object)
+Sub ClearHoveredButton()
 
 '----------------------------------------
 ' Properties
 '----------------------------------------
 
-Public Property Get ParentForm() As DP_frmDatePicker
-End Property
-
+Property Get ParentForm() As DP_frmDatePicker
 
 '----------------------------------------
 ' Queries
 '----------------------------------------
 
-Public Function IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
-End Function
-
-Public Function IsDateSelected(ByVal CellDate As Date) As Boolean
-End Function
-
-Public Function IsCurrentPeriod(ByVal CellDate As Date) As Boolean
-End Function
-
-Public Function IsSecondaryPeriod(ByVal CellDate As Date) As Boolean
-End Function
-
+Function IsArrowEnabled(ByVal Direction As DP_NavigationDirection) As Boolean
+Function IsDateSelected(ByVal CellDate As Date) As Boolean
+Function IsCurrentPeriod(ByVal CellDate As Date) As Boolean
+Function IsSecondaryPeriod(ByVal CellDate As Date) As Boolean
 
 '----------------------------------------
 ' Interaction
 '----------------------------------------
 
-Public Sub ArrowClicked(ByVal Direction As DP_NavigationDirection)
-End Sub
-
-Public Sub HeaderClicked()
-End Sub
-
-Public Sub ActionButtonClicked()
-End Sub
-
-Public Sub GridButtonClicked(ByVal SelectedDate As Date)
-End Sub
+Sub ArrowClicked(ByVal Direction As DP_NavigationDirection)
+Sub HeaderClicked()
+Sub ActionButtonClicked()
+Sub GridButtonClicked(ByVal SelectedDate As Date)
 

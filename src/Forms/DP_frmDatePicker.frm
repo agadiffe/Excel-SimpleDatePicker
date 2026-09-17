@@ -107,7 +107,7 @@ Private Sub ShowPickerView(ByVal PickerSize As DP_PickerSize)
 
     Set PickerView = GetPickerView(PickerSize)
 
-    PickerView.ResetAllHover
+    PickerView.ClearHoveredButton
 
     DP_SetPickerSize Me, PickerSize
     CurrentPickerSize = PickerSize
@@ -175,12 +175,8 @@ Public Sub DaySelected(ByVal SelectedDate As Date)
 
     Dim ExistingTime As Double
 
-    If IsDate(InitialCellDateValue) Then
-        ExistingTime = TimeValue(InitialCellDateValue)
-        TargetCell.Value = DateValue(SelectedDate) + ExistingTime
-    Else
-        TargetCell.Value = SelectedDate
-    End If
+    ExistingTime = TimeValue(InitialCellDateValue)
+    TargetCell.Value = DateValue(SelectedDate) + ExistingTime
 
     Me.Hide
 
@@ -238,7 +234,7 @@ Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal X As Single, _
                                ByVal Y As Single)
 
-    GetPickerView(CurrentPickerSize).ResetAllHover
+    GetPickerView(CurrentPickerSize).ClearHoveredButton
 
 End Sub
 

@@ -23,6 +23,8 @@ Private CurrentYearButtonHandler As DP_CButtonShortcut
 Private ArrowHandlers As Collection
 Private YearHandlers As Collection
 
+Private HoveredButton As Object
+
 Private Const YEAR_COUNT As Long = _
     DP_YEAR_GRID_COLUMNS * DP_YEAR_GRID_ROWS
 
@@ -92,7 +94,6 @@ Private Sub CreateYears()
     Dim Index As Long
     Dim DisplayedYear As Long
     Dim FirstYear As Long
-    Dim CellDate As Date
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
@@ -102,7 +103,6 @@ Private Sub CreateYears()
     For Index = 0 To YEAR_COUNT - 1
 
         DisplayedYear = FirstYear + Index
-        CellDate = DateSerial(DisplayedYear, 1, 1)
 
         ColumnIndex = DP_GridColumn(Index, DP_YEAR_GRID_COLUMNS)
         RowIndex = DP_GridRow(Index, DP_YEAR_GRID_COLUMNS)
@@ -111,7 +111,7 @@ Private Sub CreateYears()
 
         Handler.Initialize Me, _
                            CStr(DisplayedYear), _
-                           CellDate, _
+                           DateSerial(DisplayedYear, 1, 1), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_YEAR_GRID_CELL_WIDTH, DP_YEAR_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
@@ -134,9 +134,10 @@ Private Sub DP_IPickerView_UpdateView()
     Dim Index As Long
     Dim DisplayedYear As Long
     Dim FirstYear As Long
-    Dim CellDate As Date
 
     Dim Handler As DP_CButtonPeriod
+
+    DP_IPickerView_ClearHoveredButton
 
     FirstYear = FirstDisplayedYear
 
@@ -146,10 +147,9 @@ Private Sub DP_IPickerView_UpdateView()
     For Index = 0 To YEAR_COUNT - 1
 
         DisplayedYear = FirstYear + Index
-        CellDate = DateSerial(DisplayedYear, 1, 1)
 
         Set Handler = YearHandlers.Item(Index + 1)
-        Handler.UpdatePeriod CStr(DisplayedYear), CellDate
+        Handler.UpdatePeriod CStr(DisplayedYear), DateSerial(DisplayedYear, 1, 1)
 
     Next Index
 
@@ -275,12 +275,26 @@ End Sub
 ' Hover
 '----------------------------------------
 
-Private Sub DP_IPickerView_ResetAllHover()
+Private Sub DP_IPickerView_SetHoveredButton(ByVal Button As Object)
 
-    CurrentYearButtonHandler.ResetHover
+    If HoveredButton Is Button Then Exit Sub
 
-    DP_ResetHoverCollection ArrowHandlers
-    DP_ResetHoverCollection YearHandlers
+    If Not HoveredButton Is Nothing Then
+        HoveredButton.SetHovered False
+    End If
+
+    Set HoveredButton = Button
+    HoveredButton.SetHovered True
+
+End Sub
+
+
+Private Sub DP_IPickerView_ClearHoveredButton()
+
+    If HoveredButton Is Nothing Then Exit Sub
+
+    HoveredButton.SetHovered False
+    Set HoveredButton = Nothing
 
 End Sub
 

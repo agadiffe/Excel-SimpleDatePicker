@@ -44,7 +44,7 @@ Use this method to add the DatePicker directly to a specific workbook.
 
 1. Open your Excel workbook and press `Alt + F11` to open the VBA editor.
 2. In the **Project Explorer**, select your workbook's VBA project.
-3. Import the components from the corresponding folders in `src`:
+3. Import the components from the corresponding folders under `src`:
    - **Class Modules**: import the `.cls` files
    - **Forms**: import the `.frm` files (keep each `.frx` file in the same folder)
    - **Modules**: import the `.bas` files
@@ -57,13 +57,13 @@ Use this method to add the DatePicker directly to a specific workbook.
     `src/Microsoft_Excel_Objects/ThisWorkbook.cls` is provided for reference only.
 5. Save your workbook as an Excel Macro-Enabled file (`.xlsm`).
 
-### Building the add-in
+### Build the add-in
 
-To build the add-in from source, follow the **Import the VBA components** steps above, with the following changes:
+To build the add-in from source, first follow **Import the VBA components** above, then make the following changes:
 
 1. Import the additional components from `src/addins/`:
-   - `CAppEvents.cls` as a **Class Module**
-   - `modAppEvents.bas` as a **Module**
+   - `DP_CAppEvents.cls` as a **Class Module**
+   - `DP_modAppEvents.bas` as a **Module**
 2. Replace the contents of the `ThisWorkbook` module with:
     ```vba
     Option Explicit
@@ -85,8 +85,7 @@ The complete VBA source code is available in this repository for review.
 
 ## 🎨 Theme
 
-The DatePicker also supports Excel for Mac.  
-For the optional automatic dark-mode detection, copy `DatePickerTheme.applescript` from `src/Mac/` to:
+For optional automatic dark-mode detection on Mac, copy `DatePickerTheme.applescript` from `src/Mac/` to:
 
 `~/Library/Application Scripts/com.microsoft.Excel/`
 
