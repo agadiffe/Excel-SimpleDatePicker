@@ -98,7 +98,12 @@ Private Sub CreateWeekdays()
     For Index = 0 To 6
 
         Set Handler = New DP_CHeaderWeekday
-        Handler.Initialize Me, Index
+        Handler.Initialize Me, _
+                           WeekdayName(Index + 1, True, DP_FIRST_DAY_OF_WEEK), _
+                           DP_GridLeft(Index, DP_GRID_LEFT, _
+                                       DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH), _
+                           DP_GridTop(0, DP_GRID_TOP, _
+                                      DP_GRID_CELL_HEIGHT, DP_CALENDAR_CELL_HEIGHT)
 
         WeekdayHandlers.Add Handler
 
@@ -111,12 +116,12 @@ Private Sub CreateDays()
 
     Dim Handler As DP_CButtonDay
     Dim Index As Long
-    Dim MonthStartWeekday As Long
+    Dim CalendarStartDate As Date
 
     Dim ColumnIndex As Long
     Dim RowIndex As Long
 
-    MonthStartWeekday = CurrentMonth - Weekday(CurrentMonth, vbMonday) + 1
+    CalendarStartDate = CurrentMonth - Weekday(CurrentMonth, DP_FIRST_DAY_OF_WEEK) + 1
 
     For Index = 0 To CALENDAR_DAY_COUNT - 1
 
@@ -126,7 +131,8 @@ Private Sub CreateDays()
         Set Handler = New DP_CButtonDay
 
         Handler.Initialize Me, _
-                           MonthStartWeekday + Index, _
+                           CalendarStartDate + Index, _
+                           CStr(Day(CalendarStartDate + Index)), _
                            DP_GridLeft(ColumnIndex, DP_GRID_LEFT, _
                                        DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH), _
                            DP_GridTop(RowIndex + 1, DP_GRID_TOP, _
@@ -146,18 +152,19 @@ End Sub
 Private Sub DP_IPickerView_UpdateView()
 
     Dim Index As Long
-    Dim MonthStartWeekday As Long
+    Dim CalendarStartDate As Date
     Dim Handler As DP_CButtonDay
 
     DP_IPickerView_ClearHoveredButton
 
     MonthHeaderHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
 
-    MonthStartWeekday = CurrentMonth - Weekday(CurrentMonth, vbMonday) + 1
+    CalendarStartDate = CurrentMonth - Weekday(CurrentMonth, DP_FIRST_DAY_OF_WEEK) + 1
 
     For Index = 0 To CALENDAR_DAY_COUNT - 1
         Set Handler = DayHandlers.Item(Index + 1)
-        Handler.UpdateDate MonthStartWeekday + Index
+        Handler.UpdateDate CalendarStartDate + Index, _
+                           CStr(Day(CalendarStartDate + Index))
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers

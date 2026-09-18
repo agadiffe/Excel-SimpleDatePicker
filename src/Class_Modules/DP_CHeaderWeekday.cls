@@ -26,17 +26,17 @@ Private ParentView As DP_IPickerView
 '----------------------------------------
 
 Public Sub Initialize(ByVal View As DP_CViewCalendar, _
-                      ByVal WeekdayIndex As Long)
+                      ByVal Caption As String, _
+                      ByVal LeftPosition As Single, _
+                      ByVal TopPosition As Single)
 
     Set ParentView = View
 
     Set WeekdayBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With WeekdayBackground
-        .Left = DP_GridLeft(WeekdayIndex, DP_GRID_LEFT, _
-                            DP_GRID_CELL_WIDTH, DP_CALENDAR_CELL_WIDTH)
-        .Top = DP_GridTop(0, DP_GRID_TOP, _
-                          DP_GRID_CELL_HEIGHT, DP_CALENDAR_CELL_HEIGHT)
+        .Left = LeftPosition
+        .Top = TopPosition
         .Width = DP_CALENDAR_CELL_WIDTH
         .Height = DP_CALENDAR_CELL_HEIGHT
     End With
@@ -44,7 +44,7 @@ Public Sub Initialize(ByVal View As DP_CViewCalendar, _
     Set WeekdayText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With WeekdayText
-        .Caption = Format(DateSerial(2029, 1, 1 + WeekdayIndex), "ddd")
+        .Caption = Caption
         .Font.Size = DP_FONT_SIZE_WEEKDAY * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .Font.Bold = True
         .TextAlign = fmTextAlignCenter

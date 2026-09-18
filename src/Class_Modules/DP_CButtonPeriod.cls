@@ -30,8 +30,8 @@ Private IsPressed As Boolean
 '----------------------------------------
 
 Public Sub Initialize(ByVal View As DP_IPickerView, _
-                      ByVal Caption As String, _
                       ByVal CellDateValue As Date, _
+                      ByVal Caption As String, _
                       ByVal LeftPosition As Single, _
                       ByVal TopPosition As Single, _
                       ByVal CellWidth As Single)
@@ -77,8 +77,8 @@ End Sub
 ' Render
 '----------------------------------------
 
-Public Sub UpdatePeriod(ByVal Caption As String, _
-                        ByVal CellDateValue As Date)
+Public Sub UpdatePeriod(ByVal CellDateValue As Date, _
+                        ByVal Caption As String)
 
     CellDate = CellDateValue
     PeriodText.Caption = Caption

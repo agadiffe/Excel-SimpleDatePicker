@@ -110,8 +110,8 @@ Private Sub CreateYears()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
-                           CStr(DisplayedYear), _
                            DateSerial(DisplayedYear, 1, 1), _
+                           CStr(DisplayedYear), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_YEAR_GRID_CELL_WIDTH, DP_YEAR_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
@@ -149,7 +149,8 @@ Private Sub DP_IPickerView_UpdateView()
         DisplayedYear = FirstYear + Index
 
         Set Handler = YearHandlers.Item(Index + 1)
-        Handler.UpdatePeriod CStr(DisplayedYear), DateSerial(DisplayedYear, 1, 1)
+        Handler.UpdatePeriod DateSerial(DisplayedYear, 1, 1), _
+                             CStr(DisplayedYear)
 
     Next Index
 

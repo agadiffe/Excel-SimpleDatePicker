@@ -102,8 +102,8 @@ Private Sub CreateMonths()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
-                           GetCaption(Index + 1), _
                            DateSerial(CurrentYear, Index + 1, 1), _
+                           MonthName(Index + 1, DP_MONTH_GRID_COLUMNS > 3), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_MONTH_GRID_CELL_WIDTH, DP_MONTH_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
@@ -115,17 +115,6 @@ Private Sub CreateMonths()
     Next Index
 
 End Sub
-
-
-Private Function GetCaption(ByVal MonthNumber As Long) As String
-
-    If DP_MONTH_GRID_COLUMNS > 3 Then
-        GetCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmm")
-    Else
-        GetCaption = Format(DateSerial(CurrentYear, MonthNumber, 1), "mmmm")
-    End If
-
-End Function
 
 
 '----------------------------------------
@@ -143,7 +132,8 @@ Private Sub DP_IPickerView_UpdateView()
 
     For Index = 0 To MONTH_COUNT - 1
         Set Handler = MonthHandlers.Item(Index + 1)
-        Handler.UpdatePeriod GetCaption(Index + 1), DateSerial(CurrentYear, Index + 1, 1)
+        Handler.UpdatePeriod DateSerial(CurrentYear, Index + 1, 1), _
+                             MonthName(Index + 1, DP_MONTH_GRID_COLUMNS > 3)
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers

@@ -26,6 +26,8 @@ Private Const SECTION_GAP_RATIO As Single = 0.12
 ' Day
 '----------------------------------------
 
+Public Const DP_FIRST_DAY_OF_WEEK As Long = vbMonday
+
 Public Const DP_CALENDAR_COLUMNS As Long = 7
 Public Const DP_CALENDAR_ROWS As Long = 6
 

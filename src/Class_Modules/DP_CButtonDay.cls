@@ -31,6 +31,7 @@ Private IsPressed As Boolean
 
 Public Sub Initialize(ByVal View As DP_CViewCalendar, _
                       ByVal CellDateValue As Date, _
+                      ByVal Caption As String, _
                       ByVal LeftPosition As Single, _
                       ByVal TopPosition As Single)
 
@@ -49,7 +50,7 @@ Public Sub Initialize(ByVal View As DP_CViewCalendar, _
     Set DayText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
 
     With DayText
-        .Caption = CStr(Day(CellDate))
+        .Caption = Caption
         .Font.Size = DP_FONT_SIZE_DAY * DP_GetFontScale(DP_DATEPICKER_WIDTH)
         .BackStyle = fmBackStyleTransparent
         .TextAlign = fmTextAlignCenter
@@ -75,10 +76,11 @@ End Sub
 ' Render
 '----------------------------------------
 
-Public Sub UpdateDate(ByVal CellDateValue As Date)
+Public Sub UpdateDate(ByVal CellDateValue As Date, _
+                      ByVal Caption As String)
 
     CellDate = CellDateValue
-    DayText.Caption = CStr(Day(CellDate))
+    DayText.Caption = Caption
 
     Render
 
