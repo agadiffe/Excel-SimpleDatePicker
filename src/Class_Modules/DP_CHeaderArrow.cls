@@ -13,7 +13,7 @@ Option Explicit
 ' Declarations
 '----------------------------------------
 
-Private WithEvents ArrowBackground As MSForms.Label
+Private WithEvents ArrowBackground As MSForms.Image
 Attribute ArrowBackground.VB_VarHelpID = -1
 Private WithEvents ArrowText As MSForms.Label
 Attribute ArrowText.VB_VarHelpID = -1
@@ -37,13 +37,15 @@ Public Sub Initialize(ByVal View As DP_IPickerView, _
     Set ParentView = View
     Direction = DirectionValue
 
-    Set ArrowBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
+    Set ArrowBackground = ParentView.ParentForm.Controls.Add("Forms.Image.1")
 
     With ArrowBackground
         .Left = LeftPosition
         .Top = DP_ARROW_TOP
         .Width = DP_ARROW_WIDTH
         .Height = DP_ARROW_HEIGHT
+        .BorderStyle = fmBorderStyleNone
+        .PictureSizeMode = fmPictureSizeModeStretch
     End With
 
     Set ArrowText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
@@ -90,19 +92,42 @@ End Sub
 
 Private Sub Render()
 
+    Dim BackgroundColor As Long
+
+    ArrowText.ForeColor = DP_ColorTextHeader()
+
     If Not ParentView.IsArrowEnabled(Direction) Then
-        ArrowBackground.BackColor = DP_ColorBg()
+        BackgroundColor = DP_ColorBg()
         ArrowText.ForeColor = DP_ColorTextDisabled()
     ElseIf IsPressed Then
-        ArrowBackground.BackColor = DP_ColorBgPressed()
-        ArrowText.ForeColor = DP_ColorTextHeader()
+        BackgroundColor = DP_ColorBgPressed()
     ElseIf IsHovered Then
-        ArrowBackground.BackColor = DP_ColorBgHover()
-        ArrowText.ForeColor = DP_ColorTextHeader()
+        BackgroundColor = DP_ColorBgHover()
     Else
-        ArrowBackground.BackColor = DP_ColorBg()
-        ArrowText.ForeColor = DP_ColorTextHeader()
+        BackgroundColor = DP_ColorBg()
     End If
+
+    ArrowBackground.BackColor = BackgroundColor
+
+    #If Mac Then
+        ' No GDI+ on Mac.
+        ArrowBackground.Picture = Nothing
+    #Else
+        If DP_BUTTON_NO_SHAPE Then
+            ' Plain Image used as a colored background.
+            ArrowBackground.Picture = Nothing
+        Else
+            ' Render the actual button shape.
+            Set ArrowBackground.Picture = _
+                DP_GetCachedButtonPicture(DP_BUTTON_TYPE_ARROW, _
+                                          BackgroundColor, _
+                                          DP_ColorBg())
+
+            ' MSForms Image/Label overlap bug: reset Z-order.
+            ArrowBackground.ZOrder 1
+            ArrowText.ZOrder 0
+        End If
+    #End If
 
 End Sub
 
@@ -165,8 +190,9 @@ End Sub
 ' Mouse down
 '--------------------
 
-Private Sub HandleMouseDown()
+Private Sub HandleMouseDown(ByVal Button As Integer)
 
+    If Button <> 1 Then Exit Sub
     If Not ParentView.IsArrowEnabled(Direction) Then Exit Sub
 
     Pressed = True
@@ -179,7 +205,7 @@ Private Sub ArrowBackground_MouseDown(ByVal Button As Integer, _
                                       ByVal X As Single, _
                                       ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 
@@ -189,7 +215,7 @@ Private Sub ArrowText_MouseDown(ByVal Button As Integer, _
                                 ByVal X As Single, _
                                 ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 

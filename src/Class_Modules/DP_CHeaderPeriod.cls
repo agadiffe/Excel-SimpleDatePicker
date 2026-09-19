@@ -13,7 +13,7 @@ Option Explicit
 ' Declarations
 '----------------------------------------
 
-Private WithEvents HeaderBackground As MSForms.Label
+Private WithEvents HeaderBackground As MSForms.Image
 Attribute HeaderBackground.VB_VarHelpID = -1
 Private WithEvents HeaderText As MSForms.Label
 Attribute HeaderText.VB_VarHelpID = -1
@@ -35,13 +35,15 @@ Public Sub Initialize(ByVal View As DP_IPickerView, _
     Set ParentView = View
     Interactive = True
 
-    Set HeaderBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
+    Set HeaderBackground = ParentView.ParentForm.Controls.Add("Forms.Image.1")
 
     With HeaderBackground
         .Left = DP_HEADER_LEFT
         .Top = DP_HEADER_TOP
         .Width = DP_HEADER_WIDTH
         .Height = DP_HEADER_HEIGHT
+        .BorderStyle = fmBorderStyleNone
+        .PictureSizeMode = fmPictureSizeModeStretch
     End With
 
     Set HeaderText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
@@ -97,16 +99,40 @@ End Sub
 
 Private Sub Render()
 
-    HeaderBackground.BackColor = DP_ColorBg()
-    HeaderText.ForeColor = DP_ColorTextHeader()
+    Dim BackgroundColor As Long
+
+    BackgroundColor = DP_ColorBg()
 
     If Interactive Then
         If IsPressed Then
-            HeaderBackground.BackColor = DP_ColorBgPressed()
+            BackgroundColor = DP_ColorBgPressed()
         ElseIf IsHovered Then
-            HeaderBackground.BackColor = DP_ColorBgHover()
+            BackgroundColor = DP_ColorBgHover()
         End If
     End If
+
+    HeaderBackground.BackColor = BackgroundColor
+    HeaderText.ForeColor = DP_ColorTextHeader()
+
+    #If Mac Then
+        ' No GDI+ on Mac.
+        HeaderBackground.Picture = Nothing
+    #Else
+        If DP_BUTTON_NO_SHAPE Then
+            ' Plain Image used as a colored background.
+            HeaderBackground.Picture = Nothing
+        Else
+            ' Render the actual button shape.
+            Set HeaderBackground.Picture = _
+                DP_GetCachedButtonPicture(DP_BUTTON_TYPE_HEADER, _
+                                          BackgroundColor, _
+                                          DP_ColorBg())
+
+            ' MSForms Image/Label overlap bug: reset Z-order.
+            HeaderBackground.ZOrder 1
+            HeaderText.ZOrder 0
+        End If
+    #End If
 
 End Sub
 
@@ -169,8 +195,9 @@ End Sub
 ' Mouse down
 '--------------------
 
-Private Sub HandleMouseDown()
+Private Sub HandleMouseDown(ByVal Button As Integer)
 
+    If Button <> 1 Then Exit Sub
     If Not Interactive Then Exit Sub
 
     Pressed = True
@@ -183,7 +210,7 @@ Private Sub HeaderBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 
@@ -193,7 +220,7 @@ Private Sub HeaderText_MouseDown(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 

@@ -174,6 +174,8 @@ End Sub
 
 Private Sub DP_IPickerView_RefreshTheme()
 
+    DP_ClearButtonPictureCache
+
     ' Day handlers are handled by UpdateView.
     ' Shortcut button is handled by SetVisible.
 

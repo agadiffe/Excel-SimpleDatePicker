@@ -9,12 +9,15 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 
 ## 📝 Features
 
-- Opens automatically when double-clicking a cell formatted as a Date
-- Supports light and dark modes with automatic detection
-- Supports multiple languages based on Excel's display language
+- Opens when double-clicking a cell formatted as a Date
+- Supports dark mode with automatic detection
+- UI language follows Excel's display language
 - Responsive layout with adjustable size
+- Configurable button shapes
 
 > **Resizing:** To change the DatePicker size, modify the `DP_DATEPICKER_WIDTH` constant in `DP_modLayout`.
+
+> **Button Shapes:** Rounded rectangles by default, with circles available for day buttons. Shapes can be customized or disabled in `DP_modTheme`.
 
 ## 🎬 Demo
 
@@ -91,12 +94,16 @@ For optional automatic dark-mode detection on Mac, copy `DatePickerTheme.applesc
 
 ## 📌 Remarks
 
-Supported formats include Excel's Short Date formats, the system's Long Date format, and several common Long Date formats not tied to the system locale.  
-Time-only formats are not supported, and custom date formats may not trigger the DatePicker.
-
 The double-click behavior and the cell formats that trigger the DatePicker can be customized in `DP_modHelpers`.
 
-Excel Online includes a built-in date picker, but this feature is currently not available in the desktop version.
+**Supported formats:**
+- Short Date
+- System Long Date
+- Common locale-independent Long Date
+
+**Unsupported formats:**
+- Time-only
+- Custom Date
 
 ## 💙 Support
 
