@@ -14,15 +14,16 @@ Private Const CALIBRATION_POINTS_BASE As Double = 7200#
 
 
 '----------------------------------------
-' Popup
+' Display
 '----------------------------------------
 
 Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
-                                  ByVal Target As Range)
+                                  ByVal Target As Range, _
+                                  ByVal TargetWindow As Excel.Window)
 
     Dim Position As Variant
 
-    Position = GetPopupPosition(Target)
+    Position = GetPopupPosition(Target, TargetWindow)
 
     With Popup
         .StartUpPosition = 0
@@ -30,7 +31,7 @@ Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
         .Top = Position(1)
     End With
 
-    AdjustPopupPosition Popup, Target
+    AdjustPopupPosition Popup, Target, TargetWindow
     Popup.Show
 
 End Sub
@@ -40,14 +41,15 @@ End Sub
 ' Positioning
 '----------------------------------------
 
-Private Function GetPopupPosition(ByVal Target As Range) As Variant
+Private Function GetPopupPosition(ByVal Target As Range, _
+                                  ByVal TargetWindow As Excel.Window) As Variant
 
     Dim CellRight As Double
     Dim CellTop As Double
 
-    With ActiveWindow
-        CellRight = .ActivePane.PointsToScreenPixelsX(Target.Left + Target.Width) * GetPointsPerPixelX()
-        CellTop = .ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY()
+    With TargetWindow.ActivePane
+        CellRight = .PointsToScreenPixelsX(Target.Left + Target.Width) * GetPointsPerPixelX(TargetWindow)
+        CellTop = .PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY(TargetWindow)
     End With
 
     GetPopupPosition = Array(CellRight + POPUP_GAP, CellTop)
@@ -56,19 +58,19 @@ End Function
 
 
 Private Sub AdjustPopupPosition(ByVal Popup As Object, _
-                                ByVal Target As Range)
+                                ByVal Target As Range, _
+                                ByVal TargetWindow As Excel.Window)
 
     Dim ExcelRight As Double
     Dim ExcelBottom As Double
-
     Dim CellLeft As Double
     Dim CellTop As Double
 
-    ExcelRight = Application.Left + Application.Width - POPUP_MARGIN
-    ExcelBottom = Application.Top + Application.Height - POPUP_MARGIN
+    ExcelRight = TargetWindow.Left + TargetWindow.Width - POPUP_MARGIN
+    ExcelBottom = TargetWindow.Top + TargetWindow.Height - POPUP_MARGIN
 
-    CellLeft = GetCellScreenLeft(Target)
-    CellTop = GetCellScreenTop(Target)
+    CellLeft = GetCellScreenLeft(Target, TargetWindow)
+    CellTop = GetCellScreenTop(Target, TargetWindow)
 
     ' Horizontal
     '--------------------
@@ -77,8 +79,8 @@ Private Sub AdjustPopupPosition(ByVal Popup As Object, _
         Popup.Left = CellLeft - Popup.Width - POPUP_GAP
     End If
 
-    If Popup.Left < Application.Left + POPUP_MARGIN Then
-        Popup.Left = Application.Left + POPUP_MARGIN
+    If Popup.Left < TargetWindow.Left + POPUP_MARGIN Then
+        Popup.Left = TargetWindow.Left + POPUP_MARGIN
     End If
 
     ' Vertical
@@ -88,66 +90,70 @@ Private Sub AdjustPopupPosition(ByVal Popup As Object, _
         Popup.Top = ExcelBottom - Popup.Height
     End If
 
-    If Popup.Top < Application.Top + POPUP_MARGIN Then
-        Popup.Top = Application.Top + POPUP_MARGIN
+    If Popup.Top < TargetWindow.Top + POPUP_MARGIN Then
+        Popup.Top = TargetWindow.Top + POPUP_MARGIN
     End If
 
 End Sub
 
 
 '----------------------------------------
-' Screen / Coordinate Helpers
+' Screen coordinates
 '----------------------------------------
 
-Private Function GetCellScreenLeft(ByVal Target As Range) As Double
+Private Function GetCellScreenLeft(ByVal Target As Range, _
+                                   ByVal TargetWindow As Excel.Window) As Double
 
-    GetCellScreenLeft = ActiveWindow.ActivePane.PointsToScreenPixelsX(Target.Left) * GetPointsPerPixelX()
-
-End Function
-
-
-Private Function GetCellScreenTop(ByVal Target As Range) As Double
-
-    GetCellScreenTop = ActiveWindow.ActivePane.PointsToScreenPixelsY(Target.Top) * GetPointsPerPixelY()
+    GetCellScreenLeft = TargetWindow.ActivePane.PointsToScreenPixelsX(Target.Left) * _
+                        GetPointsPerPixelX(TargetWindow)
 
 End Function
 
 
-Private Function GetZoomAdjustedCalibrationPoints() As Double
+Private Function GetCellScreenTop(ByVal Target As Range, _
+                                  ByVal TargetWindow As Excel.Window) As Double
 
-    GetZoomAdjustedCalibrationPoints = CALIBRATION_POINTS_BASE / (ActiveWindow.Zoom / 100#)
+    GetCellScreenTop = TargetWindow.ActivePane.PointsToScreenPixelsY(Target.Top) * _
+                       GetPointsPerPixelY(TargetWindow)
 
 End Function
 
 
-Private Function GetPointsPerPixelX() As Double
+Private Function GetZoomAdjustedCalibrationPoints(ByVal TargetWindow As Excel.Window) As Double
+
+    GetZoomAdjustedCalibrationPoints = CALIBRATION_POINTS_BASE / (TargetWindow.Zoom / 100#)
+
+End Function
+
+
+Private Function GetPointsPerPixelX(ByVal TargetWindow As Excel.Window) As Double
 
     Dim CalibrationPoints As Double
 
-    CalibrationPoints = GetZoomAdjustedCalibrationPoints()
+    CalibrationPoints = GetZoomAdjustedCalibrationPoints(TargetWindow)
 
     GetPointsPerPixelX = _
         1# / _
         ( _
-            (ActiveWindow.ActivePane.PointsToScreenPixelsX(CalibrationPoints) - _
-              ActiveWindow.ActivePane.PointsToScreenPixelsX(0)) / _
+            (TargetWindow.ActivePane.PointsToScreenPixelsX(CalibrationPoints) - _
+              TargetWindow.ActivePane.PointsToScreenPixelsX(0)) / _
             CALIBRATION_POINTS_BASE _
         )
 
 End Function
 
 
-Private Function GetPointsPerPixelY() As Double
+Private Function GetPointsPerPixelY(ByVal TargetWindow As Excel.Window) As Double
 
     Dim CalibrationPoints As Double
 
-    CalibrationPoints = GetZoomAdjustedCalibrationPoints()
+    CalibrationPoints = GetZoomAdjustedCalibrationPoints(TargetWindow)
 
     GetPointsPerPixelY = _
         1# / _
         ( _
-            (ActiveWindow.ActivePane.PointsToScreenPixelsY(CalibrationPoints) - _
-                ActiveWindow.ActivePane.PointsToScreenPixelsY(0)) / _
+            (TargetWindow.ActivePane.PointsToScreenPixelsY(CalibrationPoints) - _
+                TargetWindow.ActivePane.PointsToScreenPixelsY(0)) / _
             CALIBRATION_POINTS_BASE _
         )
 

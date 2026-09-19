@@ -82,10 +82,6 @@ Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 End Sub
 
 
-'----------------------------------------
-' Grid
-'----------------------------------------
-
 Private Sub CreateMonths()
 
     Dim Handler As DP_CButtonPeriod
@@ -102,8 +98,9 @@ Private Sub CreateMonths()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
+                           DP_BUTTON_TYPE_MONTH, _
                            DateSerial(CurrentYear, Index + 1, 1), _
-                           MonthName(Index + 1, DP_MONTH_GRID_COLUMNS > 3), _
+                           MonthName((Index Mod 12) + 1, DP_MONTH_GRID_COLUMNS > 3), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
                                        DP_MONTH_GRID_CELL_WIDTH, DP_MONTH_CELL_WIDTH), _
                            DP_GridTop(RowIndex, DP_PERIOD_GRID_TOP, _
@@ -128,12 +125,12 @@ Private Sub DP_IPickerView_UpdateView()
 
     DP_IPickerView_ClearHoveredButton
 
-    YearHeaderHandler.SetCaption CStr(CurrentYear)
+    YearHeaderHandler.Caption = CStr(CurrentYear)
 
     For Index = 0 To MONTH_COUNT - 1
         Set Handler = MonthHandlers.Item(Index + 1)
         Handler.UpdatePeriod DateSerial(CurrentYear, Index + 1, 1), _
-                             MonthName(Index + 1, DP_MONTH_GRID_COLUMNS > 3)
+                             MonthName((Index Mod 12) + 1, DP_MONTH_GRID_COLUMNS > 3)
     Next Index
 
     DP_UpdateStateCollection ArrowHandlers
@@ -142,6 +139,8 @@ End Sub
 
 
 Private Sub DP_IPickerView_RefreshTheme()
+
+    DP_ClearButtonPictureCache
 
     ' Month handlers are handled by UpdateView.
     ' Shortcut button is handled by SetVisible.

@@ -5,12 +5,27 @@ Option Explicit
 ' Font sizes
 '----------------------------------------
 
-Public Const DP_FONT_SIZE_HEADER As Long = 10
-Public Const DP_FONT_SIZE_ARROW As Long = 10
-Public Const DP_FONT_SIZE_DAY As Long = 9
+Public Const DP_FONT_SIZE_HEADER As Long = 9
+Public Const DP_FONT_SIZE_ARROW As Long = 9
 Public Const DP_FONT_SIZE_WEEKDAY As Long = 8
+Public Const DP_FONT_SIZE_DAY As Long = 9
 Public Const DP_FONT_SIZE_PERIOD As Long = 9
 Public Const DP_FONT_SIZE_ACTION_BUTTON As Long = 9
+
+
+'----------------------------------------
+' Button shape
+'----------------------------------------
+
+' DP_BUTTON_NO_SHAPE takes precedence over DP_DAY_BUTTON_SHAPE.
+
+' Set to True to disable button shapes.
+' This can also be used as a compatibility fallback if
+' shaped buttons cause rendering issues.
+Public Const DP_BUTTON_NO_SHAPE As Boolean = False
+
+' DP_BUTTON_SHAPE_RECTANGLE or DP_BUTTON_SHAPE_CIRCLE
+Public Const DP_DAY_BUTTON_SHAPE As Long = DP_BUTTON_SHAPE_RECTANGLE
 
 
 '----------------------------------------
@@ -220,19 +235,19 @@ Private Function IsWindowsDarkThemeActive() As Boolean
     Const WindowsThemeKey As String = _
         "HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme"
 
-    Dim officeTheme As Long
-    Dim windowsLightTheme As Long
+    Dim OfficeTheme As Long
+    Dim WindowsLightTheme As Long
 
     With CreateObject("WScript.Shell")
 
         On Error Resume Next
 
         ' Read Excel / Office theme
-        officeTheme = .RegRead(OfficeThemeKey)
+        OfficeTheme = .RegRead(OfficeThemeKey)
 
         ' If Windows key is missing, assume Light Mode
-        windowsLightTheme = 1
-        windowsLightTheme = .RegRead(WindowsThemeKey)
+        WindowsLightTheme = 1
+        WindowsLightTheme = .RegRead(WindowsThemeKey)
 
         On Error GoTo 0
 
@@ -245,13 +260,13 @@ Private Function IsWindowsDarkThemeActive() As Boolean
     ' 6 = Use System setting
     ' 7 = Color
 
-    Select Case officeTheme
+    Select Case OfficeTheme
         Case 3, 4
             ' Office explicitly uses a dark theme
             IsWindowsDarkThemeActive = True
         Case 6
             ' Office follows the Windows system theme
-            IsWindowsDarkThemeActive = (windowsLightTheme = 0)
+            IsWindowsDarkThemeActive = (WindowsLightTheme = 0)
         Case Else
             ' White, Color, or unknown
             IsWindowsDarkThemeActive = False
@@ -292,17 +307,17 @@ Private Function IsMacDarkThemeActive() As Boolean
 
 #If VBA7 Then
 
-    Dim result As String
+    Dim Result As String
 
     On Error GoTo LightMode
 
-    result = AppleScriptTask( _
+    Result = AppleScriptTask( _
         "DatePickerTheme.applescript", _
         "GetDarkMode", _
         "")
 
     IsMacDarkThemeActive = _
-        (LCase$(Trim$(result)) = "true")
+        (LCase$(Trim$(Result)) = "true")
 
     Exit Function
 

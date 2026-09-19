@@ -13,8 +13,8 @@ Private Sub Workbook_SheetBeforeDoubleClick(ByVal Sh As Object, _
                                             ByVal Target As Range, _
                                             Cancel As Boolean)
 
-    If DP_HandleDatePickerDoubleClick(Target) Then
-        Cancel = True ' Prevent other Excel actions
+    If DP_TryShowDatePicker(Target, Excel.Application.ActiveWindow) Then
+        Cancel = True ' Prevent default double-click action
     End If
 
 End Sub

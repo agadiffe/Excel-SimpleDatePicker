@@ -13,7 +13,7 @@ Option Explicit
 ' Declarations
 '----------------------------------------
 
-Private WithEvents ButtonBackground As MSForms.Label
+Private WithEvents ButtonBackground As MSForms.Image
 Attribute ButtonBackground.VB_VarHelpID = -1
 Private WithEvents ButtonText As MSForms.Label
 Attribute ButtonText.VB_VarHelpID = -1
@@ -33,14 +33,15 @@ Public Sub Initialize(ByVal View As DP_IPickerView, _
                       ByVal TopPosition As Single)
 
     Dim ButtonWidth As Single
-
     Set ParentView = View
 
-    Set ButtonBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
+    Set ButtonBackground = ParentView.ParentForm.Controls.Add("Forms.Image.1")
 
     With ButtonBackground
         .Height = DP_ACTION_BUTTON_HEIGHT
         .Top = TopPosition
+        .BorderStyle = fmBorderStyleNone
+        .PictureSizeMode = fmPictureSizeModeStretch
     End With
 
     Set ButtonText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
@@ -101,14 +102,33 @@ End Sub
 
 Private Sub Render()
 
-    ButtonText.ForeColor = DP_ColorTextSecondary()
+    Dim BackgroundColor As Long
 
     If IsPressed Then
-        ButtonBackground.BackColor = DP_ColorBgPressed()
+        BackgroundColor = DP_ColorBgPressed()
     ElseIf IsHovered Then
-        ButtonBackground.BackColor = DP_ColorBgHover()
+        BackgroundColor = DP_ColorBgHover()
     Else
-        ButtonBackground.BackColor = DP_ColorBg()
+        BackgroundColor = DP_ColorBg()
+    End If
+
+    ButtonBackground.BackColor = BackgroundColor
+    ButtonText.ForeColor = DP_ColorTextSecondary()
+
+    If DP_BUTTON_NO_SHAPE Then
+        ' Plain Image used as a colored background.
+        ButtonBackground.Picture = Nothing
+    Else
+        ' Render the actual button shape.
+        Set ButtonBackground.Picture = _
+            DP_GetCachedButtonPicture(DP_BUTTON_TYPE_SHORTCUT, _
+                                      BackgroundColor, _
+                                      DP_ColorBg(), _
+                                      ButtonBackground.Width)
+
+        ' MSForms Image/Label overlap bug: reset Z-order.
+        ButtonBackground.ZOrder 1
+        ButtonText.ZOrder 0
     End If
 
 End Sub
@@ -163,12 +183,21 @@ End Sub
 ' Mouse down
 '--------------------
 
+Private Sub HandleMouseDown(ByVal Button As Integer)
+
+    If Button <> 1 Then Exit Sub
+
+    Pressed = True
+
+End Sub
+
+
 Private Sub ButtonBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal Shift As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    Pressed = True
+    HandleMouseDown Button
 
 End Sub
 
@@ -178,7 +207,7 @@ Private Sub ButtonText_MouseDown(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    Pressed = True
+    HandleMouseDown Button
 
 End Sub
 

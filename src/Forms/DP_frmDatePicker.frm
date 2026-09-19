@@ -57,7 +57,12 @@ Private Sub UserForm_Initialize()
 End Sub
 
 
-Public Sub ShowPicker(ByVal Cell As Range)
+'----------------------------------------
+' View management
+'----------------------------------------
+
+Public Sub ShowPicker(ByVal Cell As Range, _
+                      ByVal TargetWindow As Excel.Window)
 
     Set TargetCell = Cell
 
@@ -72,8 +77,8 @@ Public Sub ShowPicker(ByVal Cell As Range)
     CurrentMonthValue = SelectedMonthValue
 
     RefreshPickerTheme
-    ShowPickerView DP_SIZE_DATE
-    DP_ShowPopupNextToCell Me, TargetCell
+    SwitchPickerView DP_SIZE_DATE
+    DP_ShowPopupNextToCell Me, TargetCell, TargetWindow
 
 End Sub
 
@@ -97,11 +102,7 @@ Private Sub RefreshPickerTheme()
 End Sub
 
 
-'----------------------------------------
-' View
-'----------------------------------------
-
-Private Sub ShowPickerView(ByVal PickerSize As DP_PickerSize)
+Private Sub SwitchPickerView(ByVal PickerSize As DP_PickerSize)
 
     Dim PickerView As DP_IPickerView
 
@@ -168,7 +169,7 @@ End Property
 
 
 '----------------------------------------
-' Date Selection
+' Selection
 '----------------------------------------
 
 Public Sub DaySelected(ByVal SelectedDate As Date)
@@ -190,7 +191,7 @@ Public Sub MonthSelected(ByVal MonthNumber As Long, _
     SelectedMonthValue = DateSerial(SelectedYearValue, MonthNumber, 1)
     CurrentMonthValue = SelectedMonthValue
 
-    ShowPickerView DP_SIZE_DATE
+    SwitchPickerView DP_SIZE_DATE
 
 End Sub
 
@@ -200,7 +201,7 @@ Public Sub YearSelected(ByVal YearNumber As Long)
     SelectedYearValue = YearNumber
     CurrentMonthValue = DateSerial(SelectedYearValue, Month(CurrentMonthValue), 1)
 
-    ShowPickerView DP_SIZE_MONTH
+    SwitchPickerView DP_SIZE_MONTH
 
 End Sub
 
@@ -220,7 +221,7 @@ End Sub
 
 Public Sub HeaderClicked(ByVal PickerSize As DP_PickerSize)
 
-    ShowPickerView PickerSize
+    SwitchPickerView PickerSize
 
 End Sub
 

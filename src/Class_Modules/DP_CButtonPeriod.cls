@@ -13,13 +13,14 @@ Option Explicit
 ' Declarations
 '----------------------------------------
 
-Private WithEvents PeriodBackground As MSForms.Label
+Private WithEvents PeriodBackground As MSForms.Image
 Attribute PeriodBackground.VB_VarHelpID = -1
 Private WithEvents PeriodText As MSForms.Label
 Attribute PeriodText.VB_VarHelpID = -1
 
 Private ParentView As DP_IPickerView
 Private CellDate As Date
+Private ButtonType As DP_ButtonType
 
 Private IsHovered As Boolean
 Private IsPressed As Boolean
@@ -30,6 +31,7 @@ Private IsPressed As Boolean
 '----------------------------------------
 
 Public Sub Initialize(ByVal View As DP_IPickerView, _
+                      ByVal ButtonTypeValue As DP_ButtonType, _
                       ByVal CellDateValue As Date, _
                       ByVal Caption As String, _
                       ByVal LeftPosition As Single, _
@@ -37,15 +39,18 @@ Public Sub Initialize(ByVal View As DP_IPickerView, _
                       ByVal CellWidth As Single)
 
     Set ParentView = View
+    ButtonType = ButtonTypeValue
     CellDate = CellDateValue
 
-    Set PeriodBackground = ParentView.ParentForm.Controls.Add("Forms.Label.1")
+    Set PeriodBackground = ParentView.ParentForm.Controls.Add("Forms.Image.1")
 
     With PeriodBackground
         .Left = LeftPosition
         .Top = TopPosition
         .Width = CellWidth
         .Height = DP_PERIOD_CELL_HEIGHT
+        .BorderStyle = fmBorderStyleNone
+        .PictureSizeMode = fmPictureSizeModeStretch
     End With
 
     Set PeriodText = ParentView.ParentForm.Controls.Add("Forms.Label.1")
@@ -158,6 +163,21 @@ Private Sub Render()
     '--------------------
 
     PeriodBackground.BackColor = BackgroundColor
+
+    If DP_BUTTON_NO_SHAPE Then
+        PeriodBackground.Picture = Nothing
+    Else
+        ' Render the actual button shape.
+        Set PeriodBackground.Picture = _
+            DP_GetCachedButtonPicture(ButtonType, _
+                                      BackgroundColor, _
+                                      DP_ColorBg())
+
+        ' MSForms Image/Label overlap bug: reset Z-order.
+        PeriodBackground.ZOrder 1
+        PeriodText.ZOrder 0
+    End If
+
     PeriodText.ForeColor = TextColor
     PeriodText.Font.Bold = IsBold
 
@@ -222,8 +242,9 @@ End Sub
 ' Mouse down
 '--------------------
 
-Private Sub HandleMouseDown()
+Private Sub HandleMouseDown(ByVal Button As Integer)
 
+    If Button <> 1 Then Exit Sub
     If DP_IsDateOutsideRange(CellDate) Then Exit Sub
 
     Pressed = True
@@ -236,7 +257,7 @@ Private Sub PeriodBackground_MouseDown(ByVal Button As Integer, _
                                        ByVal X As Single, _
                                        ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 
@@ -246,7 +267,7 @@ Private Sub PeriodText_MouseDown(ByVal Button As Integer, _
                                  ByVal X As Single, _
                                  ByVal Y As Single)
 
-    HandleMouseDown
+    HandleMouseDown Button
 
 End Sub
 

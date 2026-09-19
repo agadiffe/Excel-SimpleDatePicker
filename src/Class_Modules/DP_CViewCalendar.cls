@@ -86,10 +86,6 @@ Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 End Sub
 
 
-'----------------------------------------
-' Grid
-'----------------------------------------
-
 Private Sub CreateWeekdays()
 
     Dim Handler As DP_CHeaderWeekday
@@ -157,7 +153,7 @@ Private Sub DP_IPickerView_UpdateView()
 
     DP_IPickerView_ClearHoveredButton
 
-    MonthHeaderHandler.SetCaption Format(CurrentMonth, "mmmm yyyy")
+    MonthHeaderHandler.Caption = Format(CurrentMonth, "mmmm yyyy")
 
     CalendarStartDate = CurrentMonth - Weekday(CurrentMonth, DP_FIRST_DAY_OF_WEEK) + 1
 
@@ -173,6 +169,8 @@ End Sub
 
 
 Private Sub DP_IPickerView_RefreshTheme()
+
+    DP_ClearButtonPictureCache
 
     ' Day handlers are handled by UpdateView.
     ' Shortcut button is handled by SetVisible.

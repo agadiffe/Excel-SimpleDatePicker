@@ -9,12 +9,15 @@ A simple and lightweight DatePicker for Excel, built entirely in VBA.
 
 ## 📝 Features
 
-- Opens automatically when double-clicking a cell formatted as a Date
-- Supports light and dark modes with automatic detection
-- Supports multiple languages based on Excel's display language
+- Opens when double-clicking a cell formatted as a Date
+- Supports dark mode with automatic detection
+- UI language follows Excel's display language
 - Responsive layout with adjustable size
+- Configurable button shapes
 
 > **Resizing:** To change the DatePicker size, modify the `DP_DATEPICKER_WIDTH` constant in `DP_modLayout`.
+
+> **Button Shapes:** Rounded rectangles by default, with circles available for day buttons. Shapes can be customized or disabled in `DP_modTheme`.
 
 ## 🎬 Demo
 
@@ -48,18 +51,19 @@ Use this method to add the DatePicker directly to a specific workbook.
    - **Class Modules**: import the `.cls` files
    - **Forms**: import the `.frm` files (keep each `.frx` file in the same folder)
    - **Modules**: import the `.bas` files
-4. Open your `ThisWorkbook` module and add the following code to the `Workbook_SheetBeforeDoubleClick` event:
-    ```vba
-    If DP_HandleDatePickerDoubleClick(Target) Then
-        Cancel = True ' Prevent other Excel actions
-    End If
-    ```
-    `src/Microsoft_Excel_Objects/ThisWorkbook.cls` is provided for reference only.
+4. Open your `ThisWorkbook` module and add the following code to the corresponding events:
+   - `Workbook_SheetBeforeDoubleClick`:
+     ```vba
+     If DP_TryShowDatePicker(Target, Excel.Application.ActiveWindow) Then
+         Cancel = True ' Prevent default double-click action
+     End If
+     ```
+    If needed, see `src/Microsoft_Excel_Objects/ThisWorkbook.cls` for the event examples.
 5. Save your workbook as an Excel Macro-Enabled file (`.xlsm`).
 
 ### Build the add-in
 
-To build the add-in from source, first follow **Import the VBA components** above, then make the following changes:
+To build the add-in from source, first follow **Import the VBA components** above, then make these changes:
 
 1. Import the additional components from `src/addins/`:
    - `DP_CAppEvents.cls` as a **Class Module**
@@ -72,7 +76,7 @@ To build the add-in from source, first follow **Import the VBA components** abov
         DP_InitializeAppEvents
     End Sub
     ```
-3. Save your workbook as an Excel Add-In file (`.xlam`).
+3. Save the file as an Excel Add-In (`.xlam`).
 
 ## 🔒 Security
 
@@ -91,12 +95,16 @@ For optional automatic dark-mode detection on Mac, copy `DatePickerTheme.applesc
 
 ## 📌 Remarks
 
-Supported formats include Excel's Short Date formats, the system's Long Date format, and several common Long Date formats not tied to the system locale.  
-Time-only formats are not supported, and custom date formats may not trigger the DatePicker.
-
 The double-click behavior and the cell formats that trigger the DatePicker can be customized in `DP_modHelpers`.
 
-Excel Online includes a built-in date picker, but this feature is currently not available in the desktop version.
+**Supported formats:**
+- Short Date
+- System Long Date
+- Common locale-independent Long Date
+
+**Unsupported formats:**
+- Time-only
+- Custom Date
 
 ## 💙 Support
 

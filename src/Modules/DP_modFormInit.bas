@@ -1,4 +1,4 @@
-Attribute VB_Name = "DP_modForm"
+Attribute VB_Name = "DP_modFormInit"
 Option Explicit
 
 '----------------------------------------

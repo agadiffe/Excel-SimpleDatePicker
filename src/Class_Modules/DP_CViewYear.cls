@@ -47,7 +47,7 @@ Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
     Set YearRangeHeaderHandler = New DP_CHeaderPeriod
     YearRangeHeaderHandler.Initialize Me, _
         CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
-    YearRangeHeaderHandler.SetInteractive False
+    YearRangeHeaderHandler.Interactive = False
 
     ' Previous range
     '--------------------
@@ -84,10 +84,6 @@ Private Sub DP_IPickerView_InitializeView(ByVal Form As DP_frmDatePicker)
 End Sub
 
 
-'----------------------------------------
-' Grid
-'----------------------------------------
-
 Private Sub CreateYears()
 
     Dim Handler As DP_CButtonPeriod
@@ -110,6 +106,7 @@ Private Sub CreateYears()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
+                           DP_BUTTON_TYPE_YEAR, _
                            DateSerial(DisplayedYear, 1, 1), _
                            CStr(DisplayedYear), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
@@ -141,7 +138,7 @@ Private Sub DP_IPickerView_UpdateView()
 
     FirstYear = FirstDisplayedYear
 
-    YearRangeHeaderHandler.SetCaption _
+    YearRangeHeaderHandler.Caption = _
         CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
 
     For Index = 0 To YEAR_COUNT - 1
@@ -160,6 +157,8 @@ End Sub
 
 
 Private Sub DP_IPickerView_RefreshTheme()
+
+    DP_ClearButtonPictureCache
 
     ' Year handlers are handled by UpdateView.
     ' Shortcut button is handled by SetVisible.

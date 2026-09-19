@@ -1,4 +1,4 @@
-Attribute VB_Name = "DP_modUserFormAPI"
+Attribute VB_Name = "DP_modAPIRoundedForm"
 Option Explicit
 
 '============================================================
@@ -454,8 +454,7 @@ Public Function DP_ApplyRoundedCorners( _
     ' Get current HWND
     '========================================================
 
-    FormWindowHandle = GetPickerHwnd( _
-        PickerForm)
+    FormWindowHandle = GetPickerHwnd(PickerForm)
 
     If FormWindowHandle = 0 Then Exit Function
 
@@ -495,11 +494,8 @@ Public Function DP_ApplyRoundedCorners( _
         FormWindowHandle, _
         WindowRectangle) = 0 Then Exit Function
 
-    WindowWidth = _
-        WindowRectangle.Right - WindowRectangle.Left
-
-    WindowHeight = _
-        WindowRectangle.Bottom - WindowRectangle.Top
+    WindowWidth = WindowRectangle.Right - WindowRectangle.Left
+    WindowHeight = WindowRectangle.Bottom - WindowRectangle.Top
 
     If WindowWidth <= 0 Then Exit Function
     If WindowHeight <= 0 Then Exit Function
