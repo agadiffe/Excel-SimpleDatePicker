@@ -5,8 +5,7 @@ Option Explicit
 ' Activation
 '----------------------------------------
 
-Public Function DP_TryShowDatePicker(ByVal Target As Range, _
-                                     ByVal TargetWindow As Excel.Window) As Boolean
+Public Function DP_TryShowDatePicker(ByVal Target As Range) As Boolean
 
     ' Only process a single cell
     If Target.Cells.CountLarge <> 1 Then Exit Function
@@ -23,7 +22,7 @@ Public Function DP_TryShowDatePicker(ByVal Target As Range, _
     End If
 
     ' Show the date picker
-    DP_frmDatePicker.ShowPicker Target, TargetWindow
+    DP_GetPickerForm(Excel.Application.ActiveWindow).ShowPicker Target
 
     DP_TryShowDatePicker = True
 

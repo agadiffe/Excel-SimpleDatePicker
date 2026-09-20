@@ -19,6 +19,7 @@ Option Explicit
 '----------------------------------------
 
 Private TargetCell As Range
+Private TargetWindowValue As Excel.Window
 
 Private CurrentPickerSize As DP_PickerSize
 
@@ -61,8 +62,7 @@ End Sub
 ' View management
 '----------------------------------------
 
-Public Sub ShowPicker(ByVal Cell As Range, _
-                      ByVal TargetWindow As Excel.Window)
+Public Sub ShowPicker(ByVal Cell As Range)
 
     Set TargetCell = Cell
 
@@ -78,7 +78,7 @@ Public Sub ShowPicker(ByVal Cell As Range, _
 
     RefreshPickerTheme
     SwitchPickerView DP_SIZE_DATE
-    DP_ShowPopupNextToCell Me, TargetCell, TargetWindow
+    DP_ShowPopupNextToCell Me, TargetCell, TargetWindowValue
 
 End Sub
 
@@ -139,6 +139,26 @@ End Function
 '----------------------------------------
 ' Properties
 '----------------------------------------
+
+' Context
+'--------------------
+
+Public Property Set TargetWindow(ByVal TargetWindow As Excel.Window)
+
+    Set TargetWindowValue = TargetWindow
+
+End Property
+
+
+Public Property Get TargetWindow() As Excel.Window
+
+    Set TargetWindow = TargetWindowValue
+
+End Property
+
+
+' State
+'--------------------
 
 Public Property Get SelectedMonth() As Date
 
@@ -236,6 +256,13 @@ Private Sub UserForm_MouseMove(ByVal Button As Integer, _
                                ByVal Y As Single)
 
     GetPickerView(CurrentPickerSize).ClearHoveredButton
+
+End Sub
+
+
+Private Sub UserForm_Terminate()
+
+    DP_RemovePickerForm Me
 
 End Sub
 

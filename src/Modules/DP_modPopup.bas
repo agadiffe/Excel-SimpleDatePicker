@@ -32,7 +32,7 @@ Public Sub DP_ShowPopupNextToCell(ByVal Popup As Object, _
     End With
 
     AdjustPopupPosition Popup, Target, TargetWindow
-    Popup.Show
+    Popup.Show vbModeless
 
 End Sub
 

@@ -41,7 +41,7 @@ To install it:
 4. Click **Browse...** and select `add-in/Excel-SimpleDatePicker.xlam`.
 5. Make sure **DatePicker** is checked in the Add-Ins list and click **OK**.
 
-### Import the VBA components
+### Workbook integration
 
 Use this method to add the DatePicker directly to a specific workbook.
 
@@ -54,16 +54,24 @@ Use this method to add the DatePicker directly to a specific workbook.
 4. Open your `ThisWorkbook` module and add the following code to the corresponding events:
    - `Workbook_SheetBeforeDoubleClick`:
      ```vba
-     If DP_TryShowDatePicker(Target, Excel.Application.ActiveWindow) Then
+     If DP_TryShowDatePicker(Target) Then
          Cancel = True ' Prevent default double-click action
      End If
+     ```
+   - `Workbook_SheetSelectionChange`:
+     ```vba
+     DP_HidePickerForm
+     ```
+   - `Workbook_SheetActivate`:
+     ```vba
+     DP_HidePickerForm
      ```
     If needed, see `src/Microsoft_Excel_Objects/ThisWorkbook.cls` for the event examples.
 5. Save your workbook as an Excel Macro-Enabled file (`.xlsm`).
 
 ### Build the add-in
 
-To build the add-in from source, first follow **Import the VBA components** above, then make these changes:
+To build the add-in from source, first follow the **Workbook integration** steps above, then make these changes:
 
 1. Import the additional components from `src/addins/`:
    - `DP_CAppEvents.cls` as a **Class Module**
@@ -89,13 +97,13 @@ The complete VBA source code is available in this repository for review.
 
 ## 🎨 Theme
 
-For optional automatic dark-mode detection on Mac, copy `DatePickerTheme.applescript` from `src/Mac/` to:
+For the optional automatic dark-mode detection on Mac, copy `DatePickerTheme.applescript` from `src/Mac/` to:
 
 `~/Library/Application Scripts/com.microsoft.Excel/`
 
 ## 📌 Remarks
 
-The double-click behavior and the cell formats that trigger the DatePicker can be customized in `DP_modHelpers`.
+The double-click behavior and the cell formats that trigger the DatePicker can be customized in `DP_modEntryPoint`.
 
 **Supported formats:**
 - Short Date

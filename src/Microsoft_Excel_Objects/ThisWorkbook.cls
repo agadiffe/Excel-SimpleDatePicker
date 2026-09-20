@@ -13,9 +13,24 @@ Private Sub Workbook_SheetBeforeDoubleClick(ByVal Sh As Object, _
                                             ByVal Target As Range, _
                                             Cancel As Boolean)
 
-    If DP_TryShowDatePicker(Target, Excel.Application.ActiveWindow) Then
+    If DP_TryShowDatePicker(Target) Then
         Cancel = True ' Prevent default double-click action
     End If
+
+End Sub
+
+
+Private Sub Workbook_SheetSelectionChange(ByVal Sh As Object, _
+                                          ByVal Target As Range)
+
+    DP_HidePickerForm
+
+End Sub
+
+
+Private Sub Workbook_SheetActivate(ByVal Sh As Object)
+
+    DP_HidePickerForm
 
 End Sub
 

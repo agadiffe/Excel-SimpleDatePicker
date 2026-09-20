@@ -29,6 +29,18 @@ End Enum
 
 
 '----------------------------------------
+' DatePicker form
+'----------------------------------------
+
+Public Function DP_GetWindowKey(ByVal TargetWindow As Excel.Window) As String
+
+    DP_GetWindowKey = TargetWindow.Parent.FullName & "|" & _
+                      CStr(TargetWindow.WindowNumber)
+
+End Function
+
+
+'----------------------------------------
 ' Date validation
 '----------------------------------------
 
