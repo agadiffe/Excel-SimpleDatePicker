@@ -1,6 +1,8 @@
 Attribute VB_Name = "DP_modEntryPoint"
 Option Explicit
 
+' Project repository: https://github.com/agadiffe/Excel-SimpleDatePicker
+
 '----------------------------------------
 ' Activation
 '----------------------------------------
@@ -47,7 +49,7 @@ Private Function IsDatePickerCell(ByVal Cell As Range) As Boolean
             Exit Function
     End Select
 
-    ' Common Long Date formats
+    ' Cell's number format string
     NumFormat = LCase$(Cell.NumberFormat)
 
     ' Excel's system Long Date format

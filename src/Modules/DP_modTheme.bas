@@ -205,7 +205,7 @@ End Function
 Public Function DP_IsDarkThemeActive() As Boolean
 
     If IsWindows() Then
-        DP_IsDarkThemeActive = IsWindowsDarkThemeActive()
+        DP_IsDarkThemeActive = IsOfficeDarkThemeActive()
     Else
         DP_IsDarkThemeActive = IsMacDarkThemeActive()
     End If
@@ -227,50 +227,46 @@ End Function
 ' Windows
 '--------------------
 
-Private Function IsWindowsDarkThemeActive() As Boolean
+Private Function IsOfficeDarkThemeActive() As Boolean
 
+    ' 3 = Gray | 4 = Black | 5 = White | 6 = Use System setting | 7 = Color
     Const OfficeThemeKey As String = _
         "HKCU\Software\Microsoft\Office\16.0\Common\UI Theme"
+
+    ' 0 = Colorful | 1 = Dark Gray | 2 = Black | 3 = White
+    Const OfficePolicyThemeKey As String = _
+        "HKCU\Software\Policies\Microsoft\Office\16.0\Common\Default UI Theme"
 
     Const WindowsThemeKey As String = _
         "HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme"
 
+    Dim Shell As Object
     Dim OfficeTheme As Long
+    Dim PolicyTheme As Long
     Dim WindowsLightTheme As Long
 
-    With CreateObject("WScript.Shell")
+    Set Shell = CreateObject("WScript.Shell")
+
+    On Error Resume Next
+    OfficeTheme = Shell.RegRead(OfficeThemeKey)
+    PolicyTheme = Shell.RegRead(OfficePolicyThemeKey)
+    On Error GoTo 0
+
+    If OfficeTheme = 6 Then
+
+        WindowsLightTheme = 1
 
         On Error Resume Next
-
-        ' Read Excel / Office theme
-        OfficeTheme = .RegRead(OfficeThemeKey)
-
-        ' If Windows key is missing, assume Light Mode
-        WindowsLightTheme = 1
-        WindowsLightTheme = .RegRead(WindowsThemeKey)
-
+        WindowsLightTheme = Shell.RegRead(WindowsThemeKey)
         On Error GoTo 0
 
-    End With
+        IsOfficeDarkThemeActive = (WindowsLightTheme = 0)
 
-    ' Office Theme:
-    ' 3 = Gray
-    ' 4 = Black
-    ' 5 = White
-    ' 6 = Use System setting
-    ' 7 = Color
-
-    Select Case OfficeTheme
-        Case 3, 4
-            ' Office explicitly uses a dark theme
-            IsWindowsDarkThemeActive = True
-        Case 6
-            ' Office follows the Windows system theme
-            IsWindowsDarkThemeActive = (WindowsLightTheme = 0)
-        Case Else
-            ' White, Color, or unknown
-            IsWindowsDarkThemeActive = False
-    End Select
+    ElseIf OfficeTheme <> 0 Then
+        IsOfficeDarkThemeActive = (OfficeTheme = 3 Or OfficeTheme = 4)
+    Else
+        IsOfficeDarkThemeActive = (PolicyTheme = 1 Or PolicyTheme = 2)
+    End If
 
 End Function
 
