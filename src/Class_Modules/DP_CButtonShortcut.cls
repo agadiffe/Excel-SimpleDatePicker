@@ -121,10 +121,10 @@ Private Sub Render()
     Else
         ' Render the actual button shape.
         Set ButtonBackground.Picture = _
-            DP_GetCachedButtonPicture(DP_BUTTON_TYPE_SHORTCUT, _
-                                      BackgroundColor, _
-                                      DP_ColorBg(), _
-                                      ButtonBackground.Width)
+            DP_GetCachedPicture(DP_PICTURE_TYPE_SHORTCUT, _
+                                BackgroundColor, _
+                                DP_ColorBg(), _
+                                ButtonBackground.Width)
 
         ' MSForms Image/Label overlap bug: reset Z-order.
         ButtonBackground.ZOrder 1

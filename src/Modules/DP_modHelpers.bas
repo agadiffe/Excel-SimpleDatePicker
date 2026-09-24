@@ -5,7 +5,7 @@ Option Explicit
 ' Declarations
 '----------------------------------------
 
-Private ButtonPictureCache As Collection
+Private PictureCache As Collection
 
 
 '----------------------------------------
@@ -18,13 +18,16 @@ Public Enum DP_NavigationDirection
 End Enum
 
 
-Public Enum DP_ButtonType
-    DP_BUTTON_TYPE_DAY = 0
-    DP_BUTTON_TYPE_MONTH = 1
-    DP_BUTTON_TYPE_YEAR = 2
-    DP_BUTTON_TYPE_HEADER = 3
-    DP_BUTTON_TYPE_ARROW = 4
-    DP_BUTTON_TYPE_SHORTCUT = 5
+Public Enum DP_PictureType
+    DP_PICTURE_TYPE_FORM_DATE = 0
+    DP_PICTURE_TYPE_FORM_MONTH = 1
+    DP_PICTURE_TYPE_FORM_YEAR = 2
+    DP_PICTURE_TYPE_DAY = 3
+    DP_PICTURE_TYPE_MONTH = 4
+    DP_PICTURE_TYPE_YEAR = 5
+    DP_PICTURE_TYPE_HEADER = 6
+    DP_PICTURE_TYPE_ARROW = 7
+    DP_PICTURE_TYPE_SHORTCUT = 8
 End Enum
 
 
@@ -156,23 +159,12 @@ Public Sub DP_SetVisibleCollection(ByVal Handlers As Collection, _
 End Sub
 
 
-Public Sub DP_RefreshThemeCollection(ByVal Handlers As Collection)
+Public Sub DP_UpdateHandlerCollection(ByVal Handlers As Collection)
 
     Dim Handler As Object
 
     For Each Handler In Handlers
-        Handler.RefreshTheme
-    Next Handler
-
-End Sub
-
-
-Public Sub DP_UpdateStateCollection(ByVal Handlers As Collection)
-
-    Dim Handler As Object
-
-    For Each Handler In Handlers
-        Handler.UpdateState
+        Handler.UpdateHandler
     Next Handler
 
 End Sub
@@ -182,17 +174,19 @@ End Sub
 ' Button pictures
 '----------------------------------------
 
-Public Sub DP_ClearButtonPictureCache()
+Public Sub DP_ClearPictureCache()
 
-    Set ButtonPictureCache = Nothing
+    Set PictureCache = Nothing
 
 End Sub
 
 
-Public Function DP_GetCachedButtonPicture(ByVal ButtonType As DP_ButtonType, _
-                                          ByVal FillColor As Long, _
-                                          ByVal BackgroundColor As Long, _
-                                          Optional ByVal ButtonWidth As Single = 0) As StdPicture
+Public Function DP_GetCachedPicture(ByVal PictureType As DP_PictureType, _
+                                    ByVal FillColor As Long, _
+                                    ByVal BackgroundColor As Long, _
+                                    Optional ByVal ButtonWidth As Single = 0, _
+                                    Optional ByVal BorderColor As Long = DP_NO_BORDER_COLOR, _
+                                    Optional ByVal RenderScale As Long = DP_RENDER_SCALE) As StdPicture
 
     Dim Width As Single
     Dim Height As Single
@@ -205,32 +199,44 @@ Public Function DP_GetCachedButtonPicture(ByVal ButtonType As DP_ButtonType, _
         Exit Function
     #End If
 
-    If ButtonPictureCache Is Nothing Then
-        Set ButtonPictureCache = New Collection
+    If PictureCache Is Nothing Then
+        Set PictureCache = New Collection
     End If
 
-    Select Case ButtonType
-        Case DP_BUTTON_TYPE_DAY
+    Select Case PictureType
+        Case DP_PICTURE_TYPE_FORM_DATE
+            Width = DP_DATEPICKER_WIDTH
+            Height = DP_DATEPICKER_HEIGHT
+            Shape = DP_BUTTON_SHAPE_RECTANGLE
+        Case DP_PICTURE_TYPE_FORM_MONTH
+            Width = DP_MONTHPICKER_WIDTH
+            Height = DP_MONTHPICKER_HEIGHT
+            Shape = DP_BUTTON_SHAPE_RECTANGLE
+        Case DP_PICTURE_TYPE_FORM_YEAR
+            Width = DP_YEARPICKER_WIDTH
+            Height = DP_YEARPICKER_HEIGHT
+            Shape = DP_BUTTON_SHAPE_RECTANGLE
+        Case DP_PICTURE_TYPE_DAY
             Width = DP_CALENDAR_CELL_WIDTH
             Height = DP_CALENDAR_CELL_HEIGHT
             Shape = DP_DAY_BUTTON_SHAPE
-        Case DP_BUTTON_TYPE_MONTH
+        Case DP_PICTURE_TYPE_MONTH
             Width = DP_MONTH_CELL_WIDTH
             Height = DP_PERIOD_CELL_HEIGHT
             Shape = DP_BUTTON_SHAPE_RECTANGLE
-        Case DP_BUTTON_TYPE_YEAR
+        Case DP_PICTURE_TYPE_YEAR
             Width = DP_YEAR_CELL_WIDTH
             Height = DP_PERIOD_CELL_HEIGHT
             Shape = DP_BUTTON_SHAPE_RECTANGLE
-        Case DP_BUTTON_TYPE_HEADER
+        Case DP_PICTURE_TYPE_HEADER
             Width = DP_HEADER_WIDTH
             Height = DP_HEADER_HEIGHT
             Shape = DP_BUTTON_SHAPE_RECTANGLE
-        Case DP_BUTTON_TYPE_ARROW
+        Case DP_PICTURE_TYPE_ARROW
             Width = DP_ARROW_WIDTH
             Height = DP_ARROW_HEIGHT
             Shape = DP_BUTTON_SHAPE_RECTANGLE
-        Case DP_BUTTON_TYPE_SHORTCUT
+        Case DP_PICTURE_TYPE_SHORTCUT
             Width = ButtonWidth
             Height = DP_ACTION_BUTTON_HEIGHT
             Shape = DP_BUTTON_SHAPE_RECTANGLE
@@ -239,26 +245,30 @@ Public Function DP_GetCachedButtonPicture(ByVal ButtonType As DP_ButtonType, _
     End Select
 
     CacheKey = CStr(Shape) & "|" & _
-               CStr(Width) & "|" & CStr(Height) & "|" & _
-               CStr(FillColor) & "|" & CStr(BackgroundColor)
+               CStr(Width) & "|" & _
+               CStr(Height) & "|" & _
+               CStr(FillColor) & "|" & _
+               CStr(BackgroundColor) & "|" & _
+               CStr(BorderColor) & "|" & _
+               CStr(RenderScale)
 
     On Error Resume Next
-    Set Picture = ButtonPictureCache.Item(CacheKey)
+    Set Picture = PictureCache.Item(CacheKey)
     On Error GoTo 0
 
     If Picture Is Nothing Then
 
-        Set Picture = DP_GetButtonPicture(Width, Height, _
-                                          FillColor, BackgroundColor, _
-                                          Shape)
+        Set Picture = DP_GetPicture(Width, Height, _
+                                    FillColor, BackgroundColor, _
+                                    Shape, BorderColor, RenderScale)
 
         If Picture Is Nothing Then Exit Function
 
-        ButtonPictureCache.Add Picture, CacheKey
+        PictureCache.Add Picture, CacheKey
 
     End If
 
-    Set DP_GetCachedButtonPicture = Picture
+    Set DP_GetCachedPicture = Picture
 
 End Function
 

@@ -20,7 +20,6 @@ Sub InitializeView(ByVal Form As DP_frmDatePicker)
 '----------------------------------------
 
 Sub UpdateView()
-Sub RefreshTheme()
 Sub SetVisible(ByVal IsVisible As Boolean)
 Sub SetHoveredButton(ByVal Button As Object)
 Sub ClearHoveredButton()

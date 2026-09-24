@@ -76,7 +76,7 @@ End Sub
 ' Render
 '----------------------------------------
 
-Public Sub RefreshTheme()
+Public Sub UpdateHandler()
 
     Render
 
@@ -106,9 +106,9 @@ Private Sub Render()
     Else
         ' Render the actual button shape.
         Set HeaderBackground.Picture = _
-            DP_GetCachedButtonPicture(DP_BUTTON_TYPE_HEADER, _
-                                      BackgroundColor, _
-                                      DP_ColorBg())
+            DP_GetCachedPicture(DP_PICTURE_TYPE_HEADER, _
+                                BackgroundColor, _
+                                DP_ColorBg())
 
         ' MSForms Image/Label overlap bug: reset Z-order.
         HeaderBackground.ZOrder 1

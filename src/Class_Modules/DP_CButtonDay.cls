@@ -170,9 +170,9 @@ Private Sub Render()
     Else
         ' Render the actual button shape.
         Set DayBackground.Picture = _
-            DP_GetCachedButtonPicture(DP_BUTTON_TYPE_DAY, _
-                                      BackgroundColor, _
-                                      DP_ColorBg())
+            DP_GetCachedPicture(DP_PICTURE_TYPE_DAY, _
+                                BackgroundColor, _
+                                DP_ColorBg())
 
         ' MSForms Image/Label overlap bug: reset Z-order.
         DayBackground.ZOrder 1

@@ -71,7 +71,7 @@ End Sub
 ' Render
 '----------------------------------------
 
-Public Sub RefreshTheme()
+Public Sub UpdateHandler()
 
     Render
 

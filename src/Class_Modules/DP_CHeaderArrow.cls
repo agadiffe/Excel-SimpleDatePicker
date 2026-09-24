@@ -76,14 +76,7 @@ End Sub
 ' Render
 '----------------------------------------
 
-Public Sub UpdateState()
-
-    Render
-
-End Sub
-
-
-Public Sub RefreshTheme()
+Public Sub UpdateHandler()
 
     Render
 
@@ -115,9 +108,9 @@ Private Sub Render()
     Else
         ' Render the actual button shape.
         Set ArrowBackground.Picture = _
-            DP_GetCachedButtonPicture(DP_BUTTON_TYPE_ARROW, _
-                                      BackgroundColor, _
-                                      DP_ColorBg())
+            DP_GetCachedPicture(DP_PICTURE_TYPE_ARROW, _
+                                BackgroundColor, _
+                                DP_ColorBg())
 
         ' MSForms Image/Label overlap bug: reset Z-order.
         ArrowBackground.ZOrder 1

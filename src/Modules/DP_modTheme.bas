@@ -249,7 +249,6 @@ Private Function IsOfficeDarkThemeActive() As Boolean
 
     On Error Resume Next
     OfficeTheme = Shell.RegRead(OfficeThemeKey)
-    PolicyTheme = Shell.RegRead(OfficePolicyThemeKey)
     On Error GoTo 0
 
     If OfficeTheme = 6 Then
@@ -263,9 +262,17 @@ Private Function IsOfficeDarkThemeActive() As Boolean
         IsOfficeDarkThemeActive = (WindowsLightTheme = 0)
 
     ElseIf OfficeTheme <> 0 Then
+
         IsOfficeDarkThemeActive = (OfficeTheme = 3 Or OfficeTheme = 4)
+
     Else
+
+        On Error Resume Next
+        PolicyTheme = Shell.RegRead(OfficePolicyThemeKey)
+        On Error GoTo 0
+
         IsOfficeDarkThemeActive = (PolicyTheme = 1 Or PolicyTheme = 2)
+
     End If
 
 End Function

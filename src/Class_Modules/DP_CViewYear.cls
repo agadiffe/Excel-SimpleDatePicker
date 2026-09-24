@@ -106,7 +106,7 @@ Private Sub CreateYears()
         Set Handler = New DP_CButtonPeriod
 
         Handler.Initialize Me, _
-                           DP_BUTTON_TYPE_YEAR, _
+                           DP_PICTURE_TYPE_YEAR, _
                            DateSerial(DisplayedYear, 1, 1), _
                            CStr(DisplayedYear), _
                            DP_GridLeft(ColumnIndex, DP_PERIOD_GRID_LEFT, _
@@ -138,8 +138,6 @@ Private Sub DP_IPickerView_UpdateView()
 
     FirstYear = FirstDisplayedYear
 
-    YearRangeHeaderHandler.Caption = _
-        CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
 
     For Index = 0 To YEAR_COUNT - 1
 
@@ -151,20 +149,10 @@ Private Sub DP_IPickerView_UpdateView()
 
     Next Index
 
-    DP_UpdateStateCollection ArrowHandlers
-
-End Sub
-
-
-Private Sub DP_IPickerView_RefreshTheme()
-
-    DP_ClearButtonPictureCache
-
-    ' Year handlers are handled by UpdateView.
-    ' Shortcut button is handled by SetVisible.
-
-    YearRangeHeaderHandler.RefreshTheme
-    DP_RefreshThemeCollection ArrowHandlers
+    YearRangeHeaderHandler.Caption = _
+        CStr(FirstDisplayedYear) & " - " & CStr(LastDisplayedYear)
+    YearRangeHeaderHandler.UpdateHandler
+    DP_UpdateHandlerCollection ArrowHandlers
 
 End Sub
 

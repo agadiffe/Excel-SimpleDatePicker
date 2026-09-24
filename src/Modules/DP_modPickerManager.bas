@@ -50,6 +50,7 @@ Private Function FindPickerForm(ByVal TargetWindow As Excel.Window) As DP_frmDat
 
         If Not Picker Is Nothing Then
             If DP_GetWindowKey(Picker.TargetWindow) = TargetWindowKey Then
+
                 Set FindPickerForm = Picker
                 Exit Function
             End If

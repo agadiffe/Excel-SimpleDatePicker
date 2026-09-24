@@ -153,8 +153,6 @@ Private Sub DP_IPickerView_UpdateView()
 
     DP_IPickerView_ClearHoveredButton
 
-    MonthHeaderHandler.Caption = Format(CurrentMonth, "mmmm yyyy")
-
     CalendarStartDate = CurrentMonth - Weekday(CurrentMonth, DP_FIRST_DAY_OF_WEEK) + 1
 
     For Index = 0 To CALENDAR_DAY_COUNT - 1
@@ -163,21 +161,10 @@ Private Sub DP_IPickerView_UpdateView()
                            CStr(Day(CalendarStartDate + Index))
     Next Index
 
-    DP_UpdateStateCollection ArrowHandlers
-
-End Sub
-
-
-Private Sub DP_IPickerView_RefreshTheme()
-
-    DP_ClearButtonPictureCache
-
-    ' Day handlers are handled by UpdateView.
-    ' Shortcut button is handled by SetVisible.
-
-    MonthHeaderHandler.RefreshTheme
-    DP_RefreshThemeCollection ArrowHandlers
-    DP_RefreshThemeCollection WeekdayHandlers
+    MonthHeaderHandler.Caption = Format(CurrentMonth, "mmmm yyyy")
+    MonthHeaderHandler.UpdateHandler
+    DP_UpdateHandlerCollection ArrowHandlers
+    DP_UpdateHandlerCollection WeekdayHandlers
 
 End Sub
 

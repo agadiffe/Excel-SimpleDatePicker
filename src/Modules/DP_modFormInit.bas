@@ -19,26 +19,20 @@ Private PickerFormHeight(DP_SIZE_DATE To DP_SIZE_YEAR) As Single
 ' Initialization
 '----------------------------------------
 
-Public Sub DP_InitializePicker(ByVal PickerForm As DP_frmDatePicker, _
-                               ByVal DesiredInsideWidth As Single, _
-                               ByVal DesiredInsideHeight As Single)
+Public Sub DP_InitializePicker(ByVal PickerForm As DP_frmDatePicker)
 
     If Not DP_SHOW_TITLEBAR Then
         DP_RemoveUserFormTitleBar PickerForm
     End If
 
-    With PickerForm
-        .Width = DesiredInsideWidth
-        .Height = DesiredInsideHeight
-        .BackColor = DP_ColorBg()
-    End With
-
     'Apply each desired inside size and cache the resulting form dimensions.
     CachePickerSizes PickerForm
 
-    If Not DP_SHOW_TITLEBAR Then
-        DP_ApplyBorderColor PickerForm
-    End If
+    ' If DP_SIZE_DATE is cached in last, DP_SetPickerSize SizeChanged will be False
+    With PickerForm
+        .Width = 0
+        .Height = 0
+    End With
 
 End Sub
 
@@ -81,7 +75,51 @@ Public Sub DP_SetPickerSize(ByVal PickerForm As DP_frmDatePicker, _
 
     If SizeChanged Then
         DP_ApplyRoundedCorners PickerForm
+        DP_ApplyPickerBorder PickerForm, PickerSize
     End If
+
+End Sub
+
+
+Public Sub DP_ApplyPickerBorder(ByVal PickerForm As DP_frmDatePicker, _
+                                ByVal PickerSize As DP_PickerSize)
+
+    #If Mac Then
+
+        ' Mac: DWM is unavailable; no border picture is required.
+        PickerForm.Picture = Nothing
+
+    #Else
+
+        Dim PickerType As DP_PictureType
+
+        If DP_ApplyBorderColor(PickerForm, DP_ColorBorder()) Then
+
+            ' DWM provides the border.
+            PickerForm.Picture = Nothing
+
+        Else
+            ' DWM border unavailable; use the 1px border picture.
+
+            Select Case PickerSize
+                Case DP_SIZE_DATE
+                    PickerType = DP_PICTURE_TYPE_FORM_DATE
+                Case DP_SIZE_MONTH
+                    PickerType = DP_PICTURE_TYPE_FORM_MONTH
+                Case DP_SIZE_YEAR
+                    PickerType = DP_PICTURE_TYPE_FORM_YEAR
+            End Select
+
+            PickerForm.PictureSizeMode = fmPictureSizeModeStretch
+            PickerForm.Picture = _
+                DP_GetCachedPicture(PickerType, _
+                                    DP_ColorBg(), _
+                                    DP_ColorBg(), _
+                                    BorderColor:=DP_ColorBorder(), _
+                                    RenderScale:=4)
+        End If
+
+    #End If
 
 End Sub
 

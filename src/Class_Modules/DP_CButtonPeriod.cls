@@ -20,7 +20,7 @@ Attribute PeriodText.VB_VarHelpID = -1
 
 Private ParentView As DP_IPickerView
 Private CellDate As Date
-Private ButtonType As DP_ButtonType
+Private ButtonType As DP_PictureType
 
 Private IsHovered As Boolean
 Private IsPressed As Boolean
@@ -31,7 +31,7 @@ Private IsPressed As Boolean
 '----------------------------------------
 
 Public Sub Initialize(ByVal View As DP_IPickerView, _
-                      ByVal ButtonTypeValue As DP_ButtonType, _
+                      ByVal ButtonTypeValue As DP_PictureType, _
                       ByVal CellDateValue As Date, _
                       ByVal Caption As String, _
                       ByVal LeftPosition As Single, _
@@ -169,9 +169,9 @@ Private Sub Render()
     Else
         ' Render the actual button shape.
         Set PeriodBackground.Picture = _
-            DP_GetCachedButtonPicture(ButtonType, _
-                                      BackgroundColor, _
-                                      DP_ColorBg())
+            DP_GetCachedPicture(ButtonType, _
+                                BackgroundColor, _
+                                DP_ColorBg())
 
         ' MSForms Image/Label overlap bug: reset Z-order.
         PeriodBackground.ZOrder 1

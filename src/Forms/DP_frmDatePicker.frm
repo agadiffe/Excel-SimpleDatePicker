@@ -12,6 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 '----------------------------------------
@@ -45,7 +46,7 @@ Private Sub UserForm_Initialize()
 
     DP_IsDarkMode = DP_IsDarkThemeActive()
 
-    DP_InitializePicker Me, DP_DATEPICKER_WIDTH, DP_DATEPICKER_HEIGHT
+    DP_InitializePicker Me
 
     Set CalendarView = New DP_CViewCalendar
     Set MonthView = New DP_CViewMonth
@@ -76,14 +77,14 @@ Public Sub ShowPicker(ByVal Cell As Range)
     SelectedYearValue = Year(SelectedMonthValue)
     CurrentMonthValue = SelectedMonthValue
 
-    RefreshPickerTheme
+    RefreshFormTheme
     SwitchPickerView DP_SIZE_DATE
     DP_ShowPopupNextToCell Me, TargetCell, TargetWindowValue
 
 End Sub
 
 
-Private Sub RefreshPickerTheme()
+Private Sub RefreshFormTheme()
 
     Dim CurrentDarkMode As Boolean
 
@@ -92,12 +93,10 @@ Private Sub RefreshPickerTheme()
     If CurrentDarkMode = DP_IsDarkMode Then Exit Sub
 
     DP_IsDarkMode = CurrentDarkMode
-
     Me.BackColor = DP_ColorBg()
 
-    CalendarView.RefreshTheme
-    MonthView.RefreshTheme
-    YearView.RefreshTheme
+    DP_ClearPictureCache
+    DP_ApplyPickerBorder Me, DP_SIZE_DATE
 
 End Sub
 
