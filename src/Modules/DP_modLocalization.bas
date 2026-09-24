@@ -132,11 +132,11 @@ Public Function DP_GetDatePickerActionText(ByVal ActionKey As String) As String
 
             Select Case PrimaryLanguageID
                 Case LANG_FRENCH
-                    DP_GetDatePickerActionText = "Cette année"
+                    DP_GetDatePickerActionText = "Cette ann" & ChrW(&HE9) & "e"
                 Case LANG_GERMAN
                     DP_GetDatePickerActionText = "Dieses Jahr"
                 Case LANG_SPANISH
-                    DP_GetDatePickerActionText = "Este año"
+                    DP_GetDatePickerActionText = "Este a" & ChrW(&HF1) & "o"
                 Case LANG_ITALIAN
                     DP_GetDatePickerActionText = "Quest'anno"
                 Case LANG_JAPANESE
