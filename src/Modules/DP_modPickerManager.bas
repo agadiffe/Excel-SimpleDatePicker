@@ -71,7 +71,6 @@ Private Function GetPickerFormAt(ByVal Index As Long) As DP_frmDatePicker
     On Error GoTo 0
 
     If Picker Is Nothing Then
-        ' The UserForm instance is no longer accessible.
         PickerForms.Remove Index
     Else
         Set GetPickerFormAt = Picker

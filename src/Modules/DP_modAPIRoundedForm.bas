@@ -2,7 +2,7 @@ Attribute VB_Name = "DP_modAPIRoundedForm"
 Option Explicit
 
 '============================================================
-' Rounded UserForm / VB6 / VBA6 / VBA7
+' UserForm Window Styling / VB6 / VBA6 / VBA7
 '
 ' Features:
 '
@@ -10,12 +10,10 @@ Option Explicit
 '   - 32-bit / 64-bit Office compatible
 '   - Mac-safe compilation
 '   - UserForm HWND resolved directly when needed
-'   - DWM rounded corners
-'   - CreateRoundRectRgn fallback for older Windows
-'   - Fallback region recreated when rounded corners are
-'     reapplied
-'   - Correct HRGN ownership handling
-'   - DWM border color
+'   - Windows 11 rounded corners
+'   - Windows 10 rectangular corners
+'   - Windows 11 DWM border color
+'   - Windows 10 standard WS_BORDER
 '============================================================
 
 
@@ -50,30 +48,6 @@ Private Declare PtrSafe Function SetWindowPos Lib "user32" ( _
     ByVal Width As Long, _
     ByVal Height As Long, _
     ByVal Flags As Long) As Long
-
-Private Declare PtrSafe Function GetWindowRect Lib "user32" ( _
-    ByVal FormWindowHandle As LongPtr, _
-    ByRef WindowRectangle As RECT) As Long
-
-'------------------------------------------------------------
-' GDI regions
-'------------------------------------------------------------
-
-Private Declare PtrSafe Function CreateRoundRectRgn Lib "gdi32" ( _
-    ByVal X1 As Long, _
-    ByVal Y1 As Long, _
-    ByVal X2 As Long, _
-    ByVal Y2 As Long, _
-    ByVal WidthEllipse As Long, _
-    ByVal HeightEllipse As Long) As LongPtr
-
-Private Declare PtrSafe Function SetWindowRgn Lib "user32" ( _
-    ByVal FormWindowHandle As LongPtr, _
-    ByVal RegionHandle As LongPtr, _
-    ByVal Redraw As Boolean) As Long
-
-Private Declare PtrSafe Function DeleteObject Lib "gdi32" ( _
-    ByVal ObjectHandle As LongPtr) As Long
 
 '------------------------------------------------------------
 ' DWM
@@ -114,30 +88,6 @@ Private Declare Function SetWindowPos Lib "user32" ( _
     ByVal Height As Long, _
     ByVal Flags As Long) As Long
 
-Private Declare Function GetWindowRect Lib "user32" ( _
-    ByVal FormWindowHandle As Long, _
-    ByRef WindowRectangle As RECT) As Long
-
-'------------------------------------------------------------
-' GDI regions
-'------------------------------------------------------------
-
-Private Declare Function CreateRoundRectRgn Lib "gdi32" ( _
-    ByVal X1 As Long, _
-    ByVal Y1 As Long, _
-    ByVal X2 As Long, _
-    ByVal Y2 As Long, _
-    ByVal WidthEllipse As Long, _
-    ByVal HeightEllipse As Long) As Long
-
-Private Declare Function SetWindowRgn Lib "user32" ( _
-    ByVal FormWindowHandle As Long, _
-    ByVal RegionHandle As Long, _
-    ByVal Redraw As Boolean) As Long
-
-Private Declare Function DeleteObject Lib "gdi32" ( _
-    ByVal ObjectHandle As Long) As Long
-
 '------------------------------------------------------------
 ' DWM
 '------------------------------------------------------------
@@ -147,22 +97,6 @@ Private Declare Function DwmSetWindowAttribute Lib "dwmapi" ( _
     ByVal DwmAttribute As Long, _
     ByRef DwmValue As Long, _
     ByVal DwmValueSize As Long) As Long
-
-#End If
-
-
-'============================================================
-' Structures
-'============================================================
-
-#If Not Mac Then
-
-Private Type RECT
-    Left As Long
-    Top As Long
-    Right As Long
-    Bottom As Long
-End Type
 
 #End If
 
@@ -216,19 +150,7 @@ Private Const DWMWA_BORDER_COLOR As Long = 34
 ' DWM corner preferences
 '------------------------------------------------------------
 
-Private Const DWMWCP_DEFAULT As Long = 0
-Private Const DWMWCP_DONOTROUND As Long = 1
 Private Const DWMWCP_ROUND As Long = 2
-Private Const DWMWCP_ROUNDSMALL As Long = 3
-
-'------------------------------------------------------------
-' Fallback rounded corner radius
-'
-' CreateRoundRectRgn expects ellipse dimensions, so the
-' actual value passed is DP_CORNER_RADIUS * 2.
-'------------------------------------------------------------
-
-Private Const DP_CORNER_RADIUS As Long = 12
 
 #End If
 
@@ -403,9 +325,10 @@ End Sub
 '
 '   DWM rounded corners are requested.
 '
-' Older Windows:
+' Windows 10:
 '
-'   CreateRoundRectRgn is used.
+'   Rounded corners are not applied.
+'   The normal rectangular WS_BORDER remains in place.
 '
 ' Return value:
 '
@@ -413,14 +336,8 @@ End Sub
 '       Rounded corners were successfully applied.
 '
 '   False
-'       Rounded corners could not be applied.
-'
-' IMPORTANT:
-'
-'   The HRGN is NOT cached.
-'
-'   SetWindowRgn transfers ownership of a successfully
-'   applied HRGN to Windows.
+'       Rounded corners are not available or could not be
+'       applied.
 '============================================================
 
 Public Function DP_ApplyRoundedCorners( _
@@ -434,21 +351,16 @@ Public Function DP_ApplyRoundedCorners( _
 #ElseIf VBA7 Then
 
     Dim FormWindowHandle As LongPtr
-    Dim RegionHandle As LongPtr
 
 #Else
 
     Dim FormWindowHandle As Long
-    Dim RegionHandle As Long
 
 #End If
 
 #If Not Mac Then
 
     Dim CornerPreference As Long
-    Dim WindowRectangle As RECT
-    Dim WindowWidth As Long
-    Dim WindowHeight As Long
 
     '========================================================
     ' Get current HWND
@@ -461,11 +373,8 @@ Public Function DP_ApplyRoundedCorners( _
     '========================================================
     ' Try DWM.
     '
-    ' If DWM accepts the rounded-corner preference, there is
-    ' no need to create a GDI region.
-    '
-    ' It is safe to call again when the UserForm changes
-    ' size or view.
+    ' If DWM accepts the rounded-corner preference, the
+    ' UserForm receives the Windows 11 rounded corners.
     '========================================================
 
     CornerPreference = DWMWCP_ROUND
@@ -477,72 +386,6 @@ Public Function DP_ApplyRoundedCorners( _
         4) = 0 Then
 
         DP_ApplyRoundedCorners = True
-
-        Exit Function
-
-    End If
-
-    '========================================================
-    ' GDI FALLBACK
-    '
-    ' The region is recreated each time this fallback is
-    ' applied because its geometry is based on the current
-    ' window dimensions.
-    '========================================================
-
-    If GetWindowRect( _
-        FormWindowHandle, _
-        WindowRectangle) = 0 Then Exit Function
-
-    WindowWidth = WindowRectangle.Right - WindowRectangle.Left
-    WindowHeight = WindowRectangle.Bottom - WindowRectangle.Top
-
-    If WindowWidth <= 0 Then Exit Function
-    If WindowHeight <= 0 Then Exit Function
-
-    '========================================================
-    ' Create rounded region
-    '========================================================
-
-    RegionHandle = CreateRoundRectRgn( _
-        0, _
-        0, _
-        WindowWidth + 1, _
-        WindowHeight + 1, _
-        DP_CORNER_RADIUS * 2, _
-        DP_CORNER_RADIUS * 2)
-
-    If RegionHandle = 0 Then Exit Function
-
-    '========================================================
-    ' Apply region
-    '========================================================
-
-    If SetWindowRgn( _
-        FormWindowHandle, _
-        RegionHandle, _
-        True) <> 0 Then
-
-        '----------------------------------------------------
-        ' IMPORTANT:
-        '
-        ' Windows now owns RegionHandle.
-        '
-        ' DO NOT call DeleteObject here.
-        '----------------------------------------------------
-
-        DP_ApplyRoundedCorners = True
-
-    Else
-
-        '----------------------------------------------------
-        ' SetWindowRgn failed.
-        '
-        ' Windows did NOT take ownership, so clean up the
-        ' GDI region ourselves.
-        '----------------------------------------------------
-
-        DeleteObject RegionHandle
 
     End If
 
@@ -558,7 +401,7 @@ End Function
 '
 '   DWM border color is used.
 '
-' Older Windows:
+' Windows 10:
 '
 '   WS_BORDER remains as fallback.
 '============================================================
