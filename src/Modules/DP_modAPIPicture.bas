@@ -18,7 +18,7 @@ Option Explicit
 '   CornerRadius = 0: Normal rectangle.
 '   CornerRadius > 0: Rounded rectangle.
 '
-' The bitmap is rendered using RenderScale (Default = 8).
+' The bitmap is rendered using RenderScale.
 ' A RenderScale of 1 can be used for larger pictures where
 ' supersampling is unnecessary.
 '
@@ -124,7 +124,7 @@ Private Const PIXEL_OFFSET_HIGH_QUALITY As Long = 2
 Private Const FILL_MODE_WINDING As Long = 1
 
 ' Default supersampling factor.
-Public Const DP_RENDER_SCALE As Long = 8
+Public Const DP_RENDER_SCALE As Long = 4
 
 Public Const DP_NO_BORDER_COLOR As Long = -1
 
@@ -403,7 +403,7 @@ Private Declare Function DeleteObject Lib "gdi32" ( _
 '   Any other color: 1 logical pixel border.
 '
 ' RenderScale:
-'   Default = DP_RENDER_SCALE (8).
+'   Default = DP_RENDER_SCALE.
 '
 '   Use 1 for larger pictures where supersampling is not
 '   necessary.

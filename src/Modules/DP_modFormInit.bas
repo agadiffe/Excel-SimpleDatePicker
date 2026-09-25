@@ -55,6 +55,10 @@ Public Sub DP_SetPickerSize(ByVal PickerForm As DP_frmDatePicker, _
 
     Dim SizeChanged As Boolean
 
+    DP_SetWindowRedraw PickerForm, False
+
+    On Error GoTo CleanUp
+
     With PickerForm
 
         ' Appears to prevent an occasional white flash
@@ -78,6 +82,13 @@ Public Sub DP_SetPickerSize(ByVal PickerForm As DP_frmDatePicker, _
         DP_ApplyPickerBorder PickerForm, PickerSize
     End If
 
+CleanUp:
+    DP_SetWindowRedraw PickerForm, True
+
+    If Err.Number <> 0 Then
+        Err.Raise Err.Number, Err.Source, Err.Description
+    End If
+
 End Sub
 
 
@@ -99,6 +110,7 @@ Public Sub DP_ApplyPickerBorder(ByVal PickerForm As DP_frmDatePicker, _
             PickerForm.Picture = Nothing
 
         Else
+
             ' DWM border unavailable; use the 1px border picture.
 
             Select Case PickerSize
@@ -114,9 +126,9 @@ Public Sub DP_ApplyPickerBorder(ByVal PickerForm As DP_frmDatePicker, _
             PickerForm.Picture = _
                 DP_GetCachedPicture(PickerType, _
                                     DP_ColorBg(), _
-                                    DP_ColorBg(), _
+                                    DP_ColorBorder(), _
                                     BorderColor:=DP_ColorBorder(), _
-                                    RenderScale:=4)
+                                    RenderScale:=2)
         End If
 
     #End If

@@ -49,11 +49,27 @@ Private Declare PtrSafe Function SetWindowPos Lib "user32" ( _
     ByVal Y As Long, _
     ByVal Width As Long, _
     ByVal Height As Long, _
-    ByVal Flags As Long) As Long
+    ByVal flags As Long) As Long
 
 Private Declare PtrSafe Function GetWindowRect Lib "user32" ( _
     ByVal FormWindowHandle As LongPtr, _
     ByRef WindowRectangle As RECT) As Long
+
+'------------------------------------------------------------
+' Window redraw
+'------------------------------------------------------------
+
+Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" ( _
+    ByVal FormWindowHandle As LongPtr, _
+    ByVal wMsg As Long, _
+    ByVal wParam As LongPtr, _
+    ByVal lParam As LongPtr) As LongPtr
+
+Private Declare PtrSafe Function RedrawWindow Lib "user32" ( _
+    ByVal FormWindowHandle As LongPtr, _
+    ByVal lprcUpdate As LongPtr, _
+    ByVal hrgnUpdate As LongPtr, _
+    ByVal flags As Long) As Long
 
 '------------------------------------------------------------
 ' GDI regions
@@ -117,6 +133,22 @@ Private Declare Function SetWindowPos Lib "user32" ( _
 Private Declare Function GetWindowRect Lib "user32" ( _
     ByVal FormWindowHandle As Long, _
     ByRef WindowRectangle As RECT) As Long
+
+'------------------------------------------------------------
+' Window redraw
+'------------------------------------------------------------
+
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" ( _
+    ByVal FormWindowHandle As Long, _
+    ByVal wMsg As Long, _
+    ByVal wParam As Long, _
+    ByVal lParam As Long) As Long
+
+Private Declare Function RedrawWindow Lib "user32" ( _
+    ByVal FormWindowHandle As Long, _
+    ByVal lprcUpdate As Long, _
+    ByVal hrgnUpdate As Long, _
+    ByVal flags As Long) As Long
 
 '------------------------------------------------------------
 ' GDI regions
@@ -204,6 +236,31 @@ Private Const SWP_NOMOVE As Long = &H2
 Private Const SWP_NOZORDER As Long = &H4
 Private Const SWP_FRAMECHANGED As Long = &H20
 
+#End If
+
+
+'============================================================
+' Window redraw
+'============================================================
+
+#If Not Mac Then
+
+Private Const WM_SETREDRAW As Long = &HB
+
+Private Const RDW_INVALIDATE As Long = &H1
+Private Const RDW_ERASE As Long = &H4
+Private Const RDW_ALLCHILDREN As Long = &H80
+Private Const RDW_FRAME As Long = &H400
+
+#End If
+
+
+'============================================================
+' DWM
+'============================================================
+
+#If Not Mac Then
+
 '------------------------------------------------------------
 ' DWM attributes
 '------------------------------------------------------------
@@ -227,7 +284,7 @@ Private Const DWMWCP_ROUNDSMALL As Long = 3
 ' actual value passed is DP_CORNER_RADIUS * 2.
 '------------------------------------------------------------
 
-Private Const DP_CORNER_RADIUS As Single = 9.3
+Private Const DP_CORNER_RADIUS As Single = 6
 
 #End If
 
@@ -532,4 +589,52 @@ Public Function DP_ApplyBorderColor( _
     End If
 
 End Function
+
+
+'============================================================
+' Enable or disable window redraw
+'
+' Suppresses repainting while window changes are performed.
+' Redraws the window when re-enabled.
+'
+' Prevents a visible flash when resizing the UserForm and
+' applying the rounded-corner window region.
+'============================================================
+
+Public Sub DP_SetWindowRedraw( _
+    ByVal PickerForm As DP_frmDatePicker, _
+    ByVal Enabled As Boolean)
+
+#If Mac Then
+
+    Exit Sub
+
+#Else
+
+    #If VBA7 Then
+        Dim FormWindowHandle As LongPtr
+    #Else
+        Dim FormWindowHandle As Long
+    #End If
+
+    FormWindowHandle = GetPickerHwnd(PickerForm)
+
+    If FormWindowHandle = 0 Then Exit Sub
+
+    SendMessage FormWindowHandle, _
+                WM_SETREDRAW, _
+                Abs(CLng(Enabled)), _
+                0
+
+    If Enabled Then
+        RedrawWindow FormWindowHandle, 0, 0, _
+                     RDW_INVALIDATE Or _
+                     RDW_ERASE Or _
+                     RDW_FRAME Or _
+                     RDW_ALLCHILDREN
+    End If
+
+#End If
+
+End Sub
 
